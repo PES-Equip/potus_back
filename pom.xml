@@ -19,14 +19,14 @@
 	<profiles>
 		<profile>
 			<id>dev</id>
-			<properties>
-				<spring.profiles.active>dev</spring.profiles.active>
-			</properties>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
 			<dependencies>
 				<dependency>
 					<groupId>com.h2database</groupId>
 					<artifactId>h2</artifactId>
-					<scope>runtime</scope>
+					<scope>compile</scope>
 				</dependency>
 			</dependencies>
 		</profile>
