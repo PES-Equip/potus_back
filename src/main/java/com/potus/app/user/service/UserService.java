@@ -26,10 +26,8 @@ public class UserService {
     }
 
     public User findByUsername(String username) throws ResourceNotFoundException {
-        User u = userRepository.findByUsername(username).orElseThrow( () ->
+        return  userRepository.findByUsername(username).orElseThrow( () ->
                 new ResourceNotFoundException("User", username));
-        System.out.println(u.getEmail());
-        return u;
     }
 
     public boolean exists(String id) {

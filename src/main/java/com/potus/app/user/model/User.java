@@ -1,13 +1,16 @@
 package com.potus.app.user.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Entity
 @Table(name="Users")
 public class User {
 
     private @Id String id;
-
+    @Column(unique = true)
     private String email;
     @Column(unique = true)
     private String username;
@@ -31,5 +34,6 @@ public class User {
     public String getUsername() {
         return username;
     }
+
 
 }
