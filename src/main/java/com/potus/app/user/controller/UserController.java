@@ -2,6 +2,7 @@ package com.potus.app.user.controller;
 
 
 import com.nimbusds.jose.shaded.json.JSONObject;
+import com.potus.app.user.exception.BadRequestException;
 import com.potus.app.user.exception.ResourceAlreadyExistsException;
 import com.potus.app.user.exception.ResourceNotFoundException;
 import com.potus.app.user.model.User;
@@ -34,6 +35,10 @@ public class UserController {
     @PostMapping("/profile")
     public User setUsername(Authentication auth, @RequestBody User body){
         String username = body.getUsername();
+
+        if (username == null)
+            throw new BadRequestException("Username can't be null");
+
         User user = (User) auth.getPrincipal();
         try{
             User userExist = userService.findByUsername(username);
