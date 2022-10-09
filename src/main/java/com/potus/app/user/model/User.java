@@ -9,7 +9,9 @@ import java.util.Set;
 @Table(name="Users")
 public class User {
 
-    private @Id String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(unique = true)
     private String email;
     @Column(unique = true)
@@ -17,13 +19,14 @@ public class User {
 
     public User(){}
 
-    public User(String id, String email, String username){
-        this.id = id;
+
+
+    public User(String email, String username){
         this.email = email;
         this.username = username;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -35,5 +38,14 @@ public class User {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
+    public String getStatus(){
+        if (username == null)
+            return "new";
+
+        return "normal";
+    }
 }
