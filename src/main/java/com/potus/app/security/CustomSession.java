@@ -1,4 +1,4 @@
-package com.potus.app.user.security;
+package com.potus.app.security;
 
 import com.potus.app.user.model.User;
 import org.springframework.security.authentication.AbstractAuthenticationToken;

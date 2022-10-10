@@ -1,6 +1,6 @@
-package com.potus.app.user.security;
+package com.potus.app.security;
 
-import com.potus.app.user.exception.ResourceNotFoundException;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import com.sun.istack.NotNull;

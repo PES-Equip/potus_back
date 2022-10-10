@@ -1,12 +1,14 @@
 package com.potus.app.user.model;
 
+import com.potus.app.potus.model.Potus;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 
 @Entity
-@Table(name="Users")
+@Table(name="users")
 public class User {
 
     @Id
@@ -16,6 +18,10 @@ public class User {
     private String email;
     @Column(unique = true)
     private String username;
+
+    @OneToOne(cascade = CascadeType.ALL )
+    @JoinColumn(name = "usrid")
+    private Potus potus;
 
     public User(){}
 
@@ -38,14 +44,24 @@ public class User {
         return username;
     }
 
+    public Potus getPotus() {
+        return potus;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getStatus(){
-        if (username == null)
-            return "new";
 
-        return "normal";
+    public void setPotus(Potus potus){
+        this.potus = potus;
     }
+
+    public UserStatus getStatus(){
+        if (username == null || potus == null)
+            return UserStatus.NEW;
+
+        return  UserStatus.NORMAL;
+    }
+
 }

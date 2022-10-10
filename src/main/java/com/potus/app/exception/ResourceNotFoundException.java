@@ -1,4 +1,4 @@
-package com.potus.app.user.exception;
+package com.potus.app.exception;
 
 
 import org.springframework.http.HttpStatus;
@@ -11,10 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException() {
         super();
-    }
-
-    public ResourceNotFoundException(String object, String id) {
-        super("%s (%s) not found".formatted(object, id));
     }
 
     public ResourceNotFoundException(String message, Throwable cause) {
