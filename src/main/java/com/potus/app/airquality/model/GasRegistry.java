@@ -1,5 +1,6 @@
 package com.potus.app.airquality.model;
 
+/*
 import javax.persistence.*;
 
 @Entity
@@ -45,3 +46,4 @@ public class GasRegistry {
         this.unit = unit;
     }
 }
+*/

@@ -1,6 +1,6 @@
 package com.potus.app.airquality.model;
 
-
+/*
 import javax.persistence.*;
 import java.util.List;
 import java.util.Map;
@@ -28,3 +28,4 @@ public class Region {
 
 
 }
+*/
