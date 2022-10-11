@@ -1,8 +1,8 @@
 package com.potus.app.airquality.controller;
 
 
-import com.potus.app.airquality.utils.AppToken;
 
+import com.potus.app.airquality.model.Gases;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -17,12 +17,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.potus.app.airquality.service.AirQualityService;
+
+
 @RestController
 @RequestMapping(value="/api/airquality")
 public class ApiGeneralitatController {
 
     @Autowired
     private Environment env;
+
 
     @Value("#{systemEnvironment['GENERALITAT_API_TOKEN']}")
     private String ApiToken;
@@ -52,10 +56,14 @@ public class ApiGeneralitatController {
         vars.put("$$app_token", ApiToken);
         vars.put("municipi", municipi);
 
-        System.out.print(vars);
-
         Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
         return Arrays.asList(result);
     }
+
+    @GetMapping(value = "updategas")
+    private Map<Gases, Double> updateGasComarcas(){
+        return AirQualityService.getGasData("Baix Llobregat");
+    }
+
 
 }
