@@ -8,14 +8,20 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 public class AirQualityService {
+
+    // ESTO NO VA DA PROBLEMAS DE STATIC ASI QUE DE MOMENTO LO HARDCODEO
+    /*
     @Value("#{systemEnvironment['GENERALITAT_API_TOKEN']}")
-    private static String ApiToken;
+    private String ApiToken;
+    */
+    private static final String  ApiToken = "LolDRyxtdtFUO1vCupmTXkRry";
 
 
     public static Map<Gases, Double> getGasData(String nom_comarca) {
         String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
         RestTemplate restTemplate = new RestTemplate();
         Map<String, String> vars = new HashMap<String, String>();
+
 
         vars.put("$$app_token", ApiToken);
         vars.put("nom_comarca", nom_comarca);
@@ -44,8 +50,7 @@ public class AirQualityService {
             Gases gas = Gases.valueOf(dato.get("contaminant"));
 
 
-            // AQUÍ HABRÁ QUE PILLAR TODOS LOS VALORES DEL GAS DE MOMENTO COJO SOLO EL PRIMERO)
-            //Double value_gas = Double.valueOf(dato.get("h01"));
+            // Retorna la media del gas de todas las horas que hayan
             Double value_gas = getMediaGas(dato);
 
             // If value_gas == -1, it doesn't have any value.
@@ -69,13 +74,12 @@ public class AirQualityService {
 
         System.out.println(gases);
 
-
         return gases;
      }
 
     private static Double getMediaGas(Map<String,String> dato) {
         double media = 0.0;
-        Integer cont = 0;
+        int cont = 0;
         if(!dato.containsKey(String.valueOf(GasesHours.h01))) media = -1.0;
 
         for(GasesHours hour: GasesHours.values()) {
@@ -84,9 +88,6 @@ public class AirQualityService {
             ++cont;
         }
         media = media/cont;
-        System.out.println(dato.get("codi_eoi"));
-        System.out.println(dato.get("contaminant"));
-        System.out.println(media);
 
         return media;
     }
