@@ -65,5 +65,11 @@ public class ApiGeneralitatController {
         return AirQualityService.getGasData("Baix Llobregat");
     }
 
+    @GetMapping(value = "aux")
+    private void aux() {
+        AirQualityService.InitializeGases();
+        AirQualityService.UpdateRegions();
+    }
+
 
 }
