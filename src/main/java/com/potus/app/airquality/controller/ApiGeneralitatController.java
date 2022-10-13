@@ -2,7 +2,9 @@ package com.potus.app.airquality.controller;
 
 
 
+import com.potus.app.airquality.model.GasRegistry;
 import com.potus.app.airquality.model.Gases;
+import com.potus.app.airquality.model.Region;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -12,10 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.potus.app.airquality.service.AirQualityService;
 
@@ -69,10 +68,13 @@ public class ApiGeneralitatController {
     }
 
     @GetMapping(value = "aux")
-    private void aux() {
+    private List<Region> aux() {
         airQualityService.InitializeGases();
+        return airQualityService.findAll();
         //airQualityService.UpdateRegions();
     }
+
+
 
 
 }

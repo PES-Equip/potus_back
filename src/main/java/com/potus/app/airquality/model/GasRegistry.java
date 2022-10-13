@@ -4,6 +4,7 @@ package com.potus.app.airquality.model;
 import javax.persistence.*;
 
 @Entity
+@Table(name="GASREGISTRIES")
 public class GasRegistry {
 
     @Id
@@ -12,15 +13,18 @@ public class GasRegistry {
 
     private Gases name;
 
-    private Double value;
+    private Double gvalue;
 
     private Units unit;
 
+    @ManyToOne
+    private Region region;
+
     public GasRegistry(){}
 
-    public GasRegistry(Gases name, Double value, Units unit) {
+    public GasRegistry(Gases name, Double gvalue, Units unit) {
         this.name = name;
-        this.value = value;
+        this.gvalue = gvalue;
         this.unit = unit;
     }
 
@@ -29,11 +33,11 @@ public class GasRegistry {
     }
 
     public Double getValue() {
-        return value;
+        return gvalue;
     }
 
-    public void setValue(Double value) {
-        this.value = value;
+    public void setValue(Double gvalue) {
+        this.gvalue = gvalue;
     }
 
     public Units getUnit() {

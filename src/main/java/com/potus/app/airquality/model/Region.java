@@ -5,12 +5,11 @@ import javax.persistence.*;
 import java.util.Map;
 
 @Entity
+@Table(name="REGIONS")
 public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-
 
     private Regions name;
 
@@ -18,17 +17,15 @@ public class Region {
 
     private Double length;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @OneToMany(mappedBy = "region")
     private Map<Gases,GasRegistry> registry;
 
     public Region() {}
 
-    public Region(Regions name, Double latitude, Double lenght, Map<Gases, GasRegistry> registry) {
+    public Region(Regions name, Double latitude, Double length) {
         this.name = name;
         this.latitude = latitude;
-        this.length = lenght;
-        this.registry = registry;
+        this.length = length;
     }
 
     public Regions getName() {
