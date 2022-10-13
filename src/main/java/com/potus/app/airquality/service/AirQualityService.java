@@ -78,7 +78,6 @@ public class AirQualityService {
             Regions_map.put(regionFixed, r);
         }
             System.out.println(Regions_map);
-            printRegionMap();
         }
 
     private static void printRegionMap() {
@@ -101,12 +100,12 @@ public class AirQualityService {
         for (Regions region: Regions.values()) {
             String regionFixed = FixRegionName(String.valueOf(region)); // Fixeamos el nombre en caso de haber algun fallo de espacios, puntos etc
             Map<Gases, Double> gasData = new HashMap<Gases, Double>();
+            System.out.println(regionFixed);
             gasData = getGasData(regionFixed); //Mapa con los datos del gas para la region dada
-            System.out.println(gasData);
             //Actualizamos los datos para la region
-            UpdateRegionData(regionFixed, gasData);
-
+            if(gasData != null) UpdateRegionData(regionFixed, gasData);
         }
+        printRegionMap();
     }
 
     public static void UpdateRegionData(String regionName, Map<Gases, Double> gasData) {
@@ -170,53 +169,60 @@ public class AirQualityService {
 
         Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
 
-        assert result != null;
+        System.out.println(result);
 
-        // Obtener la ultima fecha registrada para tener el dato mas actualizado.
-        Map<String,String> m = (Map<String, String>) result[0];
-        String data = m.get("data");
-        
-        Map<Gases, Double> gases = new EnumMap<Gases, Double>(Gases.class);
-        Map<Gases, Integer> gasesContador = new EnumMap<Gases, Integer>(Gases.class);
-
-
-        for(Object o : result) {
-            Map<String,String> dato = (Map<String, String>) o;
-            if(!Objects.equals(dato.get("data"), data)) break;
-
-            // ENUM IS 2_5, THIS CHANGES 2.5 TO 2_5
-            if (Objects.equals(dato.get("contaminant"), "PM2.5")) {
-                dato.put("contaminant", "PM2_5");
+        if(result != null) { // Obtener la ultima fecha registrada para tener el dato mas actualizado.
+            Map<String, String> m = new HashMap<String,String>();
+            try {
+                m = (Map<String, String>) result[0];
+            } catch (Exception e) {
+                System.out.println("No data for that comarca");
             }
 
-            Gases gas = Gases.valueOf(dato.get("contaminant"));
+            String data = m.get("data");
+
+            Map<Gases, Double> gases = new EnumMap<Gases, Double>(Gases.class);
+            Map<Gases, Integer> gasesContador = new EnumMap<Gases, Integer>(Gases.class);
 
 
-            // Retorna la media del gas de todas las horas que hayan
-            Double valueGas = getMediaGas(dato);
+            for (Object o : result) {
+                Map<String, String> dato = (Map<String, String>) o;
+                if (!Objects.equals(dato.get("data"), data)) break;
 
-            // If value_gas == -1, it doesn't have any value.
-            if(valueGas >= 0) {
-                if (!gases.containsKey(gas)) {
-                    gases.put(gas, valueGas);
-                    gasesContador.put(gas, 1);
-                } else {
-                    Double aux = gases.get(gas);
-                    valueGas += aux;
-                    gases.put(gas, valueGas);
-                    gasesContador.put(gas, gasesContador.get(gas) + 1);
+                // ENUM IS 2_5, THIS CHANGES 2.5 TO 2_5
+                if (Objects.equals(dato.get("contaminant"), "PM2.5")) {
+                    dato.put("contaminant", "PM2_5");
                 }
-        }
-        }
 
-        for(Gases g:gases.keySet()) {
-            Double media = gases.get(g)/gasesContador.get(g);
-            gases.put(g, media);
+                Gases gas = Gases.valueOf(dato.get("contaminant"));
+
+
+                // Retorna la media del gas de todas las horas que hayan
+                Double valueGas = getMediaGas(dato);
+
+                // If value_gas == -1, it doesn't have any value.
+                if (valueGas >= 0) {
+                    if (!gases.containsKey(gas)) {
+                        gases.put(gas, valueGas);
+                        gasesContador.put(gas, 1);
+                    } else {
+                        Double aux = gases.get(gas);
+                        valueGas += aux;
+                        gases.put(gas, valueGas);
+                        gasesContador.put(gas, gasesContador.get(gas) + 1);
+                    }
+                }
+            }
+
+            for (Gases g : gases.keySet()) {
+                Double media = gases.get(g) / gasesContador.get(g);
+                gases.put(g, media);
+            }
+
+            System.out.println(gases);
+            return gases;
         }
-
-        System.out.println(gases);
-
-        return gases;
+        return null;
      }
 
     private static Double getMediaGas(Map<String,String> dato) {
