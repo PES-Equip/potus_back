@@ -5,7 +5,6 @@ import javax.persistence.*;
 import java.util.Map;
 
 @Entity
-@Table(name = "AirQuality")
 public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,8 +18,8 @@ public class Region {
 
     private Double length;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @MapKeyColumn (name="gasname")
+    @OneToMany(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private Map<Gases,GasRegistry> registry;
 
     public Region() {}

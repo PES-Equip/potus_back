@@ -4,14 +4,12 @@ package com.potus.app.airquality.model;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "GasRegistries")
 public class GasRegistry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "gasname")
     private Gases name;
 
     private Double value;

@@ -71,7 +71,7 @@ public class ApiGeneralitatController {
     @GetMapping(value = "aux")
     private void aux() {
         airQualityService.InitializeGases();
-        airQualityService.UpdateRegions();
+        //airQualityService.UpdateRegions();
     }
 
 
