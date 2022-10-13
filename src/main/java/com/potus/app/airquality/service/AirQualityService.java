@@ -5,6 +5,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+import static com.potus.app.airquality.model.Units.*;
+
 public class AirQualityService {
 
     // ESTO NO VA DA PROBLEMAS DE STATIC ASI QUE DE MOMENTO LO HARDCODEO
@@ -18,7 +20,36 @@ public class AirQualityService {
 
     // CAMBIAR ESTO PARA QUE RETORNA LA UNIDAD CORRECTA EN BASE AL GAS QUE SEA!!!!!!!!!!!!!!
     public static Units getUnit(Gases gas) {
-        return Units.mg_m3;
+        Units unit = µg_m3;
+        //case PS unknown
+        //case HCl unknown
+        //case Cl2 unknown
+        //case HCNM unknown
+        switch (gas) {
+            case NO:
+            case NO2:
+            case NOX:
+            case O3:
+            case H2S:
+            case PM1:
+            case PM2_5:
+            case PM10:
+            case C6H6:
+            case SO2:
+                unit = µg_m3;
+                break;
+            case CO:
+                unit = mg_m3;
+                break;
+            case Hg:
+                unit = ng_m3;
+                break;
+
+            default:
+                System.out.println("Mistake");
+        }
+
+        return unit;
     }
 
     public static void InitializeGases() {
@@ -79,10 +110,36 @@ public class AirQualityService {
 
     private static String FixRegionName(String comarca) {
         // Aquí habrá que fixear las comarcas que puedan dar problemas
-        String comarca_fixed = comarca;
-        if (Objects.equals(comarca, "Baix_Llobregat")) comarca = "Baix Llobregat";
+        String comarcaFixed = "";
 
-        return comarca;
+        switch (comarca) {
+            case "Alt_Camp" -> comarcaFixed = "Alt Camp";
+            case "Alt_Empordà" -> comarcaFixed = "Alt Empordà";
+            case "Alt_Penedès" -> comarcaFixed = "Alt Penedès";
+            case "Alt_Urgell" -> comarcaFixed = "Alt Urgell";
+            case "Alta_Ribagorça" -> comarcaFixed = "Alta Ribagorça";
+            case "Baix_Camp" -> comarcaFixed = "Baix Camp";
+            case "Baix_Ebre" -> comarcaFixed = "Baix Ebre";
+            case "Baix_Empordà" -> comarcaFixed = "Baix Empordà";
+            case "Baix_Llobregat" -> comarcaFixed = "Baix Llobregat";
+            case "Baix_Penedès" -> comarcaFixed = "Baix Penedès";
+            case "Conca_de_Barberà" -> comarcaFixed = "Conca de Barberà";
+            case "Pallars_Jussà" -> comarcaFixed = "Pallars Jussà";
+            case "Pallars_Subirà" -> comarcaFixed = "Pallars Subirà";
+            case "Pla_d_Urgell" -> comarcaFixed = "Pla d'Urgell";
+            case "Ribera_d_Ebre" -> comarcaFixed = "Ribera d'Ebre";
+            case "Terra_Alta" -> comarcaFixed = "Terra Alta";
+            case "Vall_d_Aran" -> comarcaFixed = "Vall d'Aran";
+            case "Vallès_Occidental" -> comarcaFixed = "Vallès Occidental";
+            case "Vallès_Oriental" -> comarcaFixed = "Vallès Oriental";
+            default -> System.out.println("Mistake");
+        }
+
+        System.out.println(comarcaFixed);
+
+        //if (Objects.equals(comarca, "Baix_Llobregat")) comarca = "Baix Llobregat";
+
+        return comarcaFixed;
     }
 
 
