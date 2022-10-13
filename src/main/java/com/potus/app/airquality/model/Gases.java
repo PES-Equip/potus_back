@@ -1,7 +1,6 @@
 package com.potus.app.airquality.model;
 
 public enum Gases {
-    DEFAULT,
     NO,
     NO2,
     NOX,

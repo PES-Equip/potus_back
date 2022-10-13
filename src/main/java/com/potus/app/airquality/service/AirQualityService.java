@@ -3,6 +3,7 @@ package com.potus.app.airquality.service;
 import com.potus.app.airquality.model.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.rmi.registry.Registry;
 import java.util.*;
 
 import static com.potus.app.airquality.model.Units.*;
@@ -21,11 +22,10 @@ public class AirQualityService {
     // CAMBIAR ESTO PARA QUE RETORNA LA UNIDAD CORRECTA EN BASE AL GAS QUE SEA!!!!!!!!!!!!!!
     public static Units getUnit(Gases gas) {
         Units unit = µg_m3;
-        //case PS unknown
-        //case HCl unknown
-        //case Cl2 unknown
-        //case HCNM unknown
         switch (gas) {
+            case Cl2:
+            case HCl:
+            case PS:
             case NO:
             case NO2:
             case NOX:
@@ -44,9 +44,13 @@ public class AirQualityService {
             case Hg:
                 unit = ng_m3;
                 break;
-
+            case HCNM:
+            case HCT:
+                unit = ppm;
+                break;
             default:
                 System.out.println("Mistake");
+                break;
         }
 
         return unit;
@@ -63,7 +67,9 @@ public class AirQualityService {
 
             Map<Gases, GasRegistry> gases = new HashMap<Gases, GasRegistry>();
             for(Gases gas : Gases.values()) {
-                GasRegistry gasregistry = new GasRegistry(gas, 0.0, getUnit(gas));
+                Units gasUnit = getUnit(gas);
+                System.out.println(gasUnit);
+                GasRegistry gasregistry = new GasRegistry(gas, 0.0, gasUnit);
                 gases.put(gas, gasregistry);
             }
 
@@ -71,7 +77,20 @@ public class AirQualityService {
             Region r = new Region(regionFixed, latitude, lenght, gases);
             Regions_map.put(regionFixed, r);
         }
+            System.out.println(Regions_map);
+            printRegionMap();
+        }
 
+    private static void printRegionMap() {
+        for (Region r : Regions_map.values()) {
+            Map<Gases, GasRegistry> gr = r.getRegistry();
+            System.out.println(r.getName());
+            for (GasRegistry x : gr.values()) {
+                System.out.println(x.getName());
+                System.out.println(x.getValue());
+                System.out.println(x.getUnit());
+            }
+        }
     }
 
 
@@ -132,12 +151,8 @@ public class AirQualityService {
             case "Vall_d_Aran" -> comarcaFixed = "Vall d'Aran";
             case "Vallès_Occidental" -> comarcaFixed = "Vallès Occidental";
             case "Vallès_Oriental" -> comarcaFixed = "Vallès Oriental";
-            default -> System.out.println("Mistake");
+            default -> comarcaFixed = comarca;
         }
-
-        System.out.println(comarcaFixed);
-
-        //if (Objects.equals(comarca, "Baix_Llobregat")) comarca = "Baix Llobregat";
 
         return comarcaFixed;
     }
