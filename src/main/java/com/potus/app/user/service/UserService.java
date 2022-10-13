@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.potus.app.user.Utils.UserExceptionMessages.*;
+import static com.potus.app.user.utils.UserExceptionMessages.*;
 
 @Service
 public class UserService {
@@ -50,10 +50,8 @@ public class UserService {
         return user.isPresent();
     }
 
-    public User setUsername(User user, String username) throws ResourceAlreadyExistsException, BadRequestException{
+    public User setUsername(User user, String username) throws ResourceAlreadyExistsException{
 
-        if (username == null)
-            throw new BadRequestException(USERNAME_CANT_BE_NULL);
 
         try{
             User userExist = findByUsername(username);

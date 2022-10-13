@@ -3,8 +3,6 @@ package com.potus.app.user.model;
 import com.potus.app.potus.model.Potus;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 
 @Entity
@@ -19,8 +17,12 @@ public class User {
     @Column(unique = true)
     private String username;
 
-    @OneToOne(cascade = CascadeType.ALL )
-    @JoinColumn(name = "usrid")
+
+    @Column(columnDefinition = "int check(currency >= 0)")
+    private Integer currency;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private Potus potus;
 
     public User(){}
@@ -30,6 +32,7 @@ public class User {
     public User(String email, String username){
         this.email = email;
         this.username = username;
+        this.currency = 0;
     }
 
     public Long getId() {
@@ -61,7 +64,14 @@ public class User {
         if (username == null || potus == null)
             return UserStatus.NEW;
 
-        return  UserStatus.NORMAL;
+        return  UserStatus.CONFIRMED;
     }
 
+    public Integer getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Integer currency) {
+        this.currency = currency;
+    }
 }

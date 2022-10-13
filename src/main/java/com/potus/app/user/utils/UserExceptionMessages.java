@@ -1,4 +1,4 @@
-package com.potus.app.user.Utils;
+package com.potus.app.user.utils;
 
 public final class UserExceptionMessages {
 
@@ -10,6 +10,7 @@ public final class UserExceptionMessages {
 
     public static final String USERNAME_ALREADY_TAKEN = "Username already taken";
 
+    public static final String USER_MUST_CONFIRM_FIRST = "User must confirm first";
     public static String userNotFound(Object o){
         return "User (" + o + ") not found";
     }

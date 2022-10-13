@@ -4,7 +4,9 @@ import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.repository.PotusRepository;
 import com.potus.app.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PotusService {
 
     @Autowired
