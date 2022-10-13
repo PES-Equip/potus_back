@@ -31,6 +31,9 @@ public class ApiGeneralitatController {
     @Value("#{systemEnvironment['GENERALITAT_API_TOKEN']}")
     private String ApiToken;
 
+    @Autowired
+    private AirQualityService airQualityService;
+
 
 
     @GetMapping(value = "")
@@ -67,8 +70,8 @@ public class ApiGeneralitatController {
 
     @GetMapping(value = "aux")
     private void aux() {
-        AirQualityService.InitializeGases();
-        AirQualityService.UpdateRegions();
+        airQualityService.InitializeGases();
+        airQualityService.UpdateRegions();
     }
 
 

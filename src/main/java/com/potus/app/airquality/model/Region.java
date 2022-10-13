@@ -2,7 +2,6 @@ package com.potus.app.airquality.model;
 
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -12,11 +11,13 @@ public class Region {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+
+
+    private Regions name;
 
     private Double latitude;
 
-    private Double lenght;
+    private Double length;
 
     @OneToMany(cascade = CascadeType.ALL)
     @MapKeyColumn (name="gasname")
@@ -24,19 +25,15 @@ public class Region {
 
     public Region() {}
 
-    public Region(String name, Double latitude, Double lenght, Map<Gases, GasRegistry> registry) {
+    public Region(Regions name, Double latitude, Double lenght, Map<Gases, GasRegistry> registry) {
         this.name = name;
         this.latitude = latitude;
-        this.lenght = lenght;
+        this.length = lenght;
         this.registry = registry;
     }
 
-    public String getName() {
+    public Regions getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Double getLatitude() {
@@ -47,12 +44,12 @@ public class Region {
         this.latitude = latitude;
     }
 
-    public Double getLenght() {
-        return lenght;
+    public Double getLength() {
+        return length;
     }
 
-    public void setLenght(Double lenght) {
-        this.lenght = lenght;
+    public void setLength(Double length) {
+        this.length = length;
     }
 
     public Map<Gases, GasRegistry> getRegistry() {

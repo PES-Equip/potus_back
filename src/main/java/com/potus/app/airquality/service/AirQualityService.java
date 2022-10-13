@@ -1,14 +1,17 @@
 package com.potus.app.airquality.service;
 
 import com.potus.app.airquality.model.*;
-import com.potus.app.airquality.utils.Utils;
+import com.potus.app.airquality.repository.GasRegistryRepository;
+import com.potus.app.airquality.repository.RegionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.rmi.registry.Registry;
 import java.util.*;
 
 import static com.potus.app.airquality.model.Units.*;
 
+@Service
 public class AirQualityService {
 
     // ESTO NO VA DA PROBLEMAS DE STATIC ASI QUE DE MOMENTO LO HARDCODEO
@@ -18,23 +21,90 @@ public class AirQualityService {
     */
     private static final String  ApiToken = "LolDRyxtdtFUO1vCupmTXkRry";
 
+    @Autowired
+    RegionRepository regionRepository;
+
+    @Autowired
+    GasRegistryRepository gasRegistryRepository;
+
     public static Map<String, Region> Regions_map;
 
     // CAMBIAR ESTO PARA QUE RETORNA LA UNIDAD CORRECTA EN BASE AL GAS QUE SEA!!!!!!!!!!!!!!
     public static Units getUnit(Gases gas) {
-        Units unit = µg_m3;
+        Units unit;
         switch (gas) {
-            case Cl2, HCl, PS, NO, NO2, NOX, O3, H2S, PM1, PM2_5, PM10, C6H6, SO2 -> unit = µg_m3;
+            //case Cl2, HCl, PS, NO, NO2, NOX, O3, H2S, PM1, PM2_5, PM10, C6H6, SO2 -> unit = µg_m3;
             case CO -> unit = mg_m3;
             case Hg -> unit = ng_m3;
             case HCNM, HCT -> unit = ppm;
-            default -> System.out.println("Mistake");
+            default -> unit = µg_m3;
         }
 
         return unit;
     }
 
-    public static void InitializeGases() {
+
+    public void InitializeGases() {
+
+        List<Region> regions = new ArrayList<>();
+
+        regions.add(new Region(Regions.Alt_Camp,41.28, 1.25,  new HashMap<>()));
+
+        result.put("Alt_Camp", getAuxMap(41.28, 1.25));
+        result.put("Alt_Emporda", getAuxMap(42.28, 2.93));
+        result.put("Alt_Penedes", getAuxMap(41.36, 1.68));
+        result.put("Alt_Urgell", getAuxMap(42.24, 1.41));
+        result.put("Alta_Ribagorca", getAuxMap(42.43, 0.86));
+        result.put("Anoia", getAuxMap(41.61, 1.61));
+        result.put("Bages", getAuxMap(41.78, 1.86));
+        result.put("Baix_Camp", getAuxMap(41.1, 1.1));
+        result.put("Baix_Ebre", getAuxMap(40.85, 0.56));
+        result.put("Baix_Emporda", getAuxMap(41.95, 3.06));
+        result.put("Baix_Llobregat", getAuxMap(41.43, 1.97));
+        result.put("Baix_Penedes", getAuxMap(41.22, 1.53));
+        result.put("Barcelones", getAuxMap(41.40, 2.16));
+        result.put("Bergueda", getAuxMap(42.11, 1.84));
+        result.put("Cerdanya", getAuxMap(42.45, 1.95));
+        result.put("Conca_de_Barbera", getAuxMap(41.37, 1.15));
+        result.put("Garraf", getAuxMap(41.32, 1.82));
+        result.put("Garrigues", getAuxMap(41.52, 0.87));
+        result.put("Garrotxa", getAuxMap(42.17, 2.55));
+        result.put("Girones", getAuxMap(41.94, 2.81));
+        result.put("Maresme", getAuxMap(41.6, 2.5));
+        result.put("Montsia", getAuxMap(40.7, 0.57));
+        result.put("Noguera", getAuxMap(41.90, 0.93));
+        result.put("Osona", getAuxMap(41.95, 2.25));
+        result.put("Pallars_Jussa", getAuxMap( 42.28, 0.93));
+        result.put("Pallars_Subira", getAuxMap(42.52, 1.19));
+        result.put("Pla_d_Urgell", getAuxMap(41.64, 0.91));
+        result.put("Priorat", getAuxMap(41.13, 0.82));
+        result.put("Ribera_d_Ebre", getAuxMap(41.08, 0.63));
+        result.put("Ripolles", getAuxMap(42.27, 2.26));
+        result.put("Segarra", getAuxMap(41.739167, 1.33));
+        result.put("Serria", getAuxMap(42.018056, 2.83));
+        result.put("Selva", getAuxMap(41.8647, 2.67));
+        result.put("Solsones", getAuxMap(41.98, 1.51));
+        result.put("Tarragones", getAuxMap(41.15, 1.29));
+        result.put("Terra_Alta", getAuxMap(41.05, 0.43));
+        result.put("Urgell", getAuxMap(41.66, 1.09));
+        result.put("Vall_d_Aran", getAuxMap(42.72, 0.84));
+        result.put("Valles_Occidental", getAuxMap(41.56, 2.04));
+        result.put("Valles_Oriental", getAuxMap(41.65, 2.31));
+
+        regions.forEach(region -> {
+            for(Gases gas : Gases.values()) {
+
+                Map<Gases, GasRegistry> gases = new HashMap<>();
+                Units gasUnit = getUnit(gas);
+                GasRegistry gasregistry = new GasRegistry(gas, 0.0, gasUnit);
+                gases.put(gas, gasregistry);
+
+                gasRegistryRepository.saveAll(gases.values());
+            }
+        });
+
+        regionRepository.saveAll(regions);
+        /*
         Regions_map = new HashMap<String, Region>();
         Map<String, Map<String, Double>> RegionsLatitudeLenghtMap = Utils.getRegionData();
 
@@ -55,6 +125,7 @@ public class AirQualityService {
             Regions_map.put(regionFixed, r);
         }
             System.out.println(Regions_map);
+        */
         }
 
     private static void printRegionMap() {

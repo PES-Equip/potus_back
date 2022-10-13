@@ -3,7 +3,7 @@ package com.potus.app.airquality.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Utils {
+public class AirQualityUtils {
 
     private static Map<String, Double> getAuxMap(Double lat, Double len) {
         Map<String, Double> aux = new HashMap<>();
