@@ -37,7 +37,7 @@ public class Utils {
         result.put("Garrotxa", getAuxMap(42.17, 2.55));
         result.put("Gironès", getAuxMap(41.94, 2.81));
         result.put("Maresme", getAuxMap(41.6, 2.5));
-        result.put("Montsia", getAuxMap(40.7, 0.57));
+        result.put("Montsià", getAuxMap(40.7, 0.57));
         result.put("Noguera", getAuxMap(41.90, 0.93));
         result.put("Osona", getAuxMap(41.95, 2.25));
         result.put("Pallars_Jussà", getAuxMap( 42.28, 0.93));
@@ -55,7 +55,7 @@ public class Utils {
         result.put("Urgell", getAuxMap(41.66, 1.09));
         result.put("Vall_d_Aran", getAuxMap(42.72, 0.84));
         result.put("Vallès_Occidental", getAuxMap(41.56, 2.04));
-        result.put("Valles_Oriental", getAuxMap(41.65, 2.31));
+        result.put("Vallès_Oriental", getAuxMap(41.65, 2.31));
 
 
         return result;

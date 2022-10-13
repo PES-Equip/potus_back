@@ -1,6 +1,7 @@
 package com.potus.app.airquality.service;
 
 import com.potus.app.airquality.model.*;
+import com.potus.app.airquality.utils.Utils;
 import org.springframework.web.client.RestTemplate;
 
 import java.rmi.registry.Registry;
@@ -58,17 +59,16 @@ public class AirQualityService {
 
     public static void InitializeGases() {
         Regions_map = new HashMap<String, Region>();
+        Map<String, Map<String, Double>> RegionsLatitudeLenghtMap = Utils.getRegionData();
+
         for (Regions region: Regions.values()) {
             String regionFixed = FixRegionName(String.valueOf(region)); // Fixeamos el nombre en caso de haber algun fallo de espacios, puntos etc
-
-            // ESTO HAY QUE CAMBIARLO PARA PONER LA LATITUD Y LENGHT CORRECTO PARA CADA REGION !!!!!!!!!!!!!!
-            Double latitude = 0.0;
-            Double lenght = 0.0;
+            Double latitude = RegionsLatitudeLenghtMap.get(String.valueOf(region)).get("latitude");
+            Double lenght = RegionsLatitudeLenghtMap.get(String.valueOf(region)).get("length");
 
             Map<Gases, GasRegistry> gases = new HashMap<Gases, GasRegistry>();
             for(Gases gas : Gases.values()) {
                 Units gasUnit = getUnit(gas);
-                System.out.println(gasUnit);
                 GasRegistry gasregistry = new GasRegistry(gas, 0.0, gasUnit);
                 gases.put(gas, gasregistry);
             }
@@ -105,7 +105,6 @@ public class AirQualityService {
             //Actualizamos los datos para la region
             if(gasData != null) UpdateRegionData(regionFixed, gasData);
         }
-        printRegionMap();
     }
 
     public static void UpdateRegionData(String regionName, Map<Gases, Double> gasData) {
@@ -168,8 +167,6 @@ public class AirQualityService {
         vars.put("nom_comarca", nom_comarca);
 
         Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
-
-        System.out.println(result);
 
         if(result != null) { // Obtener la ultima fecha registrada para tener el dato mas actualizado.
             Map<String, String> m = new HashMap<String,String>();
