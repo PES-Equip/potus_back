@@ -24,34 +24,11 @@ public class AirQualityService {
     public static Units getUnit(Gases gas) {
         Units unit = µg_m3;
         switch (gas) {
-            case Cl2:
-            case HCl:
-            case PS:
-            case NO:
-            case NO2:
-            case NOX:
-            case O3:
-            case H2S:
-            case PM1:
-            case PM2_5:
-            case PM10:
-            case C6H6:
-            case SO2:
-                unit = µg_m3;
-                break;
-            case CO:
-                unit = mg_m3;
-                break;
-            case Hg:
-                unit = ng_m3;
-                break;
-            case HCNM:
-            case HCT:
-                unit = ppm;
-                break;
-            default:
-                System.out.println("Mistake");
-                break;
+            case Cl2, HCl, PS, NO, NO2, NOX, O3, H2S, PM1, PM2_5, PM10, C6H6, SO2 -> unit = µg_m3;
+            case CO -> unit = mg_m3;
+            case Hg -> unit = ng_m3;
+            case HCNM, HCT -> unit = ppm;
+            default -> System.out.println("Mistake");
         }
 
         return unit;
@@ -131,24 +108,24 @@ public class AirQualityService {
 
         switch (comarca) {
             case "Alt_Camp" -> comarcaFixed = "Alt Camp";
-            case "Alt_Empordà" -> comarcaFixed = "Alt Empordà";
-            case "Alt_Penedès" -> comarcaFixed = "Alt Penedès";
+            case "Alt_Emporda" -> comarcaFixed = "Alt Empordà";
+            case "Alt_Penedes" -> comarcaFixed = "Alt Penedès";
             case "Alt_Urgell" -> comarcaFixed = "Alt Urgell";
-            case "Alta_Ribagorça" -> comarcaFixed = "Alta Ribagorça";
+            case "Alta_Ribagorca" -> comarcaFixed = "Alta Ribagorça";
             case "Baix_Camp" -> comarcaFixed = "Baix Camp";
             case "Baix_Ebre" -> comarcaFixed = "Baix Ebre";
-            case "Baix_Empordà" -> comarcaFixed = "Baix Empordà";
+            case "Baix_Emporda" -> comarcaFixed = "Baix Empordà";
             case "Baix_Llobregat" -> comarcaFixed = "Baix Llobregat";
-            case "Baix_Penedès" -> comarcaFixed = "Baix Penedès";
-            case "Conca_de_Barberà" -> comarcaFixed = "Conca de Barberà";
-            case "Pallars_Jussà" -> comarcaFixed = "Pallars Jussà";
-            case "Pallars_Subirà" -> comarcaFixed = "Pallars Subirà";
+            case "Baix_Penedes" -> comarcaFixed = "Baix Penedès";
+            case "Conca_de_Barbera" -> comarcaFixed = "Conca de Barberà";
+            case "Pallars_Jussa" -> comarcaFixed = "Pallars Jussà";
+            case "Pallars_Subira" -> comarcaFixed = "Pallars Subirà";
             case "Pla_d_Urgell" -> comarcaFixed = "Pla d'Urgell";
             case "Ribera_d_Ebre" -> comarcaFixed = "Ribera d'Ebre";
             case "Terra_Alta" -> comarcaFixed = "Terra Alta";
             case "Vall_d_Aran" -> comarcaFixed = "Vall d'Aran";
-            case "Vallès_Occidental" -> comarcaFixed = "Vallès Occidental";
-            case "Vallès_Oriental" -> comarcaFixed = "Vallès Oriental";
+            case "Valles_Occidental" -> comarcaFixed = "Vallès Occidental";
+            case "Valles_Oriental" -> comarcaFixed = "Vallès Oriental";
             default -> comarcaFixed = comarca;
         }
 
