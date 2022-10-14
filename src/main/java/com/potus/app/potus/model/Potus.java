@@ -59,7 +59,7 @@ public class Potus {
         return infested;
     }
 
-    public Boolean getAlive() {
+    public Boolean isAlive() {
         return alive;
     }
 
@@ -67,16 +67,32 @@ public class Potus {
         return createdDate;
     }
 
-    public void setCreatedDate(Date createdDate) {
-        this.createdDate = createdDate;
-    }
-
     public Date getLastModified() {
         return lastModified;
     }
 
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public void setHealth(Integer health) {
+        this.health = health;
+    }
+
+    public void setWaterLevel(Integer waterLevel) {
+        this.waterLevel = waterLevel;
+    }
+
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
+    }
+
+    public void setInfested(Boolean infested) {
+        this.infested = infested;
+    }
+
+    public void setAlive(Boolean alive) {
+        this.alive = alive;
     }
 }
 
