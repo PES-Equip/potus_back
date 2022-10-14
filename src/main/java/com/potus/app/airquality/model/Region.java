@@ -13,6 +13,8 @@ public class Region {
 
     private Regions name;
 
+    private String code;
+
     private Double latitude;
 
     private Double length;
@@ -22,10 +24,11 @@ public class Region {
 
     public Region() {}
 
-    public Region(Regions name, Double latitude, Double length) {
+    public Region(Regions name, Double latitude, Double length, String code) {
         this.name = name;
         this.latitude = latitude;
         this.length = length;
+        this.code = code;
     }
 
     public Regions getName() {

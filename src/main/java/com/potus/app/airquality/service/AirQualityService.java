@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+import static com.potus.app.airquality.model.Regions.*;
 import static com.potus.app.airquality.model.Units.*;
 
 @Service
@@ -48,8 +49,8 @@ public class AirQualityService {
 
         List<Region> regions = new ArrayList<>();
 
-
-        regions.add(new Region(Regions.Alt_Camp,41.28, 1.25));
+        /*
+        regions.add(new Region(Alt_Camp,41.28, 1.25));
         regions.add(new Region(Regions.Alt_Emporda,42.28, 2.93));
         regions.add(new Region(Regions.Alt_Penedes,41.36, 1.68));
         regions.add(new Region(Regions.Alt_Urgell,42.24, 1.41));
@@ -104,22 +105,9 @@ public class AirQualityService {
         });
 
         regionRepository.saveAll(regions);
+
+         */
         }
-
-
-    public static void UpdateRegions() {
-        // PENDING : ACABAR EL ENUM DE REGIONS (Comarcas)
-        // Habrá que hacer casos especiales para las comarcas que no se pueden poner bien en el enum.
-
-        for (Regions region: Regions.values()) {
-            String regionFixed = FixRegionName(String.valueOf(region)); // Fixeamos el nombre en caso de haber algun fallo de espacios, puntos etc
-            Map<Gases, Double> gasData = new HashMap<Gases, Double>();
-            System.out.println(regionFixed);
-            gasData = getGasData(regionFixed); //Mapa con los datos del gas para la region dada
-            //Actualizamos los datos para la region
-            if(gasData != null) UpdateRegionData(regionFixed, gasData);
-        }
-    }
 
     public List<Region> findAll(){
         return regionRepository.findAll();
@@ -147,31 +135,31 @@ public class AirQualityService {
 
     }
 
-    private static String FixRegionName(String comarca) {
+    public String FixRegionName(Regions comarca) {
         // Aquí habrá que fixear las comarcas que puedan dar problemas
         String comarcaFixed = "";
 
         switch (comarca) {
-            case "Alt_Camp" -> comarcaFixed = "Alt Camp";
-            case "Alt_Emporda" -> comarcaFixed = "Alt Empordà";
-            case "Alt_Penedes" -> comarcaFixed = "Alt Penedès";
-            case "Alt_Urgell" -> comarcaFixed = "Alt Urgell";
-            case "Alta_Ribagorca" -> comarcaFixed = "Alta Ribagorça";
-            case "Baix_Camp" -> comarcaFixed = "Baix Camp";
-            case "Baix_Ebre" -> comarcaFixed = "Baix Ebre";
-            case "Baix_Emporda" -> comarcaFixed = "Baix Empordà";
-            case "Baix_Llobregat" -> comarcaFixed = "Baix Llobregat";
-            case "Baix_Penedes" -> comarcaFixed = "Baix Penedès";
-            case "Conca_de_Barbera" -> comarcaFixed = "Conca de Barberà";
-            case "Pallars_Jussa" -> comarcaFixed = "Pallars Jussà";
-            case "Pallars_Subira" -> comarcaFixed = "Pallars Subirà";
-            case "Pla_d_Urgell" -> comarcaFixed = "Pla d'Urgell";
-            case "Ribera_d_Ebre" -> comarcaFixed = "Ribera d'Ebre";
-            case "Terra_Alta" -> comarcaFixed = "Terra Alta";
-            case "Vall_d_Aran" -> comarcaFixed = "Vall d'Aran";
-            case "Valles_Occidental" -> comarcaFixed = "Vallès Occidental";
-            case "Valles_Oriental" -> comarcaFixed = "Vallès Oriental";
-            default -> comarcaFixed = comarca;
+            case Alt_Camp -> comarcaFixed = "Alt Camp";
+            case Alt_Emporda -> comarcaFixed = "Alt Empordà";
+            case Alt_Penedes -> comarcaFixed = "Alt Penedès";
+            case Alt_Urgell -> comarcaFixed = "Alt Urgell";
+            case Alta_Ribagorca -> comarcaFixed = "Alta Ribagorça";
+            case Baix_Camp -> comarcaFixed = "Baix Camp";
+            case Baix_Ebre -> comarcaFixed = "Baix Ebre";
+            case Baix_Emporda -> comarcaFixed = "Baix Empordà";
+            case Baix_Llobregat -> comarcaFixed = "Baix Llobregat";
+            case Baix_Penedes -> comarcaFixed = "Baix Penedès";
+            case Conca_de_Barbera -> comarcaFixed = "Conca de Barberà";
+            case Pallars_Jussa -> comarcaFixed = "Pallars Jussà";
+            case Pallars_Subira -> comarcaFixed = "Pallars Subirà";
+            case Pla_d_Urgell -> comarcaFixed = "Pla d'Urgell";
+            case Ribera_d_Ebre -> comarcaFixed = "Ribera d'Ebre";
+            case Terra_Alta -> comarcaFixed = "Terra Alta";
+            case Vall_d_Aran -> comarcaFixed = "Vall d'Aran";
+            case Valles_Occidental -> comarcaFixed = "Vallès Occidental";
+            case Valles_Oriental -> comarcaFixed = "Vallès Oriental";
+            //default -> comarcaFixed = comarca;
         }
 
         return comarcaFixed;
@@ -179,7 +167,7 @@ public class AirQualityService {
 
 
 
-    public static Map<Gases, Double> getGasData(String nom_comarca) {
+    public String getGasData(String nom_comarca) {
         String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
         RestTemplate restTemplate = new RestTemplate();
         Map<String, String> vars = new HashMap<String, String>();
@@ -206,6 +194,11 @@ public class AirQualityService {
 
             for (Object o : result) {
                 Map<String, String> dato = (Map<String, String>) o;
+
+                String code = dato.get("codi_comarca");
+                if(code != null)
+                    return code;
+
                 if (!Objects.equals(dato.get("data"), data)) break;
 
                 // ENUM IS 2_5, THIS CHANGES 2.5 TO 2_5
@@ -239,7 +232,7 @@ public class AirQualityService {
             }
 
             System.out.println(gases);
-            return gases;
+            //return gases;
         }
         return null;
      }
