@@ -1,4 +1,4 @@
-package com.potus.app.user.exception;
+package com.potus.app.exception;
 
 
 import org.springframework.http.HttpStatus;
@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ResourceAlreadyExistsException extends RuntimeException {
     public ResourceAlreadyExistsException() {
         super();
-    }
-
-    public ResourceAlreadyExistsException(String object, String id) {
-        super("%s (%s) already exists".formatted(object, id));
     }
 
     public ResourceAlreadyExistsException(String message, Throwable cause) {

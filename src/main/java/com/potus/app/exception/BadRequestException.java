@@ -1,4 +1,4 @@
-package com.potus.app.user.exception;
+package com.potus.app.exception;
 
 
 import org.springframework.http.HttpStatus;

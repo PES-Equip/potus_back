@@ -1,12 +1,13 @@
 package com.potus.app.user.model;
 
+import com.potus.app.potus.model.Potus;
+
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.transaction.Transactional;
 
 
 @Entity
-@Table(name="Users")
+@Table(name="users")
 public class User {
 
     @Id
@@ -17,6 +18,14 @@ public class User {
     @Column(unique = true)
     private String username;
 
+
+    @Column(columnDefinition = "int check(currency >= 0)")
+    private Integer currency;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Potus potus;
+
     public User(){}
 
 
@@ -24,6 +33,7 @@ public class User {
     public User(String email, String username){
         this.email = email;
         this.username = username;
+        this.currency = 0;
     }
 
     public Long getId() {
@@ -38,14 +48,31 @@ public class User {
         return username;
     }
 
+    public Potus getPotus() {
+        return potus;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
 
-    public String getStatus(){
-        if (username == null)
-            return "new";
 
-        return "normal";
+    public void setPotus(Potus potus){
+        this.potus = potus;
+    }
+
+    public UserStatus getStatus(){
+        if (username == null || potus == null)
+            return UserStatus.NEW;
+
+        return  UserStatus.CONFIRMED;
+    }
+
+    public Integer getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(Integer currency) {
+        this.currency = currency;
     }
 }
