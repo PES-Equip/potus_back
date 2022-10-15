@@ -3,6 +3,7 @@ package com.potus.app.user.model;
 import com.potus.app.potus.model.Potus;
 
 import javax.persistence.*;
+import javax.transaction.Transactional;
 
 
 @Entity

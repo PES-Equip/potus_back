@@ -1,11 +1,10 @@
 package com.potus.app.user.service;
 
 
-import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.repository.PotusRepository;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,7 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    PotusRepository potusRepository;
+    PotusService potusService;
 
     public List<User> getAll() {
         return userRepository.findAll();
@@ -63,9 +62,13 @@ public class UserService {
     }
 
     public User createPotus(User user) {
-        Potus potus = new Potus();
-        potusRepository.save(potus);
+        Potus potus = potusService.createPotus();
         user.setPotus(potus);
+        return saveUser(user);
+    }
+
+    public User addCurrency(User user, Integer amount){
+        user.setCurrency(user.getCurrency() + amount);
         return saveUser(user);
     }
 

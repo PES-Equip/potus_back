@@ -1,11 +1,14 @@
 package com.potus.app.potus.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.potus.app.potus.utils.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Entity
@@ -15,6 +18,7 @@ public class Potus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private Long id;
 
     //@Column(columnDefinition = "int check(health >= 0 and health <= 100")
@@ -34,13 +38,22 @@ public class Potus {
 
     private Boolean alive;
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @MapKeyEnumerated(EnumType.STRING)
+    @JoinColumn(name = "potus_id")
+    private Map<Actions, PotusAction> actions;
+
     public Potus() {
+
+        Date now = new Date();
+
         this.health = PotusUtils.MAX_HEALTH;
         this.waterLevel = PotusUtils.MAX_WATER_LEVEL;
-        this.createdDate = new Date();
-        this.lastModified = new Date();
+        this.createdDate = now;
+        this.lastModified = now;
         this.alive = true;
         this.infested = false;
+        this.actions = new HashMap<>();
     }
 
     public Long getId() {
@@ -71,6 +84,14 @@ public class Potus {
         return lastModified;
     }
 
+    public Map<Actions, PotusAction> getActions() {
+        return actions;
+    }
+
+    public void setActions(Map<Actions, PotusAction> actions) {
+        this.actions = actions;
+    }
+
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
@@ -94,5 +115,11 @@ public class Potus {
     public void setAlive(Boolean alive) {
         this.alive = alive;
     }
+
+    public PotusAction getAction(Actions action){
+        return actions.get(action);
+    }
+
+
 }
 
