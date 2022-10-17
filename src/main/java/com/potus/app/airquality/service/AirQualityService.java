@@ -3,6 +3,9 @@ package com.potus.app.airquality.service;
 import com.potus.app.airquality.model.*;
 import com.potus.app.airquality.repository.GasRegistryRepository;
 import com.potus.app.airquality.repository.RegionRepository;
+import com.potus.app.airquality.utils.InitialDataConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +24,9 @@ public class AirQualityService {
     private String ApiToken;
     */
     private static final String  ApiToken = "LolDRyxtdtFUO1vCupmTXkRry";
+
+
+    Logger logger = LoggerFactory.getLogger(AirQualityService.class);
 
     @Autowired
     RegionRepository regionRepository;
@@ -97,6 +103,7 @@ public class AirQualityService {
             gasRegistryRepository.saveAll(gases.values());
             region.setRegistry(gases);
         });
+        logger.info("Initialized all the regions");
         return regionRepository.saveAll(regions);
         }
 
@@ -126,6 +133,7 @@ public class AirQualityService {
                 }
                 region.setRegistry(registry);
                 regionRepository.save(region);
+                logger.info(region.getName() + " UPDATED");
                 //System.out.println(region.getName() + "UPDATED");
             }
         });
