@@ -32,7 +32,7 @@ public enum Regions {
     Ribera_d_Ebre, //Provided by API (Potential mistake "Ribera d¿Ebre")
     Ripolles, //Provided by API
     Segarra,
-    Serria, //Provided by API
+    Segria, //Provided by API
     Selva,
     Solsones,
     Tarragones, //Provided by API

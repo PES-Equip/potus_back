@@ -46,50 +46,48 @@ public class AirQualityService {
 
 
     public void InitializeGases() {
-
         List<Region> regions = new ArrayList<>();
 
-        /*
-        regions.add(new Region(Alt_Camp,41.28, 1.25));
-        regions.add(new Region(Regions.Alt_Emporda,42.28, 2.93));
-        regions.add(new Region(Regions.Alt_Penedes,41.36, 1.68));
-        regions.add(new Region(Regions.Alt_Urgell,42.24, 1.41));
-        regions.add(new Region(Regions.Alta_Ribagorca,42.43, 0.86));
-        regions.add(new Region(Regions.Anoia,41.61, 1.61));
-        regions.add(new Region(Regions.Bages,41.78, 1.86));
-        regions.add(new Region(Regions.Baix_Camp,41.1, 1.1));
-        regions.add(new Region(Regions.Baix_Ebre,40.85, 0.56));
-        regions.add(new Region(Regions.Baix_Emporda,41.95, 3.06));
-        regions.add(new Region(Regions.Baix_Llobregat,41.43, 1.97));
-        regions.add(new Region(Regions.Baix_Penedes,41.22, 1.53));
-        regions.add(new Region(Regions.Barcelones,41.40, 2.16));
-        regions.add(new Region(Regions.Bergueda,42.11, 1.84));
-        regions.add(new Region(Regions.Cerdanya,42.45, 1.95));
-        regions.add(new Region(Regions.Conca_de_Barbera,41.37, 1.15));
-        regions.add(new Region(Regions.Garraf,41.32, 1.82));
-        regions.add(new Region(Regions.Garrigues,41.52, 0.87));
-        regions.add(new Region(Regions.Garrotxa,42.17, 2.55));
-        regions.add(new Region(Regions.Girones,41.94, 2.81));
-        regions.add(new Region(Regions.Maresme,41.6, 2.5));
-        regions.add(new Region(Regions.Montsia,40.7, 0.57));
-        regions.add(new Region(Regions.Noguera,41.90, 0.93));
-        regions.add(new Region(Regions.Osona,41.95, 2.25));
-        regions.add(new Region(Regions.Pallars_Jussa,42.28, 0.93));
-        regions.add(new Region(Regions.Pallars_Subira,42.52, 1.19));
-        regions.add(new Region(Regions.Pla_d_Urgell,41.64, 0.91));
-        regions.add(new Region(Regions.Priorat,41.13, 0.82));
-        regions.add(new Region(Regions.Ribera_d_Ebre,41.08, 0.63));
-        regions.add(new Region(Regions.Ripolles,42.27, 2.26));
-        regions.add(new Region(Regions.Segarra,41.739167, 1.33));
-        regions.add(new Region(Regions.Serria,42.018056, 2.83));
-        regions.add(new Region(Regions.Selva,41.8647, 2.67));
-        regions.add(new Region(Regions.Solsones,41.98, 1.51));
-        regions.add(new Region(Regions.Tarragones,41.15, 1.29));
-        regions.add(new Region(Regions.Terra_Alta,41.05, 0.43));
-        regions.add(new Region(Regions.Urgell,41.66, 1.09));
-        regions.add(new Region(Regions.Vall_d_Aran,42.72, 0.84));
-        regions.add(new Region(Regions.Valles_Occidental,41.56, 2.04));
-        regions.add(new Region(Regions.Valles_Oriental,41.65, 2.31));
+        regions.add(new Region(Regions.Alt_Camp,41.28, 1.25,"01"));
+        regions.add(new Region(Regions.Alt_Emporda,42.28, 2.93, "02"));
+        regions.add(new Region(Regions.Alt_Penedes,41.36, 1.68, "03"));
+        regions.add(new Region(Regions.Alt_Urgell,42.24, 1.41,null));
+        regions.add(new Region(Regions.Alta_Ribagorca,42.43, 0.86, null));
+        regions.add(new Region(Regions.Anoia,41.61, 1.61, "06"));
+        regions.add(new Region(Regions.Bages,41.78, 1.86, "07"));
+        regions.add(new Region(Regions.Baix_Camp,41.1, 1.1, "08"));
+        regions.add(new Region(Regions.Baix_Ebre,40.85, 0.56, "09"));
+        regions.add(new Region(Regions.Baix_Emporda,41.95, 3.06, "10"));
+        regions.add(new Region(Regions.Baix_Llobregat,41.43, 1.97, "11"));
+        regions.add(new Region(Regions.Baix_Penedes,41.22, 1.53, null));
+        regions.add(new Region(Regions.Barcelones,41.40, 2.16, "13"));
+        regions.add(new Region(Regions.Bergueda,42.11, 1.84, "14"));
+        regions.add(new Region(Regions.Cerdanya,42.45, 1.95, "15"));
+        regions.add(new Region(Regions.Conca_de_Barbera,41.37, 1.15, null));
+        regions.add(new Region(Regions.Garraf,41.32, 1.82, "17"));
+        regions.add(new Region(Regions.Garrigues,41.52, 0.87, "18"));
+        regions.add(new Region(Regions.Garrotxa,42.17, 2.55, "19"));
+        regions.add(new Region(Regions.Girones,41.94, 2.81, "20"));
+        regions.add(new Region(Regions.Maresme,41.6, 2.5, "21"));
+        regions.add(new Region(Regions.Montsia,40.7, 0.57, "22"));
+        regions.add(new Region(Regions.Noguera,41.90, 0.93, "23"));
+        regions.add(new Region(Regions.Osona,41.95, 2.25, "24"));
+        regions.add(new Region(Regions.Pallars_Jussa,42.28, 0.93, "25"));
+        regions.add(new Region(Regions.Pallars_Subira,42.52, 1.19, "26"));
+        regions.add(new Region(Regions.Pla_d_Urgell,41.64, 0.91, null));
+        regions.add(new Region(Regions.Priorat,41.13, 0.82, "29"));
+        regions.add(new Region(Regions.Ribera_d_Ebre,41.08, 0.63, "30"));
+        regions.add(new Region(Regions.Ripolles,42.27, 2.26,"31"));
+        regions.add(new Region(Regions.Segarra,41.739167, 1.33, null));
+        regions.add(new Region(Regions.Segria,42.018056, 2.83, "33"));
+        regions.add(new Region(Regions.Selva,41.8647, 2.67,null));
+        regions.add(new Region(Regions.Solsones,41.98, 1.51, null));
+        regions.add(new Region(Regions.Tarragones,41.15, 1.29, "36"));
+        regions.add(new Region(Regions.Terra_Alta,41.05, 0.43, "37"));
+        regions.add(new Region(Regions.Urgell,41.66, 1.09, null));
+        regions.add(new Region(Regions.Vall_d_Aran,42.72, 0.84, null));
+        regions.add(new Region(Regions.Valles_Occidental,41.56, 2.04, "40"));
+        regions.add(new Region(Regions.Valles_Oriental,41.65, 2.31, "41"));
 
         regions.forEach(region -> {
             Map<Gases, GasRegistry> gases = new HashMap<>();
@@ -97,16 +95,12 @@ public class AirQualityService {
                 Units gasUnit = getUnit(gas);
                 GasRegistry gasregistry = new GasRegistry(gas, 0.0, gasUnit);
                 gases.put(gas, gasregistry);
-
             }
-
             gasRegistryRepository.saveAll(gases.values());
             region.setRegistry(gases);
         });
-
         regionRepository.saveAll(regions);
-
-         */
+        //printRegions();
         }
 
     public List<Region> findAll(){
@@ -129,11 +123,45 @@ public class AirQualityService {
                     gasRegistry.setValue(data);
                 }
             }
-
-
-
-
     }
+
+    public void UpdateRegionGasData(){
+        List<Region> regions = regionRepository.findAll();
+        regions.forEach(region -> {
+            if (region.getCode() != null) {
+                System.out.println(region.getCode());
+                Map<Gases, Double> gasData = getGasData(region.getName());
+
+                Map<Gases, GasRegistry> registry = region.getRegistry();
+                System.out.println("size");
+                System.out.println(registry.size());
+
+                for(GasRegistry g : registry.values()) {
+                    System.out.println(g.getValue());
+                    System.out.println(g.getUnit());
+                    System.out.println(g.getName());
+                }
+
+
+
+
+                for (Gases gas : registry.keySet()) {
+                    GasRegistry gasRegistryAux = registry.get(gas);
+                    Double valueGas = gasData.get(gas);
+                    gasRegistryAux.setValue(valueGas);
+                    registry.put(gas, gasRegistryAux);
+                    System.out.println(registry.get(gas).getValue());
+                    gasRegistryRepository.save(gasRegistryAux);
+                }
+                region.setRegistry(registry);
+                regionRepository.save(region);
+            }
+        });
+        //printRegions();
+    }
+
+
+
 
     public String FixRegionName(Regions comarca) {
         // Aquí habrá que fixear las comarcas que puedan dar problemas
@@ -152,14 +180,22 @@ public class AirQualityService {
             case Baix_Penedes -> comarcaFixed = "Baix Penedès";
             case Conca_de_Barbera -> comarcaFixed = "Conca de Barberà";
             case Pallars_Jussa -> comarcaFixed = "Pallars Jussà";
-            case Pallars_Subira -> comarcaFixed = "Pallars Subirà";
+            case Pallars_Subira -> comarcaFixed = "Pallars Sobirà";
             case Pla_d_Urgell -> comarcaFixed = "Pla d'Urgell";
             case Ribera_d_Ebre -> comarcaFixed = "Ribera d'Ebre";
             case Terra_Alta -> comarcaFixed = "Terra Alta";
             case Vall_d_Aran -> comarcaFixed = "Vall d'Aran";
             case Valles_Occidental -> comarcaFixed = "Vallès Occidental";
             case Valles_Oriental -> comarcaFixed = "Vallès Oriental";
-            //default -> comarcaFixed = comarca;
+            case Segarra -> comarcaFixed = "Segarrà";
+            case Segria -> comarcaFixed = "Segrià";
+            case Girones -> comarcaFixed = "Gironès";
+            case Tarragones -> comarcaFixed = "Tarragonès";
+            case Ripolles -> comarcaFixed = "Ripollès";
+            case Montsia -> comarcaFixed = "Montsià";
+            case Barcelones -> comarcaFixed = "Barcelonès";
+            case Bergueda -> comarcaFixed = "Berguedà";
+            default -> comarcaFixed = String.valueOf(comarca);
         }
 
         return comarcaFixed;
@@ -167,19 +203,21 @@ public class AirQualityService {
 
 
 
-    public String getGasData(String nom_comarca) {
+    public Map<Gases, Double> getGasData(Regions municipi) {
         String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
         RestTemplate restTemplate = new RestTemplate();
         Map<String, String> vars = new HashMap<String, String>();
 
+        System.out.println(FixRegionName(municipi));
 
         vars.put("$$app_token", ApiToken);
-        vars.put("nom_comarca", nom_comarca);
+        vars.put("nom_comarca", (FixRegionName(municipi)));
 
         Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
 
         if(result != null) { // Obtener la ultima fecha registrada para tener el dato mas actualizado.
             Map<String, String> m = new HashMap<String,String>();
+
             try {
                 m = (Map<String, String>) result[0];
             } catch (Exception e) {
@@ -188,16 +226,13 @@ public class AirQualityService {
 
             String data = m.get("data");
 
+
             Map<Gases, Double> gases = new EnumMap<Gases, Double>(Gases.class);
             Map<Gases, Integer> gasesContador = new EnumMap<Gases, Integer>(Gases.class);
 
 
             for (Object o : result) {
                 Map<String, String> dato = (Map<String, String>) o;
-
-                String code = dato.get("codi_comarca");
-                if(code != null)
-                    return code;
 
                 if (!Objects.equals(dato.get("data"), data)) break;
 
@@ -232,7 +267,7 @@ public class AirQualityService {
             }
 
             System.out.println(gases);
-            //return gases;
+            return gases;
         }
         return null;
      }
@@ -251,6 +286,26 @@ public class AirQualityService {
 
         return media;
     }
+    private void printRegions() {
+        List<Region> regions = regionRepository.findAll();
+        regions.forEach(region1 -> {
+            System.out.println("name");
+            System.out.println(region1.getName());
+            System.out.println("code");
+            System.out.println(region1.getCode());
+
+            Map<Gases, GasRegistry> registry = region1.getRegistry();
+            System.out.println("Registry");
+            for(GasRegistry g : registry.values()) {
+                System.out.println("Name");
+                System.out.println(g.getName());
+                System.out.println("Value");
+                System.out.println(g.getValue());
+            }
+        });
+    }
 }
+
+
 
 

@@ -63,23 +63,49 @@ public class ApiGeneralitatController {
         return Arrays.asList(result);
     }
 
-    @GetMapping(value = "updategas")
-    private Map<Regions, String> updateGasComarcas(){
 
-        Map<Regions,String> result = new HashMap<>();
-        for(Regions r : Regions.values()){
-            result.put(r, airQualityService.getGasData(airQualityService.FixRegionName(r)));
-        }
-
-        return result;
-    }
 
     @GetMapping(value = "aux")
     private List<Region> aux() {
         airQualityService.InitializeGases();
+
         return airQualityService.findAll();
     }
 
+    @GetMapping(value = "find")
+    private List<Region> find() {
+        return airQualityService.findAll();
+    }
+
+    @GetMapping(value = "updategas")
+    private List<Region> updategas(){
+        airQualityService.UpdateRegionGasData();
+
+        return airQualityService.findAll();
+    }
+
+    @GetMapping(value = "getcodes")
+    private Map<Regions, String> getcodes(){
+        Map<Regions,String> regionCodes = new HashMap<>();
+        for(Regions r : Regions.values()){
+            String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, String> vars = new HashMap<String, String>();
+            vars.put("$$app_token", ApiToken);
+            vars.put("nom_comarca", airQualityService.FixRegionName(r));
+
+            Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
+            Map<String, String> m = new HashMap<String,String>();
+            try {
+                m = (Map<String, String>) result[0];
+            } catch (Exception e) {
+                System.out.println("No data for that comarca");
+            }
+
+            regionCodes.put(r, m.get("codi_comarca"));
+        }
+        return regionCodes;
+    }
 
 
 

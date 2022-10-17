@@ -35,6 +35,8 @@ public class Region {
         return name;
     }
 
+    public String getCode(){return code;}
+
     public Double getLatitude() {
         return latitude;
     }
