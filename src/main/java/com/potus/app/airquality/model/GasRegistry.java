@@ -17,8 +17,6 @@ public class GasRegistry {
 
     private Units unit;
 
-    @ManyToOne
-    private Region region;
 
     public GasRegistry(){}
 

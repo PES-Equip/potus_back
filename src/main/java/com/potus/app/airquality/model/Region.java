@@ -19,7 +19,9 @@ public class Region {
 
     private Double length;
 
-    @OneToMany(mappedBy = "region")
+    @OneToMany(fetch = FetchType.EAGER)
+    @MapKeyEnumerated(EnumType.STRING)
+    @JoinColumn(name = "region_id")
     private Map<Gases,GasRegistry> registry;
 
     public Region() {}

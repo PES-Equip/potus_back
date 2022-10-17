@@ -6,6 +6,7 @@ import com.potus.app.airquality.model.GasRegistry;
 import com.potus.app.airquality.model.Gases;
 import com.potus.app.airquality.model.Region;
 import com.potus.app.airquality.model.Regions;
+import com.potus.app.airquality.utils.AirQualityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -34,54 +35,15 @@ public class ApiGeneralitatController {
     @Autowired
     private AirQualityService airQualityService;
 
-
-
-    @GetMapping(value = "")
-    private List<Object> getQualityAir(){
-        String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}";
-        RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, String> vars = new HashMap<String, String>();
-        vars.put("$$app_token", ApiToken);
-
-        Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
-        return Arrays.asList(result);
-    }
-
-    @GetMapping(value = "municipi")
-    private List<Object> getQualityAir_municipi(@RequestParam(required = true) String municipi){
-        String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&municipi={municipi}";
-        RestTemplate restTemplate = new RestTemplate();
-
-        Map<String, String> vars = new HashMap<String, String>();
-
-
-        vars.put("$$app_token", ApiToken);
-        vars.put("municipi", municipi);
-
-        Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
-        return Arrays.asList(result);
-    }
-
-
-
-    @GetMapping(value = "aux")
+    @GetMapping(value = "initialize")
     private List<Region> aux() {
-        airQualityService.InitializeGases();
-
-        return airQualityService.findAll();
+        return airQualityService.InitializeGases();
     }
 
-    @GetMapping(value = "find")
-    private List<Region> find() {
-        return airQualityService.findAll();
-    }
 
-    @GetMapping(value = "updategas")
+    @GetMapping(value = "update")
     private List<Region> updategas(){
-        airQualityService.UpdateRegionGasData();
-
-        return airQualityService.findAll();
+        return airQualityService.UpdateRegionGasData();
     }
 
     @GetMapping(value = "getcodes")
@@ -92,7 +54,7 @@ public class ApiGeneralitatController {
             RestTemplate restTemplate = new RestTemplate();
             Map<String, String> vars = new HashMap<String, String>();
             vars.put("$$app_token", ApiToken);
-            vars.put("nom_comarca", airQualityService.FixRegionName(r));
+            vars.put("nom_comarca", AirQualityUtils.FixRegionName(r));
 
             Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
             Map<String, String> m = new HashMap<String,String>();

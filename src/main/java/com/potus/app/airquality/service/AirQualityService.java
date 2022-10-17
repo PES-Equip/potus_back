@@ -11,6 +11,7 @@ import java.util.*;
 
 import static com.potus.app.airquality.model.Regions.*;
 import static com.potus.app.airquality.model.Units.*;
+import static com.potus.app.airquality.utils.AirQualityUtils.*;
 
 @Service
 public class AirQualityService {
@@ -28,8 +29,6 @@ public class AirQualityService {
     @Autowired
     GasRegistryRepository gasRegistryRepository;
 
-    public static Map<String, Region> Regions_map;
-
     // CAMBIAR ESTO PARA QUE RETORNA LA UNIDAD CORRECTA EN BASE AL GAS QUE SEA!!!!!!!!!!!!!!
     public static Units getUnit(Gases gas) {
         Units unit;
@@ -45,7 +44,7 @@ public class AirQualityService {
     }
 
 
-    public void InitializeGases() {
+    public List<Region> InitializeGases() {
         List<Region> regions = new ArrayList<>();
 
         regions.add(new Region(Regions.Alt_Camp,41.28, 1.25,"01"));
@@ -99,8 +98,7 @@ public class AirQualityService {
             gasRegistryRepository.saveAll(gases.values());
             region.setRegistry(gases);
         });
-        regionRepository.saveAll(regions);
-        //printRegions();
+        return regionRepository.saveAll(regions);
         }
 
     public List<Region> findAll(){
@@ -111,162 +109,93 @@ public class AirQualityService {
         return gasRegistryRepository.findAll();
     }
 
-    public static void UpdateRegionData(String regionName, Map<Gases, Double> gasData) {
-            Region region = Regions_map.get(regionName);
-            Map<Gases, GasRegistry> gases = region.getRegistry();
-            for(Gases gas: gases.keySet()) {
-
-                Double data = gasData.get(gas);
-
-                if(data != null) {
-                    GasRegistry gasRegistry = gases.get(gas);
-                    gasRegistry.setValue(data);
-                }
-            }
-    }
-
-    public void UpdateRegionGasData(){
+    public List<Region> UpdateRegionGasData(){
         List<Region> regions = regionRepository.findAll();
+
         regions.forEach(region -> {
             if (region.getCode() != null) {
-                System.out.println(region.getCode());
-                Map<Gases, Double> gasData = getGasData(region.getName());
+                Map<Gases, Double> gasData = getGasData(region.getCode());
 
                 Map<Gases, GasRegistry> registry = region.getRegistry();
-                System.out.println("size");
-                System.out.println(registry.size());
-
-                for(GasRegistry g : registry.values()) {
-                    System.out.println(g.getValue());
-                    System.out.println(g.getUnit());
-                    System.out.println(g.getName());
-                }
-
-
-
 
                 for (Gases gas : registry.keySet()) {
                     GasRegistry gasRegistryAux = registry.get(gas);
                     Double valueGas = gasData.get(gas);
                     gasRegistryAux.setValue(valueGas);
                     registry.put(gas, gasRegistryAux);
-                    System.out.println(registry.get(gas).getValue());
                     gasRegistryRepository.save(gasRegistryAux);
                 }
                 region.setRegistry(registry);
                 regionRepository.save(region);
+                //System.out.println(region.getName() + "UPDATED");
             }
         });
-        //printRegions();
+        return regions;
     }
 
 
-
-
-    public String FixRegionName(Regions comarca) {
-        // Aquí habrá que fixear las comarcas que puedan dar problemas
-        String comarcaFixed = "";
-
-        switch (comarca) {
-            case Alt_Camp -> comarcaFixed = "Alt Camp";
-            case Alt_Emporda -> comarcaFixed = "Alt Empordà";
-            case Alt_Penedes -> comarcaFixed = "Alt Penedès";
-            case Alt_Urgell -> comarcaFixed = "Alt Urgell";
-            case Alta_Ribagorca -> comarcaFixed = "Alta Ribagorça";
-            case Baix_Camp -> comarcaFixed = "Baix Camp";
-            case Baix_Ebre -> comarcaFixed = "Baix Ebre";
-            case Baix_Emporda -> comarcaFixed = "Baix Empordà";
-            case Baix_Llobregat -> comarcaFixed = "Baix Llobregat";
-            case Baix_Penedes -> comarcaFixed = "Baix Penedès";
-            case Conca_de_Barbera -> comarcaFixed = "Conca de Barberà";
-            case Pallars_Jussa -> comarcaFixed = "Pallars Jussà";
-            case Pallars_Subira -> comarcaFixed = "Pallars Sobirà";
-            case Pla_d_Urgell -> comarcaFixed = "Pla d'Urgell";
-            case Ribera_d_Ebre -> comarcaFixed = "Ribera d'Ebre";
-            case Terra_Alta -> comarcaFixed = "Terra Alta";
-            case Vall_d_Aran -> comarcaFixed = "Vall d'Aran";
-            case Valles_Occidental -> comarcaFixed = "Vallès Occidental";
-            case Valles_Oriental -> comarcaFixed = "Vallès Oriental";
-            case Segarra -> comarcaFixed = "Segarrà";
-            case Segria -> comarcaFixed = "Segrià";
-            case Girones -> comarcaFixed = "Gironès";
-            case Tarragones -> comarcaFixed = "Tarragonès";
-            case Ripolles -> comarcaFixed = "Ripollès";
-            case Montsia -> comarcaFixed = "Montsià";
-            case Barcelones -> comarcaFixed = "Barcelonès";
-            case Bergueda -> comarcaFixed = "Berguedà";
-            default -> comarcaFixed = String.valueOf(comarca);
-        }
-
-        return comarcaFixed;
-    }
-
-
-
-    public Map<Gases, Double> getGasData(Regions municipi) {
-        String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
+    public Map<Gases, Double> getGasData(String regionCode) {
+        String uri = API_URL+API_TOKEN_PARAM+"={"+API_TOKEN_PARAM+"}&"+API_CODE_PARAM+"={"+API_CODE_PARAM+"}";
         RestTemplate restTemplate = new RestTemplate();
-        Map<String, String> vars = new HashMap<String, String>();
+        Map<String, String> vars = new HashMap<>();
 
-        System.out.println(FixRegionName(municipi));
 
-        vars.put("$$app_token", ApiToken);
-        vars.put("nom_comarca", (FixRegionName(municipi)));
+        vars.put(API_TOKEN_PARAM, ApiToken);
+        vars.put(API_CODE_PARAM, regionCode);
 
         Object[] result = restTemplate.getForObject(uri, Object[].class, vars);
 
         if(result != null) { // Obtener la ultima fecha registrada para tener el dato mas actualizado.
-            Map<String, String> m = new HashMap<String,String>();
+            Map<String, String> query_result = new HashMap<>();
 
             try {
-                m = (Map<String, String>) result[0];
+                query_result = (Map<String, String>) result[0];
             } catch (Exception e) {
-                System.out.println("No data for that comarca");
+                System.out.println("No data for " + regionCode);
+                return null;
             }
 
-            String data = m.get("data");
+            String data = query_result.get("data");
 
 
-            Map<Gases, Double> gases = new EnumMap<Gases, Double>(Gases.class);
-            Map<Gases, Integer> gasesContador = new EnumMap<Gases, Integer>(Gases.class);
+            Map<Gases, Double> gases = new EnumMap<>(Gases.class);
+            Map<Gases, Integer> gasesCounter = new EnumMap<>(Gases.class);
 
 
             for (Object o : result) {
-                Map<String, String> dato = (Map<String, String>) o;
+                Map<String, String> row = (Map<String, String>) o;
 
-                if (!Objects.equals(dato.get("data"), data)) break;
+                if (!Objects.equals(row.get("data"), data)) break;
 
                 // ENUM IS 2_5, THIS CHANGES 2.5 TO 2_5
-                if (Objects.equals(dato.get("contaminant"), "PM2.5")) {
-                    dato.put("contaminant", "PM2_5");
+                if (Objects.equals(row.get("contaminant"), "PM2.5")) {
+                    row.put("contaminant", "PM2_5");
                 }
 
-                Gases gas = Gases.valueOf(dato.get("contaminant"));
+                Gases gas = Gases.valueOf(row.get("contaminant"));
 
 
                 // Retorna la media del gas de todas las horas que hayan
-                Double valueGas = getMediaGas(dato);
+                Double valueGas = getMediaGas(row);
 
                 // If value_gas == -1, it doesn't have any value.
                 if (valueGas >= 0) {
                     if (!gases.containsKey(gas)) {
                         gases.put(gas, valueGas);
-                        gasesContador.put(gas, 1);
+                        gasesCounter.put(gas, 1);
                     } else {
                         Double aux = gases.get(gas);
                         valueGas += aux;
                         gases.put(gas, valueGas);
-                        gasesContador.put(gas, gasesContador.get(gas) + 1);
+                        gasesCounter.put(gas, gasesCounter.get(gas) + 1);
                     }
                 }
             }
 
             for (Gases g : gases.keySet()) {
-                Double media = gases.get(g) / gasesContador.get(g);
+                Double media = gases.get(g) / gasesCounter.get(g);
                 gases.put(g, media);
             }
-
-            System.out.println(gases);
             return gases;
         }
         return null;
