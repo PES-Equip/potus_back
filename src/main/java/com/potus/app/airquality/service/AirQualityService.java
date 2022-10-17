@@ -9,7 +9,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-import static com.potus.app.airquality.model.Regions.*;
 import static com.potus.app.airquality.model.Units.*;
 import static com.potus.app.airquality.utils.AirQualityUtils.*;
 
@@ -44,7 +43,7 @@ public class AirQualityService {
     }
 
 
-    public List<Region> InitializeGases() {
+    public List<Region> InitializeRegions() {
         List<Region> regions = new ArrayList<>();
 
         regions.add(new Region(Regions.Alt_Camp,41.28, 1.25,"01"));
