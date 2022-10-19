@@ -25,8 +25,8 @@ public class InitialDataConfiguration {
 
         if(regions.size() == 0) {
             logger.info("Initializing regions");
-            airQualityService.InitializeRegions();
-            airQualityService.UpdateRegionGasData();
+            airQualityService.initializeRegions();
+            airQualityService.updateRegionGasData();
         }
         return null;
     }

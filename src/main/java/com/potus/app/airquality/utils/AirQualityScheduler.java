@@ -13,6 +13,6 @@ public class AirQualityScheduler {
 
     @Scheduled(cron = "0 30 1 ? * *")
     public void cronUpdateRegions(){
-        airQualityService.UpdateRegionGasData();
+        airQualityService.updateRegionGasData();
     }
 }
