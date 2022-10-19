@@ -43,6 +43,9 @@ public class ApiGeneralitatController {
         return airQualityService.UpdateRegionGasData();
     }
 
+    @GetMapping(value = "regions")
+    private List<Region> getRegions() {return airQualityService.findAll();}
+
     @GetMapping(value = "getcodes")
     private Map<Regions, String> getcodes(){
         Map<Regions,String> regionCodes = new HashMap<>();
