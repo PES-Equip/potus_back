@@ -51,32 +51,8 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public User getProfile(Authentication auth){
-        return (User) auth.getPrincipal();
+    public User getProfile(){
+        return getUser();
     }
-
-
-    @PostMapping("/profile")
-    public User setUsername(@RequestBody @Valid UsernameRequest body, Errors errors){
-
-        if (errors.hasErrors())
-            throw new BadRequestException(USERNAME_CANT_BE_NULL);
-
-        String username = body.getUsername();
-        User user = getUser();
-
-        return userService.setUsername(user,username);
-    }
-
-    @GetMapping("/status")
-    public JSONObject getStatus(){
-        User user = getUser();
-
-        JSONObject response = new JSONObject();
-        response.put("status",user.getStatus());
-        return response;
-    }
-
-
 
 }

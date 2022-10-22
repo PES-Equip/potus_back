@@ -15,4 +15,18 @@ public class TestUtils {
 
         return user;
     }
+
+    public static User getMockUserWithDeadPotus(){
+        User user = new User("test@test.com", "test");
+        Potus p = new Potus();
+        p.setAlive(false);
+        user.setPotus(p);
+
+        return user;
+    }
+
+    public static User getMockNewUser(){
+        User user = new User("test@test.com", null);
+        return user;
+    }
 }

@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.potus.app.user.utils.UserExceptionMessages.USER_MUST_CONFIRM_FIRST;
+import static com.potus.app.user.utils.UserUtils.getUser;
 
 
 public class ConfirmedUserFilter extends OncePerRequestFilter {
@@ -21,8 +22,8 @@ public class ConfirmedUserFilter extends OncePerRequestFilter {
                                  HttpServletResponse response,
                                  FilterChain filterChain) throws IOException, ServletException {
 
-        CustomSession session = (CustomSession) request.getUserPrincipal();
-        User user = (User) session.getPrincipal();
+        //CustomSession session = (CustomSession) request.getUserPrincipal();
+        User user = getUser();
 
         if(user.getStatus() == UserStatus.NEW){
             response.sendError(HttpStatus.BAD_REQUEST.value(), USER_MUST_CONFIRM_FIRST);
