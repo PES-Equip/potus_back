@@ -5,6 +5,7 @@ import com.potus.app.potus.model.Actions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.lang.Math;
 
 public final class PotusUtils {
 
@@ -28,6 +29,10 @@ public final class PotusUtils {
 
     //public static Integer getCurrentWaterLevel()
     private PotusUtils(){
+    }
+
+    public static Double euclideanDistance(Double x1, Double y1, Double x2, Double y2) {
+        return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
     }
 
     public static Map<Actions, PotusAction> generateDefaultActions(){
