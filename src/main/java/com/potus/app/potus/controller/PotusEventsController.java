@@ -34,7 +34,7 @@ public class PotusEventsController {
     @Autowired
     AirQualityService airQualityService;
 
-    @PostMapping("/event")
+    @PostMapping("")
     public Potus doEvent(Authentication auth, @RequestBody @Valid PotusEventRequest body, Errors errors) {
 
         if(errors.hasErrors())

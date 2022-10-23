@@ -11,9 +11,11 @@ import javax.validation.constraints.NotNull;
 
 public class PotusEventRequest {
     @NotNull()
-    @NotEmpty()
     private Double latitude;
+    @NotNull()
     private Double length;
+
+    public PotusEventRequest() {}
 
     public void setValues(Double latitude, Double length) {
         this.latitude = latitude;

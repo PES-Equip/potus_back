@@ -1,6 +1,8 @@
 package com.potus.app.airquality.model;
 
-public enum Gases {
+import com.potus.app.potus.model.GasesAndStates;
+
+public enum Gases implements GasesAndStates {
     NO,
     NO2,
     NOX,
@@ -18,6 +20,7 @@ public enum Gases {
     HCNM,
     HCT,
     SO2
+
 }
 
 
