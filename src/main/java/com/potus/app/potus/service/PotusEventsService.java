@@ -37,6 +37,8 @@ public class PotusEventsService {
 
         applyState(potus, state);
 
+        potusRepository.save(potus);
+
     }
 
     private void applyState (Potus potus, GasesAndStates state) {
