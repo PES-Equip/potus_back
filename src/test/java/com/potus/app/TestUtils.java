@@ -1,5 +1,6 @@
 package com.potus.app;
 
+import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.user.model.User;
 
@@ -29,4 +30,5 @@ public class TestUtils {
         User user = new User("test@test.com", null);
         return user;
     }
+
 }
