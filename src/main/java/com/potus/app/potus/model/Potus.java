@@ -43,6 +43,9 @@ public class Potus {
     @JoinColumn(name = "potus_id")
     private Map<Actions, PotusAction> actions;
 
+    @Transient
+    private GasesAndStates state;
+
     public Potus() {
 
         Date now = new Date();
@@ -54,6 +57,7 @@ public class Potus {
         this.alive = true;
         this.infested = false;
         this.actions = new HashMap<>();
+        this.state = States.DEFAULT;
     }
 
     public Long getId() {
@@ -119,6 +123,11 @@ public class Potus {
     public PotusAction getAction(Actions action){
         return actions.get(action);
     }
+
+    public GasesAndStates getState() { return state; }
+
+    public void setState(GasesAndStates state) { this.state = state; }
+
 
 
 }
