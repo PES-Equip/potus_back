@@ -3,7 +3,6 @@ package com.potus.app.airquality.service;
 import com.potus.app.airquality.model.*;
 import com.potus.app.airquality.repository.GasRegistryRepository;
 import com.potus.app.airquality.repository.RegionRepository;
-import com.potus.app.airquality.utils.InitialDataConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class AirQualityService {
     }
 
 
-    public List<Region> InitializeRegions() {
+    public List<Region> initializeRegions() {
         List<Region> regions = new ArrayList<>();
 
         regions.add(new Region(Regions.Alt_Camp,41.28, 1.25,"01"));
@@ -115,7 +114,7 @@ public class AirQualityService {
         return gasRegistryRepository.findAll();
     }
 
-    public List<Region> UpdateRegionGasData(){
+    public List<Region> updateRegionGasData(){
         List<Region> regions = regionRepository.findAll();
 
         regions.forEach(region -> {
@@ -127,7 +126,7 @@ public class AirQualityService {
                 for (Gases gas : registry.keySet()) {
                     GasRegistry gasRegistryAux = registry.get(gas);
                     Double valueGas = gasData.get(gas);
-                    gasRegistryAux.setValue(valueGas);
+                    if(valueGas != null) gasRegistryAux.setValue(valueGas);
                     registry.put(gas, gasRegistryAux);
                     gasRegistryRepository.save(gasRegistryAux);
                 }

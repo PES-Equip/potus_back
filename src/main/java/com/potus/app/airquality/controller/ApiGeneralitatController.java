@@ -33,18 +33,21 @@ public class ApiGeneralitatController {
     private AirQualityService airQualityService;
 
     @GetMapping(value = "initialize")
-    private List<Region> aux() {
-        return airQualityService.InitializeRegions();
+    private List<Region> initializeRegions() {
+        return airQualityService.initializeRegions();
     }
 
 
     @GetMapping(value = "update")
-    private List<Region> updategas(){
-        return airQualityService.UpdateRegionGasData();
+    private List<Region> updateGasDataRegions(){
+        return airQualityService.updateRegionGasData();
     }
 
+    @GetMapping(value = "regions")
+    private List<Region> getRegions() {return airQualityService.findAll();}
+
     @GetMapping(value = "getcodes")
-    private Map<Regions, String> getcodes(){
+    private Map<Regions, String> getCodes(){
         Map<Regions,String> regionCodes = new HashMap<>();
         for(Regions r : Regions.values()){
             String uri = "https://analisi.transparenciacatalunya.cat/resource/tasf-thgu.json?$$app_token={$$app_token}&nom_comarca={nom_comarca}";
