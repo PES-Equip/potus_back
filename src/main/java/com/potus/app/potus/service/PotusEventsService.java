@@ -27,7 +27,7 @@ public class PotusEventsService {
     RegionRepository regionRepository;
 
 
-    public void doEvent (Potus potus, Double latitude, Double length) {
+    public Potus doEvent (Potus potus, Double latitude, Double length) {
         List<Region> closestRegions = getClosestRegions(latitude, length);
 
         List<GasRegistry> gasValues = getGasValues(closestRegions);
@@ -38,8 +38,7 @@ public class PotusEventsService {
 
         applyState(potus, state);
 
-        potusRepository.save(potus);
-
+        return potusRepository.save(potus);
     }
 
     private void applyState (Potus potus, GasesAndStates state) {

@@ -23,6 +23,7 @@ import javax.validation.Valid;
 
 import static com.potus.app.potus.utils.PotusExceptionMessages.ACTION_IS_NULL;
 import static com.potus.app.potus.utils.PotusExceptionMessages.COORDINATES_ARE_NULL;
+import static com.potus.app.user.utils.UserUtils.getUser;
 
 @RestController
 @RequestMapping(value="/api/potus/events")
@@ -35,19 +36,17 @@ public class PotusEventsController {
     AirQualityService airQualityService;
 
     @PostMapping("")
-    public Potus doEvent(Authentication auth, @RequestBody @Valid PotusEventRequest body, Errors errors) {
+    public Potus doEvent(@RequestBody @Valid PotusEventRequest body, Errors errors) {
 
         if(errors.hasErrors())
             throw new BadRequestException(COORDINATES_ARE_NULL);
 
-        User user = (User) auth.getPrincipal();
-        Potus potus = (Potus) user.getPotus();
+        User user = getUser();
         Double latitude = body.getLatitude();
         Double length = body.getLength();
 
-        potusEventsService.doEvent(potus, latitude, length);
 
-        return potus;
-    }
 
+        return potusEventsService.doEvent(user.getPotus(), latitude, length);
     }
+}

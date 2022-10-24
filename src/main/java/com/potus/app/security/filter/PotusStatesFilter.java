@@ -34,17 +34,17 @@ public class PotusStatesFilter extends OncePerRequestFilter {
                                  FilterChain filterChain) throws IOException, ServletException {
 
         User user = getUser();
-        Potus potus = (Potus) user.getPotus();
+        Potus potus = user.getPotus();
 
 
+        if(user.getStatus() == UserStatus.CONFIRMED) {
+            potusService.updatePotusStats(potus);
 
-        potusService.updatePotusStats(potus);
-
-        if(! potus.isAlive()){
-            response.sendError(HttpStatus.BAD_REQUEST.value(), POTUS_IS_DEAD);
-            return;
+            if (!potus.isAlive()) {
+                response.sendError(HttpStatus.BAD_REQUEST.value(), POTUS_IS_DEAD);
+                return;
+            }
         }
-
         filterChain.doFilter(request,response);
     }
 

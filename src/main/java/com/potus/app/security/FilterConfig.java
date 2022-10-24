@@ -31,7 +31,7 @@ public class FilterConfig {
 
         registrationBean.setFilter(new PotusStatesFilter(potusService));
 
-        registrationBean.addUrlPatterns("/api/potus/*");
+        registrationBean.addUrlPatterns("/api/potus/*","/api/user/profile");
         registrationBean.setOrder(3);
         return registrationBean;
     }
