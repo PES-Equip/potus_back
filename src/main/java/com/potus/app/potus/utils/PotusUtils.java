@@ -17,12 +17,14 @@ public final class PotusUtils {
 
     public static final Integer WATERING_BONUS = 25;
 
+    public static final Integer PRUNNING_CURRENCY_BONUS = 5;
+
     // 5 mins in secs
     public static final Long TIME_REDUCTION = 300L;
 
 
     //30 minutes in seconds
-    public static final Long ACTION_TIME = 1800L;
+    public static final Long ACTION_TIME = 30L;//1800L;
 
 
     public static final Integer ACTION_CURRENCY = 25;

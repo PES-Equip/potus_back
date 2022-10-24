@@ -38,7 +38,7 @@ public class PotusActionsController {
 
 
     @PostMapping("/action")
-    public Potus doAction(@RequestBody @Valid PotusActionRequest body, Errors errors){
+    public User doAction(@RequestBody @Valid PotusActionRequest body, Errors errors){
 
         if(errors.hasErrors())
             throw new BadRequestException(ACTION_IS_NULL);
@@ -47,8 +47,9 @@ public class PotusActionsController {
         User user = getUser();
         Potus potus = (Potus) user.getPotus();
 
-        potusService.doFilterAction(potus,action);
-        userService.addCurrency(user, ACTION_CURRENCY);
-        return potus;
+        Integer reward = potusService.doFilterAction(potus,action);
+
+        userService.addCurrency(user, reward);
+        return user;
     }
 }

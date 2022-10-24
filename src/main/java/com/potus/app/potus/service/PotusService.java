@@ -7,8 +7,11 @@ import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.repository.ActionsRepository;
 import com.potus.app.potus.repository.PotusRepository;
 import com.potus.app.potus.utils.PotusUtils;
+import com.potus.app.user.model.User;
+import com.potus.app.user.model.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.potus.app.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.util.Date;
@@ -26,6 +29,7 @@ public class PotusService {
 
     @Autowired
     ActionsRepository actionsRepository;
+
 
     public Potus savePotus(Potus potus){
         return potusRepository.save(potus);
@@ -99,7 +103,7 @@ public class PotusService {
 
     }
 
-    public void doWatering(Potus potus) throws BadRequestException{
+    public Integer doWatering(Potus potus) throws BadRequestException{
         PotusAction action = potus.getAction(Actions.WATERING);
 
         doAction(action);
@@ -112,6 +116,8 @@ public class PotusService {
 
         potus.setWaterLevel(waterLevel);
         saveFullPotus(potus);
+
+        return 0;
     }
 
     private static void doAction(PotusAction action) throws BadRequestException{
@@ -127,14 +133,22 @@ public class PotusService {
         action.setLastTime(now);
     }
 
-    public void doPrune(Potus potus){
+    public Integer doPrune(Potus potus){
+        PotusAction action = potus.getAction(Actions.PRUNE);
 
+        doAction(action);
+        saveFullPotus(potus);
+
+        return PRUNNING_CURRENCY_BONUS;
     }
-    public void doFilterAction(Potus potus, Actions action){
+
+    public Integer doFilterAction(Potus potus, Actions action){
+        Integer currency = 0;
         switch (action){
-            case PRUNE -> doPrune(potus);
-            case WATERING -> doWatering(potus);
+            case PRUNE -> currency = doPrune(potus);
+            case WATERING -> currency = doWatering(potus);
         }
+        return currency;
     }
 
 }
