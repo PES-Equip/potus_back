@@ -1,8 +1,11 @@
 package com.potus.app.airquality.utils;
 
+import com.potus.app.airquality.model.Gases;
 import com.potus.app.airquality.model.Regions;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AirQualityUtils {
@@ -53,6 +56,10 @@ public class AirQualityUtils {
         }
 
         return comarcaFixed;
+    }
+
+    public static List<Gases> getGases () {
+        return Arrays.asList(Gases.values());
     }
 
 }
