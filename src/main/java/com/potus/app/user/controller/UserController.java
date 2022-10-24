@@ -18,6 +18,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 import static com.potus.app.user.utils.UserExceptionMessages.*;
+import static com.potus.app.user.utils.UserUtils.getUser;
 
 @RestController
 @RequestMapping(value="/api/user")
@@ -33,13 +34,13 @@ public class UserController {
     }
 
     @PostMapping("")
-    public User createProfile(Authentication auth, @RequestBody @Valid UsernameRequest body, Errors errors){
+    public User createProfile(@RequestBody @Valid UsernameRequest body, Errors errors){
 
         if (errors.hasErrors())
             throw new BadRequestException(USERNAME_CANT_BE_NULL);
 
 
-        User user = (User) auth.getPrincipal();
+        User user = getUser();
         String username = body.getUsername();
 
         if(user.getStatus() != UserStatus.NEW)
@@ -50,32 +51,8 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public User getUser(Authentication auth){
-        return (User) auth.getPrincipal();
+    public User getProfile(){
+        return getUser();
     }
-
-
-    @PostMapping("/profile")
-    public User setUsername(Authentication auth, @RequestBody @Valid UsernameRequest body, Errors errors){
-
-        if (errors.hasErrors())
-            throw new BadRequestException(USERNAME_CANT_BE_NULL);
-
-        String username = body.getUsername();
-        User user = (User) auth.getPrincipal();
-
-        return userService.setUsername(user,username);
-    }
-
-    @GetMapping("/status")
-    public JSONObject getStatus(Authentication auth){
-        User user = (User) auth.getPrincipal();
-
-        JSONObject response = new JSONObject();
-        response.put("status",user.getStatus());
-        return response;
-    }
-
-
 
 }

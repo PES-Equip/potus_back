@@ -17,6 +17,7 @@ import java.io.IOException;
 
 import static com.potus.app.potus.utils.PotusExceptionMessages.POTUS_IS_DEAD;
 import static com.potus.app.user.utils.UserExceptionMessages.USER_MUST_CONFIRM_FIRST;
+import static com.potus.app.user.utils.UserUtils.getUser;
 
 public class PotusStatesFilter extends OncePerRequestFilter {
 
@@ -32,9 +33,10 @@ public class PotusStatesFilter extends OncePerRequestFilter {
                                  HttpServletResponse response,
                                  FilterChain filterChain) throws IOException, ServletException {
 
-        CustomSession session = (CustomSession) request.getUserPrincipal();
-        User user = (User) session.getPrincipal();
+        User user = getUser();
         Potus potus = (Potus) user.getPotus();
+
+
 
         potusService.updatePotusStats(potus);
 
