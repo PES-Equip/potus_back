@@ -126,7 +126,7 @@ public class AirQualityService {
                 for (Gases gas : registry.keySet()) {
                     GasRegistry gasRegistryAux = registry.get(gas);
                     Double valueGas = gasData.get(gas);
-                    gasRegistryAux.setValue(valueGas);
+                    if(valueGas != null) gasRegistryAux.setValue(valueGas);
                     registry.put(gas, gasRegistryAux);
                     gasRegistryRepository.save(gasRegistryAux);
                 }
