@@ -12,6 +12,7 @@ import com.potus.app.potus.utils.PotusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,7 @@ public class PotusEventsService {
     }
 
     private GasesAndStates chooseDangerousGas(Map<DangerLevel, List<GasesAndStates>> dangerousGases) {
-        Random rand = new Random();
+        Random rand = new SecureRandom();
         GasesAndStates randomGas = States.DEFAULT;
 
         for (List<GasesAndStates> gasList: dangerousGases.values()) {
