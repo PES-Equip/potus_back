@@ -113,7 +113,7 @@ public class PotusEventsControllerTests {
     @Test
     public void potusEventError() throws Exception {
 
-        User mockUser = TestUtils.getMockNewUser();
+        User mockUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
 
         PotusEventRequest potusEventRequest = new PotusEventRequest();

@@ -18,12 +18,8 @@ public class PotusActionRequest {
     public PotusActionRequest() {
     }
 
-    public Actions getAction() throws BadRequestException{
-        try {
-            return Actions.valueOf(action.toUpperCase());
-        } catch (Exception e){
-            throw new BadRequestException(ACTION_DOES_NOT_EXISTS);
-        }
+    public String getAction() {
+        return action;
     }
 
     public void setAction(String action) {

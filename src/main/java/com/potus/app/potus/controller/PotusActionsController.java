@@ -8,16 +8,13 @@ import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
-import static com.potus.app.potus.utils.PotusUtils.ACTION_CURRENCY;
+import static com.potus.app.user.utils.UserUtils.getActionFormatted;
 import static com.potus.app.user.utils.UserUtils.getUser;
 
 @RestController
@@ -43,13 +40,11 @@ public class PotusActionsController {
         if(errors.hasErrors())
             throw new BadRequestException(ACTION_IS_NULL);
 
-        Actions action = body.getAction();
+        Actions action = getActionFormatted(body.getAction());
         User user = getUser();
-        Potus potus = (Potus) user.getPotus();
+        Potus potus = user.getPotus();
 
         Integer reward = potusService.doFilterAction(potus,action);
-
-        userService.addCurrency(user, reward);
-        return user;
+        return userService.addCurrency(user, reward);
     }
 }
