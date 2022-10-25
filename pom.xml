@@ -23,6 +23,12 @@
 				<activeByDefault>false</activeByDefault>
 			</activation>
 		</profile>
+		<profile>
+			<id>prod</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
 	</profiles>
 	<dependencies>
 		<dependency>
@@ -76,7 +82,11 @@
 			<artifactId>spring-addons-oauth2-test</artifactId>
 			<version>6.0.2</version>
 		</dependency>
-
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
 	</dependencies>
 
