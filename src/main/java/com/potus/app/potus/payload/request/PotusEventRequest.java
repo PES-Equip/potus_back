@@ -5,7 +5,6 @@ package com.potus.app.potus.payload.request;
 import com.potus.app.potus.model.Potus;
 import org.springframework.data.util.Pair;
 
-import javax.swing.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
