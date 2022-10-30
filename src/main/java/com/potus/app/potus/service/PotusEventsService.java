@@ -8,6 +8,7 @@ import com.potus.app.potus.model.GasesAndStates;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.States;
 import com.potus.app.potus.repository.PotusRepository;
+import com.potus.app.potus.utils.EventsUtils;
 import com.potus.app.potus.utils.PotusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.potus.app.potus.utils.EventsUtils.StringPositionDay1Beginning;
 
 
 @Service
@@ -28,15 +31,28 @@ public class PotusEventsService {
 
 
     public Potus doEvent (Potus potus, Double latitude, Double length) {
-        List<Region> closestRegions = getClosestRegions(latitude, length);
 
-        List<GasRegistry> gasValues = getGasValues(closestRegions);
+        GasesAndStates state = checkFestivity(potus);
 
-        Map<DangerLevel, List<GasesAndStates>> dangerousGases = getDangerousGases(gasValues);
+        if (state == States.DEFAULT) {
+            System.out.println("Let me in");
 
-        GasesAndStates state = chooseDangerousGas(dangerousGases);
+            List<Region> closestRegions = getClosestRegions(latitude, length);
 
-        applyState(potus, state);
+            List<GasRegistry> gasValues = getGasValues(closestRegions);
+
+            Map<DangerLevel, List<GasesAndStates>> dangerousGases = getDangerousGases(gasValues);
+
+            System.out.println(state);
+
+            state = chooseDangerousGas(dangerousGases);
+        }
+        else System.out.println(":(");
+
+        //applyState(potus, state);
+        potus.setState(state);
+
+        System.out.println(state);
 
         return potusRepository.save(potus);
     }
@@ -45,6 +61,36 @@ public class PotusEventsService {
         potus.setState(state);
 
         System.out.println("Potus State: " + potus.getState());
+    }
+
+    private GasesAndStates checkFestivity(Potus potus) {
+        GasesAndStates resultantState = States.DEFAULT;
+
+        String date = EventsUtils.getDate();
+
+
+        String month = (date.substring(5, 7));
+        Integer day = Integer.valueOf(date.substring(8, 10));
+
+        System.out.println(month);
+        System.out.println(day);
+
+        Map<String, GasesAndStates> festivitiesMonth = EventsUtils.getMonthFestivities(month);
+
+        boolean festivityFound = false;
+        Iterator<Map.Entry<String, GasesAndStates>> iterator = festivitiesMonth.entrySet().iterator();
+
+        while (iterator.hasNext() && !festivityFound) {
+            Map.Entry<String, GasesAndStates> entry = iterator.next();
+
+            if (day >= Integer.parseInt(entry.getKey().substring(EventsUtils.StringPositionDay1Beginning, EventsUtils.StringPositionDay1Ending)) &&
+            day <= Integer.parseInt(entry.getKey().substring(EventsUtils.StringPositionDay2Beginning, EventsUtils.StringPositionDay2Ending))) {
+                festivityFound = true;
+                resultantState = entry.getValue();
+            }
+        }
+
+        return resultantState;
     }
 
     private GasesAndStates chooseDangerousGas(Map<DangerLevel, List<GasesAndStates>> dangerousGases) {
