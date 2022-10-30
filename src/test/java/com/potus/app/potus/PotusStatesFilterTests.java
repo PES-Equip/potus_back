@@ -3,9 +3,11 @@ package com.potus.app.potus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
-import com.potus.app.potus.controller.PotusActionsController;
+import com.potus.app.potus.controller.PotusController;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
+import com.potus.app.security.filter.PotusIsDeadFilter;
 import com.potus.app.security.filter.PotusStatesFilter;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
@@ -40,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = {PotusStatesFilter.class, PotusActionsController.class, TestConfig.class})
+@SpringBootTest(classes = {PotusStatesFilter.class, PotusIsDeadFilter.class, PotusController.class, TestConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
 public class PotusStatesFilterTests {
@@ -57,17 +59,23 @@ public class PotusStatesFilterTests {
     private PotusService potusService;
 
     @MockBean
+    private PotusEventsService potusEventsService;
+
+    @MockBean
     private UserService userService;
 
     private Authentication auth;
     @Autowired
     public PotusStatesFilter potusStatesFilter;
+
+    @Autowired
+    public PotusIsDeadFilter potusIsDeadFilter;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders.webAppContextSetup(context)
-                .addFilter(potusStatesFilter).build();
+                .addFilters(potusStatesFilter,potusIsDeadFilter).build();
 
         auth = Mockito.mock(Authentication.class);
         securityContext = Mockito.mock(SecurityContext.class);

@@ -3,11 +3,11 @@ package com.potus.app.potus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
-import com.potus.app.potus.controller.PotusActionsController;
-import com.potus.app.potus.model.Actions;
+import com.potus.app.potus.controller.PotusController;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
+import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.user.model.User;
@@ -33,8 +33,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Date;
-
 import static com.potus.app.potus.utils.PotusUtils.PRUNNING_CURRENCY_BONUS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -42,10 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest(classes = {PotusActionsController.class, TestConfig.class})
+@SpringBootTest(classes = {PotusController.class, TestConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
-public class PotusActionsControllerTests {
+public class PotusControllerTests {
 
     @Autowired
     private WebApplicationContext context;
@@ -61,6 +59,9 @@ public class PotusActionsControllerTests {
 
     @MockBean
     private PotusService potusService;
+
+    @MockBean
+    private PotusEventsService potusEventsService;
 
     @MockBean
     private UserService userService;
@@ -199,5 +200,54 @@ public class PotusActionsControllerTests {
 
     }
 
+    @Test
+    public void potusEventOK() throws Exception {
+
+        User mockUser = TestUtils.getMockNewUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
+
+        PotusEventRequest potusEventRequest = new PotusEventRequest();
+        potusEventRequest.setValues(11.0, 11.0);
+
+        Potus potus = new Potus();
+
+        Mockito.when(potusEventsService.doEvent(any(),any(),any())).thenReturn(potus);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(potus);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/potus/events")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(potusEventRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void potusEventError() throws Exception {
+
+        User mockUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
+
+        PotusEventRequest potusEventRequest = new PotusEventRequest();
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/potus/events")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(potusEventRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andReturn();
+    }
 
 }

@@ -2,6 +2,7 @@ package com.potus.app.security;
 
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.ConfirmedUserFilter;
+import com.potus.app.security.filter.PotusIsDeadFilter;
 import com.potus.app.security.filter.PotusStatesFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -33,6 +34,17 @@ public class FilterConfig {
 
         registrationBean.addUrlPatterns("/api/potus/*","/api/user/profile");
         registrationBean.setOrder(3);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<PotusIsDeadFilter> potusIsDeadFilter(){
+        FilterRegistrationBean<PotusIsDeadFilter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new PotusIsDeadFilter());
+
+        registrationBean.addUrlPatterns("/api/potus/*");
+        registrationBean.setOrder(4);
         return registrationBean;
     }
 }
