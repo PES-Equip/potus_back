@@ -2,7 +2,8 @@ package com.potus.app.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestUtils;
-import com.potus.app.potus.controller.PotusActionsController;
+import com.potus.app.potus.controller.PotusController;
+import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.security.filter.ConfirmedUserFilter;
@@ -32,7 +33,7 @@ import static com.potus.app.user.utils.UserExceptionMessages.USER_MUST_CONFIRM_F
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = {ConfirmedUserFilter.class, PotusActionsController.class, TestConfig.class})
+@SpringBootTest(classes = {ConfirmedUserFilter.class, PotusController.class, TestConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
 public class ConfirmedUserFilterTests {
@@ -49,6 +50,9 @@ public class ConfirmedUserFilterTests {
 
     @MockBean
     private PotusService potusService;
+
+    @MockBean
+    private PotusEventsService potusEventsService;
 
     @MockBean
     private UserService userService;

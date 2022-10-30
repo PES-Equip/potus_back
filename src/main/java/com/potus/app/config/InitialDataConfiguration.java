@@ -1,4 +1,4 @@
-package com.potus.app.airquality.utils;
+package com.potus.app.config;
 
 import com.potus.app.airquality.model.Region;
 import com.potus.app.airquality.service.AirQualityService;
