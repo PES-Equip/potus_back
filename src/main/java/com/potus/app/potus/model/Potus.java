@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.potus.app.potus.utils.EventsUtils.getStateValue;
+
 
 @Entity
 @Table(name="potus")
@@ -43,8 +45,7 @@ public class Potus {
     @JoinColumn(name = "potus_id")
     private Map<Actions, PotusAction> actions;
 
-    @Transient
-    private GasesAndStates state;
+    private String state;
 
     public Potus() {
 
@@ -57,7 +58,7 @@ public class Potus {
         this.alive = true;
         this.infested = false;
         this.actions = new HashMap<>();
-        this.state = States.DEFAULT;
+        this.state = States.DEFAULT.toString();
     }
 
     public Long getId() {
@@ -124,9 +125,9 @@ public class Potus {
         return actions.get(action);
     }
 
-    public GasesAndStates getState() { return state; }
+    public GasesAndStates getState() { return getStateValue(state); }
 
-    public void setState(GasesAndStates state) { this.state = state; }
+    public void setState(GasesAndStates state) { this.state = state.toString(); }
 
 
 

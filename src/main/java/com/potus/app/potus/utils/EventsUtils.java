@@ -1,6 +1,8 @@
 package com.potus.app.potus.utils;
 
+import com.potus.app.airquality.model.Gases;
 import com.potus.app.potus.model.GasesAndStates;
+import com.potus.app.potus.model.States;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -81,6 +83,20 @@ public final class EventsUtils {
 
     public static String getDate() {
         return Instant.now().toString();
+    }
+
+    public static GasesAndStates getStateValue (String state) {
+        GasesAndStates result = DEFAULT;
+
+        try {
+            result = States.valueOf(state);
+        } catch (Exception ignored) {}
+
+        try {
+            result = Gases.valueOf(state);
+        } catch (Exception ignored) {}
+
+        return result;
     }
 }
 

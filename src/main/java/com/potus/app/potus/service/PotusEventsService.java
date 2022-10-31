@@ -35,7 +35,6 @@ public class PotusEventsService {
         GasesAndStates state = checkFestivity(potus);
 
         if (state == States.DEFAULT) {
-            System.out.println("Let me in");
 
             List<Region> closestRegions = getClosestRegions(latitude, length);
 
@@ -47,12 +46,8 @@ public class PotusEventsService {
 
             state = chooseDangerousGas(dangerousGases);
         }
-        else System.out.println(":(");
 
-        //applyState(potus, state);
-        potus.setState(state);
-
-        System.out.println(state);
+        applyState(potus, state);
 
         return potusRepository.save(potus);
     }
