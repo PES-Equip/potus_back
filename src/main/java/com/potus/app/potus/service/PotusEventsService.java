@@ -34,7 +34,7 @@ public class PotusEventsService {
 
         GasesAndStates state = checkFestivity(potus);
 
-        if (state == States.DEFAULT) {
+        if (state != States.DEFAULT) {
 
             List<Region> closestRegions = getClosestRegions(latitude, length);
 
@@ -93,6 +93,8 @@ public class PotusEventsService {
         GasesAndStates randomGas = States.DEFAULT;
 
         Map<DangerLevel, List<GasesAndStates>> sortedMap = new TreeMap<>(dangerousGases);
+
+        System.out.println(sortedMap);
 
         if (sortedMap.get(DangerLevel.Hazardous).size() > 1) sortedMap.get(DangerLevel.Hazardous).remove(States.DEFAULT);
 
@@ -194,21 +196,43 @@ public class PotusEventsService {
         List<Gases> remainingGases = AirQualityUtils.getGases();
         List<Gases> remainingGasesCopy = new ArrayList<>(remainingGases);
         List<GasRegistry> result = new ArrayList<>();
+        int counter = 0;
 
-        for (Region region : closestRegions) {
+        Iterator<Region> iterator = closestRegions.iterator();
+        while (iterator.hasNext() && counter < 3) {
+            Map<Gases, GasRegistry> regionGases = iterator.next().getRegistry();
+
+            for (Gases remainingGas : remainingGases) {
+                GasRegistry gasValues = regionGases.get(remainingGas);
+                System.out.println(gasValues.getValue());
+                if (!gasValues.getValue().equals(0.0)) {
+                    remainingGasesCopy.remove(remainingGas);
+                    result.add(gasValues);
+                }
+            }
+
+            remainingGases = new ArrayList<>(remainingGasesCopy);
+            counter += 1;
+
+        }
+
+        /*for (Region region : closestRegions) {
+            System.out.println("counter :" + counter);
             Map<Gases, GasRegistry> regionGases = region.getRegistry();
 
             for (Gases remainingGas : remainingGases) {
                 GasRegistry gasValues = regionGases.get(remainingGas);
-                if (gasValues != null) {
+                System.out.println(gasValues.getValue());
+                if (!gasValues.getValue().equals(0.0)) {
                     remainingGasesCopy.remove(remainingGas);
                     result.add(gasValues);
                 }
             }
             remainingGases = remainingGasesCopy;
+            counter += 1;
 
-            if (remainingGases.isEmpty()) break;
-        }
+            if (remainingGases.isEmpty() || counter > 2) break;
+        } */
 
         for (GasRegistry g : result) {
             System.out.println(g.getName() + " : " + g.getValue());
