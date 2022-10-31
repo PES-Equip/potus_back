@@ -17,7 +17,7 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.potus.app.potus.utils.EventsUtils.StringPositionDay1Beginning;
+import static com.potus.app.potus.utils.EventsUtils.*;
 
 
 @Service
@@ -92,7 +92,11 @@ public class PotusEventsService {
         Random rand = new SecureRandom();
         GasesAndStates randomGas = States.DEFAULT;
 
-        for (List<GasesAndStates> gasList: dangerousGases.values()) {
+        Map<DangerLevel, List<GasesAndStates>> sortedMap = new TreeMap<>(dangerousGases);
+
+        if (sortedMap.get(DangerLevel.Hazardous).size() > 1) sortedMap.get(DangerLevel.Hazardous).remove(States.DEFAULT);
+
+        for (List<GasesAndStates> gasList: sortedMap.values()) {
             randomGas = gasList.get(rand.nextInt(gasList.size()));
             if (randomGas != States.DEFAULT) break;
         }
@@ -126,58 +130,58 @@ public class PotusEventsService {
         if (gasValue != null) {
             switch(gasName) {
                 case NO2, NOX:
-                    if (gasValue >= 25 && gasValue < 50) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 50 && gasValue < 100) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 100 && gasValue < 200) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 200) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= NOXLow && gasValue < NOXModerate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= NOXModerate && gasValue < NOXHigh) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= NOXHigh && gasValue < NOXHazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= NOXHazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case O3:
-                    if (gasValue >= 60 && gasValue < 120) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 120 && gasValue < 180) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 180 && gasValue < 240) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 240) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= O3Low && gasValue < O3Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= O3Moderate && gasValue < O3High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= O3High && gasValue < O3Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= O3Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case PM1:
-                    if (gasValue >= 10 && gasValue < 20) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 20 && gasValue < 30) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 30 && gasValue < 60) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 60) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= PM1Low && gasValue < PM1Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= PM1Moderate && gasValue < PM1High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= PM1High && gasValue < PM1Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= PM1Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case PM2_5:
-                    if (gasValue >= 5 && gasValue < 15) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 15 && gasValue < 25) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 25 && gasValue < 50) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 50) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= PM2_5Low && gasValue < PM2_5Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= PM2_5Moderate && gasValue < PM2_5High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= PM2_5High && gasValue < PM2_5Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= PM2_5Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case PM10:
-                    if (gasValue >= 15 && gasValue < 30) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 30 && gasValue < 50) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 50 && gasValue < 80) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 80) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= PM10Low && gasValue < PM10Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= PM10Moderate && gasValue < PM10High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= PM10High && gasValue < PM10Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= PM10Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case SO2:
-                    if (gasValue >= 40 && gasValue < 80) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 80 && gasValue < 120) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 120 && gasValue < 240) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 240) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= SO2Low && gasValue < SO2Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= SO2Moderate && gasValue < SO2High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= SO2High && gasValue < SO2Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= SO2Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case CO:
-                    if (gasValue >= 4 && gasValue < 8) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 8 && gasValue < 12) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 12 && gasValue < 24) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 24) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= COLow && gasValue < COModerate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= COModerate && gasValue < COHigh) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= COHigh && gasValue < COHazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= COHazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case C6H6:
-                    if (gasValue >= 1.7 && gasValue < 3.4) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 3.4 && gasValue < 7) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 7 && gasValue < 15) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 15) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= C6H6Low && gasValue < C6H6Moderate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= C6H6Moderate && gasValue < C6H6High) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= C6H6High && gasValue < C6H6Hazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= C6H6Hazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 case Hg:
-                    if (gasValue >= 10 && gasValue < 20) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 20 && gasValue < 40) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 40 && gasValue < 80) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 80) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
+                    if (gasValue >= HgLow && gasValue < HgModerate) dangerousGases.get(DangerLevel.Low).add(gasName);
+                    else if (gasValue >= HgModerate && gasValue < HgHigh) dangerousGases.get(DangerLevel.Moderate).add(gasName);
+                    else if (gasValue >= HgHigh && gasValue < HgHazardous) dangerousGases.get(DangerLevel.High).add(gasName);
+                    else if (gasValue >= HgHazardous) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
                     break;
                 default:
                     break;

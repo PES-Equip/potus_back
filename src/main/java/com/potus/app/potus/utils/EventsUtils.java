@@ -52,6 +52,53 @@ public final class EventsUtils {
     public static final String ChristmasEnding = "12-31"; //Month-Day format
     public static final String Christmas = "12-17/12-31";
 
+    //NOX && NO2
+    public static final Double NOXLow = 25.0;
+    public static final Double NOXModerate = 50.0;
+    public static final Double NOXHigh = 100.0;
+    public static final Double NOXHazardous = 200.0;
+
+    public static final Double O3Low = 60.0;
+    public static final Double O3Moderate = 120.0;
+    public static final Double O3High = 180.0;
+    public static final Double O3Hazardous = 240.0;
+
+    public static final Double PM1Low = 10.0;
+    public static final Double PM1Moderate = 20.0;
+    public static final Double PM1High = 30.0;
+    public static final Double PM1Hazardous = 60.0;
+
+    public static final Double PM2_5Low = 5.0;
+    public static final Double PM2_5Moderate = 15.0;
+    public static final Double PM2_5High = 25.0;
+    public static final Double PM2_5Hazardous = 50.0;
+
+    public static final Double PM10Low = 15.0;
+    public static final Double PM10Moderate = 30.0;
+    public static final Double PM10High = 50.0;
+    public static final Double PM10Hazardous = 80.0;
+
+    public static final Double SO2Low = 40.0;
+    public static final Double SO2Moderate = 80.0;
+    public static final Double SO2High = 120.0;
+    public static final Double SO2Hazardous = 240.0;
+
+    public static final Double COLow = 4.0;
+    public static final Double COModerate = 8.0;
+    public static final Double COHigh = 12.0;
+    public static final Double COHazardous = 24.0;
+
+    public static final Double C6H6Low = 1.7;
+    public static final Double C6H6Moderate = 3.4;
+    public static final Double C6H6High = 7.0;
+    public static final Double C6H6Hazardous = 15.0;
+
+    public static final Double HgLow = 10.0;
+    public static final Double HgModerate = 20.0;
+    public static final Double HgHigh = 40.0;
+    public static final Double HgHazardous = 80.0;
+
+
 
     public static Map<String, GasesAndStates> getAllFestivities () {
         Map<String, GasesAndStates> result = new HashMap<>();
