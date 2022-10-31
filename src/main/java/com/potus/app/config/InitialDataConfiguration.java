@@ -25,7 +25,7 @@ public class InitialDataConfiguration {
     CommandLineRunner runner(){
         List<Region> regions = airQualityService.findAll();
 
-        if(regions.size() == 0) {
+        if(regions.size() == 1) {
             logger.info("Initializing regions");
             airQualityService.initializeRegions();
             airQualityService.updateRegionGasData();

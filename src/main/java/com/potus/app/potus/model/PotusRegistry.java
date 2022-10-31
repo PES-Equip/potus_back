@@ -22,9 +22,9 @@ public class PotusRegistry {
     @NotBlank
     private String name;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User user;
 
     @CreatedDate
@@ -35,6 +35,18 @@ public class PotusRegistry {
     @Temporal(TemporalType.TIMESTAMP)
     private Date deathDate;
 
+    public PotusRegistry() {
+    }
+
+    public PotusRegistry(String name, User user, Date createdDate, Date deathDate) {
+        this.name = name;
+        this.user = user;
+        this.createdDate = createdDate;
+        this.deathDate = deathDate;
+    }
+
+
+
     public User getUser() {
         return user;
     }
@@ -43,4 +55,27 @@ public class PotusRegistry {
         this.user = user;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getDeathDate() {
+        return deathDate;
+    }
+
+    public void setDeathDate(Date deathDate) {
+        this.deathDate = deathDate;
+    }
 }

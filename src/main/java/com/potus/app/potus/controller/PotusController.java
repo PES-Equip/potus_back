@@ -1,11 +1,14 @@
 package com.potus.app.potus.controller;
 
 import com.potus.app.exception.BadRequestException;
+import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.potus.model.Actions;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.payload.request.PotusActionRequest;
+import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
 import com.potus.app.potus.service.PotusEventsService;
+import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
@@ -32,13 +35,14 @@ import static java.net.HttpURLConnection.HTTP_CONFLICT;
 public class PotusController {
 
     @Autowired
-    PotusService potusService;
+    private PotusService potusService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    PotusEventsService potusEventsService;
+    private PotusEventsService potusEventsService;
+
 
     @ApiOperation(value = "GET POTUS")
     @ApiResponses(value = {

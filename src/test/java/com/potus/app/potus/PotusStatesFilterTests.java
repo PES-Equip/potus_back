@@ -5,7 +5,9 @@ import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
 import com.potus.app.potus.controller.PotusController;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusRegistry;
 import com.potus.app.potus.service.PotusEventsService;
+import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.PotusIsDeadFilter;
 import com.potus.app.security.filter.PotusStatesFilter;
@@ -63,6 +65,9 @@ public class PotusStatesFilterTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private PotusRegistryService potusRegistryService;
 
     private Authentication auth;
     @Autowired

@@ -8,7 +8,7 @@ public class TestUtils {
 
     private TestUtils(){}
 
-    private static Potus potus = new Potus();
+    private static Potus potus = new Potus("potus");
 
     public static User getMockUser(){
         User user = new User("test@test.com", "test");

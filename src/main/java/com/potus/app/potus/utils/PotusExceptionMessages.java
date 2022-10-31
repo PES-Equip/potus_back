@@ -11,7 +11,13 @@ public final class PotusExceptionMessages {
 
     public static final String ACTION_IS_NULL = "Action must be defined";
 
-    public static final String COORDINATES_ARE_NULL = " Coordinates must be defined";
+    public static final String COORDINATES_ARE_NULL = "Coordinates must be defined";
+
+    public static final String POTUS_NAME_IS_NULL = "Potus name must be defined";
+
+    public static final String POTUS_ALREADY_ALIVE = "Potus already alive";
+
+    public static final String POTUS_NAME_ALREADY_EXISTS = "Potus name already choose by user";
     private PotusExceptionMessages(){
     }
 }

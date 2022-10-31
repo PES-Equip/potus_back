@@ -1,5 +1,6 @@
 package com.potus.app.security;
 
+import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.ConfirmedUserFilter;
 import com.potus.app.security.filter.PotusIsDeadFilter;
@@ -14,6 +15,9 @@ public class FilterConfig {
 
     @Autowired
     PotusService potusService;
+
+    @Autowired
+    PotusRegistryService potusRegistryService;
 
     @Bean
     public FilterRegistrationBean<ConfirmedUserFilter> userNormalFilter(){
@@ -41,7 +45,7 @@ public class FilterConfig {
     public FilterRegistrationBean<PotusIsDeadFilter> potusIsDeadFilter(){
         FilterRegistrationBean<PotusIsDeadFilter> registrationBean = new FilterRegistrationBean<>();
 
-        registrationBean.setFilter(new PotusIsDeadFilter());
+        registrationBean.setFilter(new PotusIsDeadFilter(potusRegistryService));
 
         registrationBean.addUrlPatterns("/api/potus/*");
         registrationBean.setOrder(4);
