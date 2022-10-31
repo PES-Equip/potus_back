@@ -25,7 +25,7 @@ public class FilterConfig {
 
         registrationBean.setFilter(new ConfirmedUserFilter());
 
-        registrationBean.addUrlPatterns("/api/potus/*");
+        registrationBean.addUrlPatterns("/api/potus/*","api/users/profile/potus");
         registrationBean.setOrder(2);
         return registrationBean;
     }
