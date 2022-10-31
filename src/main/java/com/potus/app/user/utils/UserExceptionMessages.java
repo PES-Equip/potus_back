@@ -8,6 +8,8 @@ public final class UserExceptionMessages {
 
     public static final String USER_NOT_FOUND = "User not found";
 
+    public static final String USERNAME_IS_SAME = "Username is the same";
+
     public static final String USERNAME_ALREADY_TAKEN = "Username already taken";
 
     public static final String USER_MUST_CONFIRM_FIRST = "User must confirm first";
