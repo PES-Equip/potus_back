@@ -7,6 +7,7 @@ import com.potus.app.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -30,5 +31,11 @@ public class PotusRegistryService {
 
     public List<PotusRegistry> findByUser(User user) {
         return potusRegistryRepository.findByUser(user);
+    }
+
+    @Transactional
+    public void deleteRegistries(User user) {
+        List<PotusRegistry> potusRegistries = potusRegistryRepository.findByUser(user);
+        potusRegistryRepository.deleteAll(potusRegistries);
     }
 }

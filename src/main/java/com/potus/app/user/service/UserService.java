@@ -54,8 +54,6 @@ public class UserService {
     }
 
     public User setUsername(User user, String username) throws ResourceAlreadyExistsException{
-
-
         try{
             User userExist = findByUsername(username);
             throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN);
@@ -85,5 +83,15 @@ public class UserService {
         Potus potus = potusService.createPotus(name);
         user.setPotus(potus);
         return user;
+    }
+
+
+    /**
+     * DELETES POTUS - REGISTRY - USER
+     * @param user
+     */
+    @Transactional
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 }
