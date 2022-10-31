@@ -3,6 +3,11 @@ package com.potus.app.user.controller;
 
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusRegistry;
+import com.potus.app.potus.payload.request.PotusCreationRequest;
+import com.potus.app.potus.service.PotusRegistryService;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
 import com.potus.app.user.payload.request.UsernameRequest;
@@ -19,6 +24,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
+import static com.potus.app.potus.utils.PotusExceptionMessages.*;
 import static com.potus.app.user.utils.UserExceptionMessages.USERNAME_CANT_BE_NULL;
 import static com.potus.app.user.utils.UserExceptionMessages.USER_PROFILE_ALREADY_EXISTS;
 import static com.potus.app.user.utils.UserUtils.getUser;
@@ -32,6 +38,11 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PotusRegistryService potusRegistryService;
+
+    @Autowired
+    private PotusService potusService;
 
     @ApiOperation(value = "GET USERS")
     @ApiResponses(value = {
@@ -64,7 +75,7 @@ public class UserController {
             throw new ResourceAlreadyExistsException(USER_PROFILE_ALREADY_EXISTS);
 
         userService.setUsername(user, username);
-        return userService.createPotus(user);
+        return userService.createPotus(user, "potus");
     }
 
     @ApiOperation(value = "GET PROFILE")
@@ -76,5 +87,41 @@ public class UserController {
     public User getProfile(){
         return getUser();
     }
+
+
+    @ApiOperation(value = "CREATE POTUS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Potus"),
+            @ApiResponse(code = HTTP_BAD_REQUEST, message = BAD_REQUEST),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
+    })
+    @PostMapping("/profile/potus")
+    public Potus createPotus(@RequestBody @Valid PotusCreationRequest body, Errors errors){
+
+        if (errors.hasErrors())
+            throw new BadRequestException(POTUS_NAME_IS_NULL);
+
+        User user = getUser();
+
+        if(user.getPotus().isAlive())
+            throw new ResourceAlreadyExistsException(POTUS_ALREADY_ALIVE);
+
+        if(potusRegistryService.existsByUserAndName(user, body.getName()))
+            throw new ResourceAlreadyExistsException(POTUS_NAME_ALREADY_EXISTS);
+
+        return potusService.restartPotus(user.getPotus(), body.getName());
+    }
+
+    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/profile/history")
+    public List<PotusRegistry> getPotusRegistry(){
+        return potusRegistryService.findByUser(getUser());
+    }
+
 
 }

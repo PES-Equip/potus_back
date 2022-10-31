@@ -6,6 +6,8 @@ import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.service.PotusRegistryService;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.controller.UserController;
 import com.potus.app.user.model.User;
 import com.potus.app.user.payload.request.UsernameRequest;
@@ -61,6 +63,12 @@ public class UserControllerTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private PotusService potusService;
+
+    @MockBean
+    private PotusRegistryService potusRegistryService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -129,7 +137,7 @@ public class UserControllerTests {
         user.setPotus(new Potus());
 
         Mockito.when(userService.setUsername(any(),any())).thenReturn(user);
-        Mockito.when(userService.createPotus(any())).thenReturn(user);
+        Mockito.when(userService.createPotus(any(),any())).thenReturn(user);
 
         final String expectedResponseContent = objectMapper.writeValueAsString(user);
 
@@ -142,6 +150,7 @@ public class UserControllerTests {
 
         MvcResult result = this.mockMvc.perform(request)
                 .andExpect(status().isOk())
+                .andDo(print())
                 .andExpect(content().json(expectedResponseContent))
                 .andReturn();
     }
@@ -158,7 +167,7 @@ public class UserControllerTests {
         user.setPotus(new Potus());
 
         Mockito.when(userService.setUsername(any(),any())).thenReturn(user);
-        Mockito.when(userService.createPotus(any())).thenReturn(user);
+        Mockito.when(userService.createPotus(any(), any())).thenReturn(user);
 
 
         RequestBuilder request = MockMvcRequestBuilders
