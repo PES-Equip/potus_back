@@ -362,8 +362,7 @@ public class UserControllerTests {
     @Test
     public void createPotusOKTest() throws Exception {
 
-        User mockUser = TestUtils.getMockUser();
-        mockUser.getPotus().setAlive(false);
+        User mockUser = TestUtils.getMockUserWithDeadPotus();
         Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
 
         PotusCreationRequest potusCreationRequest = new PotusCreationRequest();
@@ -393,8 +392,7 @@ public class UserControllerTests {
 
     @Test
     public void createPotusCantBeNullTest() throws Exception {
-        User mockUser = TestUtils.getMockUser();
-        mockUser.getPotus().setAlive(false);
+        User mockUser = TestUtils.getMockUserWithDeadPotus();
         Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
 
         PotusCreationRequest potusCreationRequest = new PotusCreationRequest();
@@ -434,8 +432,7 @@ public class UserControllerTests {
     }
     @Test
     public void createPotusAlreadyTakenTest() throws Exception {
-        User mockUser = TestUtils.getMockUser();
-        mockUser.getPotus().setAlive(false);
+        User mockUser = TestUtils.getMockUserWithDeadPotus();
         Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
 
         PotusCreationRequest potusCreationRequest = new PotusCreationRequest();
