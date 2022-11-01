@@ -34,7 +34,7 @@ public class PotusEventsService {
 
         GasesAndStates state = checkFestivity(potus);
 
-        if (state != States.DEFAULT) {
+        if (state == States.DEFAULT) {
 
             List<Region> closestRegions = getClosestRegions(latitude, length);
 

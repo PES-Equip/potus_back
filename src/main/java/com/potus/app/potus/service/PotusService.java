@@ -1,6 +1,8 @@
 package com.potus.app.potus.service;
 
 import com.potus.app.exception.BadRequestException;
+import com.potus.app.exception.GeneralExceptionMessages;
+import com.potus.app.exception.TooManyRequestsException;
 import com.potus.app.potus.model.PotusAction;
 import com.potus.app.potus.model.Actions;
 import com.potus.app.potus.model.Potus;
@@ -123,12 +125,24 @@ public class PotusService {
     private static void doAction(PotusAction action) throws BadRequestException{
         Date now = new Date();
 
-        boolean canAction = TimeUnit.SECONDS.convert(Math.abs
-                (now.getTime() - action.getLastTime().getTime()),
-                TimeUnit.MILLISECONDS)/ACTION_TIME > 0;
+        boolean canAction;
 
-        if(! canAction)
-            throw new BadRequestException(ACTION_ALREADY_DID_IT);
+        Long actualTime = TimeUnit.SECONDS.convert(Math.abs(now.getTime()), TimeUnit.MILLISECONDS);
+        Long lastActionTime = TimeUnit.SECONDS.convert(Math.abs(action.getLastTime().getTime()), TimeUnit.MILLISECONDS);
+
+        if (action.getName().equals(Actions.WATERING)) {
+            canAction = (actualTime - lastActionTime) / WATERING_ACTION_TIME > 0;
+        }
+        else {//Pruning
+            canAction = (actualTime - lastActionTime) / PRUNING_ACTION_TIME > 0;
+        }
+
+
+        if(!canAction) {
+            String remainingTime = getActionRemainingTime(actualTime, lastActionTime, action);
+            throw new TooManyRequestsException(GeneralExceptionMessages.TOO_MANY_REQUESTS + ". Try again in: " + remainingTime);
+        }
+
 
         action.setLastTime(now);
     }
@@ -136,10 +150,24 @@ public class PotusService {
     public Integer doPrune(Potus potus){
         PotusAction action = potus.getAction(Actions.PRUNE);
 
+        Integer currency = calculateCurrencyBonus(action);
         doAction(action);
         saveFullPotus(potus);
 
-        return PRUNNING_CURRENCY_BONUS;
+        System.out.println("currency : " +currency);
+        return currency;
+    }
+
+    private Integer calculateCurrencyBonus(PotusAction action) {
+        Date now = new Date();
+
+        Long currency = (TimeUnit.SECONDS.convert(Math.abs
+                        (now.getTime() - action.getLastTime().getTime()),
+                TimeUnit.MILLISECONDS)/PRUNING_ACTION_TIME);
+       currency = currency * PRUNNING_CURRENCY_BONUS;
+       if (currency > PRUNING_MAX_CURRENCY) currency = PRUNING_MAX_CURRENCY;
+
+        return currency.intValue();
     }
 
     public Integer doFilterAction(Potus potus, Actions action){
