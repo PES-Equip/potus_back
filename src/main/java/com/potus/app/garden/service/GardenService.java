@@ -9,6 +9,8 @@ import com.potus.app.garden.model.GardenMember;
 import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.repository.GardenMemberRepository;
 import com.potus.app.garden.repository.GardenRepository;
+import com.potus.app.garden.utils.GardenExceptionMessages;
+import com.potus.app.garden.utils.GardenUtils;
 import com.potus.app.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
 
@@ -47,9 +48,9 @@ public class GardenService {
         return gardenMember;
     }
 
-    private Garden saveFullGarden(Garden garden) {
+    private void saveFullGarden(Garden garden) {
         gardenMemberRepository.saveAll(garden.getMembers());
-        return gardenRepository.save(garden);
+        gardenRepository.save(garden);
     }
 
     public Garden findByName(String name){
@@ -87,4 +88,20 @@ public class GardenService {
         garden.setDescription(description);
         return gardenRepository.save(garden);
     }
+
+    public GardenMember addUser(Garden garden, User user) {
+
+        if(garden.getMembers().size() == GardenUtils.GARDEN_MAX_SIZE)
+            throw new ConflictException(GARDEN_MAX_SIZE);
+
+        if(user.getGarden() != null)
+            throw new ConflictException(USER_HAS_GARDEN);
+
+        GardenMember gardenMember = new GardenMember(garden, user, GardenRole.NORMAL);
+        garden.getMembers().add(gardenMember);
+        garden.setMembers(garden.getMembers());
+        saveFullGarden(garden);
+        return gardenMember;
+    }
+
 }

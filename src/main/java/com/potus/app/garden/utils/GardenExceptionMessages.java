@@ -9,4 +9,10 @@ public class GardenExceptionMessages {
     public static final String USER_HAS_NOT_GARDEN = "User hasn't garden";
     public static final String USER_HAS_GARDEN = "User has already garden";
     public static final String GARDEN_OWNER_CAN_NOT_EXIT = "Garden owner can not exit";
+
+
+    public static final String REQUEST_NOT_FOUND = "Garden request doesn't exists";
+
+    public static final String REQUEST_ALREADY_EXISTS = "Garden request already exists";
+    public static final String GARDEN_MAX_SIZE = "Garden has max size";
 }

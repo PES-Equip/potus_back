@@ -1,17 +1,16 @@
 package com.potus.app.garden.controller;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.garden.model.Garden;
 import com.potus.app.garden.model.GardenMember;
+import com.potus.app.garden.model.GardenRequest;
 import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
+import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
@@ -25,10 +24,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
+import static com.potus.app.garden.model.GardenRequestType.USER_INVITATION_REQUEST;
+import static com.potus.app.garden.model.GardenRequestType.GROUP_JOIN_REQUEST;
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
-import static com.potus.app.potus.utils.PotusExceptionMessages.*;
 import static com.potus.app.user.utils.UserUtils.getUser;
 import static java.net.HttpURLConnection.*;
 import static java.net.HttpURLConnection.HTTP_CONFLICT;
@@ -40,6 +41,9 @@ public class GardenController {
 
     @Autowired
     GardenService gardenService;
+
+    @Autowired
+    GardenRequestService gardenRequestService;
 
     @Autowired
     UserService userService;
@@ -72,7 +76,7 @@ public class GardenController {
         if(user.getGarden() != null)
             throw new ResourceAlreadyExistsException(USER_HAS_GARDEN);
 
-        if(gardenService.existsByName(body.getName()))
+        if(gardenService.existsByName(body.getName()) || body.getName().equals("profile"))
             throw new ResourceAlreadyExistsException(GARDEN_NAME_ALREADY_EXISTS);
 
         GardenMember gardenMember = gardenService.createGarden(user, body.getName());
@@ -132,11 +136,11 @@ public class GardenController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
     })
-    @PostMapping("/profile")
+    @PutMapping("/profile")
     public Garden editGardenDescription(@RequestBody @Valid GardenDescriptionRequest body, Errors errors){
 
         if (errors.hasErrors())
-            throw new BadRequestException("Error");
+            throw new BadRequestException("Error on description");
 
         GardenMember member =  gardenService.findByUser(getUser());
 
@@ -160,6 +164,188 @@ public class GardenController {
         GardenMember member =  gardenService.findByUser(user);
         gardenService.removeUser(member);
     }
+
+    // REQUESTS
+
+    @ApiOperation(value = "GET ALL USER GARDEN INVITATION REQUESTS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User garden invitation list"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/profile/requests")
+    public List<Garden> getUserGardenRequests() {
+
+        User user = getUser();
+
+        gardenRequestService.validateUserRequests(user);
+        List<GardenRequest> gardenRequests = gardenRequestService.findUserRequests(user);
+
+        return gardenRequests.stream().map(GardenRequest::getGarden).collect(Collectors.toList());
+    }
+
+    @ApiOperation(value = "CREATE A GROUP JOIN REQUEST")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_CREATED, message = "Join request created"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PostMapping("/profile/requests/{garden}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createInvitation(@PathVariable String garden) {
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        User user = getUser();
+
+        if(gardenRequestService.existsRequest(selectedGarden, user))
+            throw new ResourceAlreadyExistsException(REQUEST_ALREADY_EXISTS);
+
+        gardenRequestService.createRequest(user,selectedGarden, GROUP_JOIN_REQUEST);
+    }
+
+    @ApiOperation(value = "ACCEPT A GROUP INVITATION")
+    @ApiResponses(value = {
+    @ApiResponse(code = HTTP_CREATED, message = "Garden member"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PutMapping("/profile/requests/{garden}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GardenMember acceptInvitation(@PathVariable String garden) {
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        User user = getUser();
+
+        GardenRequest gardenRequest = gardenRequestService.findRequest(user,selectedGarden);
+
+        if(gardenRequest.getType().equals(GROUP_JOIN_REQUEST))
+            throw new BadRequestException(REQUEST_NOT_FOUND);
+
+
+        GardenMember gardenMember = gardenService.addUser(selectedGarden, user);
+        gardenRequestService.deleteUserRequests(user);
+        return gardenMember;
+    }
+
+
+    @ApiOperation(value = "DENY A GROUP INVITATION")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Denied correctly"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @DeleteMapping("/profile/requests/{garden}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void denyInvitation(@PathVariable String garden) {
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        User user = getUser();
+
+        GardenRequest gardenRequest = gardenRequestService.findRequest(user,selectedGarden);
+
+        if(gardenRequest.getType().equals(GROUP_JOIN_REQUEST))
+            throw new BadRequestException(REQUEST_NOT_FOUND);
+
+
+        gardenRequestService.deleteRequest(gardenRequest);
+    }
+
+    @ApiOperation(value = "GET ALL GARDEN JOIN REQUESTS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Garden join requests"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/{garden}/requests")
+    public List<User> getUserGardenRequests(@PathVariable String garden) {
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        gardenRequestService.validateGardenRequests(selectedGarden);
+        List<GardenRequest> gardenRequests = gardenRequestService.findGardenRequests(selectedGarden);
+
+        return gardenRequests.stream().map(GardenRequest::getUser).collect(Collectors.toList());
+    }
+
+    @ApiOperation(value = "CREATE A  USER INVITATION REQUEST")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_CREATED, message = "User invitation created correctly"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PostMapping("/{garden}/requests/{user}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createJoin(@PathVariable String garden, @PathVariable String user) {
+
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        GardenMember member = gardenService.findByUser(getUser());
+
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        User requestUser = userService.findByUsername(user);
+
+        if(gardenRequestService.existsRequest(selectedGarden, requestUser))
+            throw new ResourceAlreadyExistsException(REQUEST_ALREADY_EXISTS);
+
+        gardenRequestService.createRequest(requestUser,selectedGarden, USER_INVITATION_REQUEST);
+    }
+
+    @ApiOperation(value = "ACCEPT A GROUP JOIN REQUEST")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Garden member"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PutMapping("/{garden}/requests/{user}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GardenMember acceptJoin(@PathVariable String garden,@PathVariable String user) {
+
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        GardenMember member = gardenService.findByUser(getUser());
+
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        User requestUser = userService.findByUsername(user);
+        GardenRequest gardenRequest = gardenRequestService.findRequest(requestUser,selectedGarden);
+
+        if(gardenRequest.getType().equals(USER_INVITATION_REQUEST))
+            throw new BadRequestException(REQUEST_NOT_FOUND);
+
+
+        GardenMember gardenMember = gardenService.addUser(selectedGarden, requestUser);
+        gardenRequestService.deleteUserRequests(requestUser);
+        return gardenMember;
+    }
+
+    @ApiOperation(value = "DENY A GROUP JOIN REQUEST")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Denied correctly"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @DeleteMapping("/{garden}/requests/{user}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void denyJoin(@PathVariable String garden,@PathVariable String user) {
+
+
+        Garden selectedGarden = gardenService.findByName(garden);
+        GardenMember member = gardenService.findByUser(getUser());
+
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        User requestUser = userService.findByUsername(user);
+        GardenRequest gardenRequest = gardenRequestService.findRequest(requestUser,selectedGarden);
+
+        if(gardenRequest.getType().equals(USER_INVITATION_REQUEST))
+            throw new BadRequestException(REQUEST_NOT_FOUND);
+
+
+        gardenRequestService.deleteRequest(gardenRequest);
+    }
+
+
+
 
 
 

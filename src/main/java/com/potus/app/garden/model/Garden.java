@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.potus.app.garden.model.GardenRole.OWNER;
+import static com.potus.app.garden.utils.GardenUtils.GARDEN_MAX_SIZE;
 
 @Entity
 @Table(name="gardens")
@@ -31,7 +32,7 @@ public class Garden {
     private String Description;
 
     @OneToMany(orphanRemoval = true)
-    @Size(max=20)
+    @Size(max=GARDEN_MAX_SIZE)
     @JsonIgnore
     private Set<GardenMember> members;
 
