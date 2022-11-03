@@ -1,6 +1,7 @@
 package com.potus.app.garden.service;
 
 
+import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ConflictException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceNotFoundException;
@@ -104,4 +105,17 @@ public class GardenService {
         return gardenMember;
     }
 
+    @Transactional
+    public void changeOwner(GardenMember member, GardenMember memberRequest) {
+        if(! member.getRole().equals(GardenRole.OWNER))
+            throw new BadRequestException(MEMBER_IS_NOT_OWNER);
+
+        changeRole(member, GardenRole.ADMIN);
+        changeRole(memberRequest, GardenRole.OWNER);
+    }
+
+    public void changeRole(GardenMember member, GardenRole role){
+        member.setRole(role);
+        gardenMemberRepository.save(member);
+    }
 }

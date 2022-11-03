@@ -3,12 +3,14 @@ package com.potus.app.garden.controller;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.garden.model.Garden;
 import com.potus.app.garden.model.GardenMember;
 import com.potus.app.garden.model.GardenRequest;
 import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
+import com.potus.app.garden.payload.request.GardenSetRoleRequest;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
 import com.potus.app.user.model.User;
@@ -30,6 +32,7 @@ import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.garden.model.GardenRequestType.USER_INVITATION_REQUEST;
 import static com.potus.app.garden.model.GardenRequestType.GROUP_JOIN_REQUEST;
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
+import static com.potus.app.garden.utils.GardenUtils.getGardenRoleFormatted;
 import static com.potus.app.user.utils.UserUtils.getUser;
 import static java.net.HttpURLConnection.*;
 import static java.net.HttpURLConnection.HTTP_CONFLICT;
@@ -89,6 +92,7 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "Garden"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @GetMapping("/{garden}")
     public Garden getGarden(@PathVariable String garden){
@@ -100,6 +104,7 @@ public class GardenController {
             @ApiResponse(code = HTTP_NO_CONTENT, message = "Garden removed"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @DeleteMapping("/{garden}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -115,6 +120,70 @@ public class GardenController {
             throw new ForbiddenException();
 
         gardenService.deleteGarden(selectedGarden);
+    }
+
+    @ApiOperation(value = "REMOVE GARDEN MEMBER")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Garden member removed"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+    })
+    @DeleteMapping("/{garden}/{user}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeUser(@PathVariable String garden, @PathVariable String user){
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        User userRequest = userService.findByUsername(user);
+        GardenMember memberRequest = gardenService.findByUser(userRequest);
+        if(member.getRole().compareTo(memberRequest.getRole()) < 1)
+            throw new ForbiddenException();
+
+        gardenService.removeUser(memberRequest);
+    }
+
+    @ApiOperation(value = "SET MEMBER ROLE")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Set member role"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+    })
+    @PutMapping("/{garden}/{user}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void setMemberRole(@PathVariable String garden, @PathVariable String user, @RequestBody @Valid GardenSetRoleRequest body, Errors errors) {
+
+        if (errors.hasErrors())
+            throw new BadRequestException(ROLE_IS_NOT_DEFINED);
+
+        GardenRole role = getGardenRoleFormatted(body.getRole());
+        Garden selectedGarden = gardenService.findByName(garden);
+        GardenMember member = gardenService.findByUser(getUser());
+
+        if (member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+        User userRequest = userService.findByUsername(user);
+        GardenMember memberRequest = gardenService.findByUser(userRequest);
+
+        //NO HACE FALTA REALMENTE PERO BUENO
+        if (member.equals(memberRequest))
+            throw new BadRequestException(USER_CAN_NOT_EDIT_ITSELF);
+
+        if (member.getRole().compareTo(memberRequest.getRole()) < 1 || member.getRole().compareTo(role) < 0)
+            throw new ForbiddenException();
+
+        if (role.equals(GardenRole.OWNER)) {
+            gardenService.changeOwner(member, memberRequest);
+        } else {
+            gardenService.changeRole(memberRequest, role);
+        }
     }
 
     @ApiOperation(value = "GET USER GARDEN")
@@ -135,6 +204,7 @@ public class GardenController {
             @ApiResponse(code = HTTP_BAD_REQUEST, message = BAD_REQUEST),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @PutMapping("/profile")
     public Garden editGardenDescription(@RequestBody @Valid GardenDescriptionRequest body, Errors errors){
@@ -155,7 +225,8 @@ public class GardenController {
             @ApiResponse(code = HTTP_NO_CONTENT, message = "Exit correctly"),
             @ApiResponse(code = HTTP_BAD_REQUEST, message = BAD_REQUEST),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
-            @ApiResponse(code = HTTP_UNAUTHORIZED, message = CONFLICT),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @DeleteMapping("/profile")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -187,6 +258,8 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_CREATED, message = "Join request created"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
     })
     @PostMapping("/profile/requests/{garden}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -205,6 +278,8 @@ public class GardenController {
     @ApiResponses(value = {
     @ApiResponse(code = HTTP_CREATED, message = "Garden member"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
     })
     @PutMapping("/profile/requests/{garden}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -229,6 +304,7 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_NO_CONTENT, message = "Denied correctly"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @DeleteMapping("/profile/requests/{garden}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -240,7 +316,7 @@ public class GardenController {
         GardenRequest gardenRequest = gardenRequestService.findRequest(user,selectedGarden);
 
         if(gardenRequest.getType().equals(GROUP_JOIN_REQUEST))
-            throw new BadRequestException(REQUEST_NOT_FOUND);
+            throw new ResourceNotFoundException(REQUEST_NOT_FOUND);
 
 
         gardenRequestService.deleteRequest(gardenRequest);
@@ -250,6 +326,7 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "Garden join requests"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @GetMapping("/{garden}/requests")
     public List<User> getUserGardenRequests(@PathVariable String garden) {
@@ -270,6 +347,8 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_CREATED, message = "User invitation created correctly"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
     })
     @PostMapping("/{garden}/requests/{user}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -294,6 +373,8 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "Garden member"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
     })
     @PutMapping("/{garden}/requests/{user}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -322,6 +403,7 @@ public class GardenController {
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_NO_CONTENT, message = "Denied correctly"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @DeleteMapping("/{garden}/requests/{user}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -338,7 +420,7 @@ public class GardenController {
         GardenRequest gardenRequest = gardenRequestService.findRequest(requestUser,selectedGarden);
 
         if(gardenRequest.getType().equals(USER_INVITATION_REQUEST))
-            throw new BadRequestException(REQUEST_NOT_FOUND);
+            throw new ResourceNotFoundException(REQUEST_NOT_FOUND);
 
 
         gardenRequestService.deleteRequest(gardenRequest);
