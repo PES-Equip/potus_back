@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.HashMap;
@@ -64,6 +65,13 @@ public class Potus {
 
     private String state;
 
+    public Potus() {
+    }
+
+    public Potus(String name) {
+        initialize(name);
+    }
+
     public void initialize(String name){
         Date now = new Date();
 
@@ -83,6 +91,10 @@ public class Potus {
         this.festivityBonus = 0;
         this.waterRecovery = 10;
         this.ignored = false;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Long getId() {

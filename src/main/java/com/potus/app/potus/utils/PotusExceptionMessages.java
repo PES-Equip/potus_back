@@ -22,7 +22,6 @@ public final class PotusExceptionMessages {
 
     public static final String MAXED_OUT_BONUS = " The bonus is already maxed out";
 
-    public static final String COORDINATES_ARE_NULL = " Coordinates must be defined";
 
     private PotusExceptionMessages(){
     }
