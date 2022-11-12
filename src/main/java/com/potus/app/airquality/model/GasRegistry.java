@@ -17,6 +17,8 @@ public class GasRegistry {
 
     private Units unit;
 
+    @Enumerated(EnumType.STRING)
+    private DangerLevel dangerLevel;
 
     public GasRegistry(){}
 
@@ -24,6 +26,7 @@ public class GasRegistry {
         this.name = name;
         this.gvalue = gvalue;
         this.unit = unit;
+        this.dangerLevel = DangerLevel.NoDanger;
     }
 
     public Gases getName() {
@@ -36,6 +39,14 @@ public class GasRegistry {
 
     public void setValue(Double gvalue) {
         this.gvalue = gvalue;
+    }
+
+    public DangerLevel getDangerLevel() {
+        return dangerLevel;
+    }
+
+    public void setDangerLevel(DangerLevel dangerLevel) {
+        this.dangerLevel = dangerLevel;
     }
 
     public Units getUnit() {
