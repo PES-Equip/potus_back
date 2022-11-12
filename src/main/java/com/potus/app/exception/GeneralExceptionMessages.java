@@ -7,4 +7,5 @@ public class GeneralExceptionMessages {
     public static final String FORBIDDEN = "No permissions";
     public static final String NOT_FOUND = "Resource not found";
     public static final String CONFLICT = "Conflict";
+    public static final String TOO_MANY_REQUESTS = "Too many Requests";
 }
