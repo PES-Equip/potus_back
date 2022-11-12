@@ -35,6 +35,7 @@ public class PotusEventsService {
         GasesAndStates state = checkFestivity(potus);
 
         if (state == States.DEFAULT) {
+            potus.setFestivityBonus(PotusUtils.FESTIVITY_DEFAULT_CURRENCY);
 
             List<Region> closestRegions = getClosestRegions(latitude, length);
 
@@ -46,10 +47,16 @@ public class PotusEventsService {
 
             state = chooseDangerousGas(dangerousGases);
         }
+        else assignFestivityBonus(potus, state);
 
         applyState(potus, state);
 
         return potusRepository.save(potus);
+    }
+
+    private void assignFestivityBonus(Potus potus, GasesAndStates state) {
+        potus.setFestivityBonus(PotusUtils.FESTIVITY_ADDITIONAL_CURRENCY);
+
     }
 
     private void applyState (Potus potus, GasesAndStates state) {
@@ -62,7 +69,6 @@ public class PotusEventsService {
         GasesAndStates resultantState = States.DEFAULT;
 
         String date = EventsUtils.getDate();
-
 
         String month = (date.substring(5, 7));
         Integer day = Integer.valueOf(date.substring(8, 10));

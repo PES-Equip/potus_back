@@ -1,0 +1,9 @@
+package com.potus.app.potus.model;
+
+public enum Bonuses {
+    CURRENCY_GENERATION,
+    TEMPORAL_CURRENCY_MULTIPLIER,
+    MAX_ACCUMULATED_CURRENCY,
+    WATER_RESTORING,
+    TEMPORAL_WATER_RESTORING
+}

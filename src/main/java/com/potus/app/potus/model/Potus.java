@@ -6,6 +6,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,18 @@ public class Potus {
     @JoinColumn(name = "potus_id")
     private Map<Actions, PotusAction> actions;
 
+    private Integer currencyMultiplier;
+
+    private Integer permanentBonus;
+    private Integer eventBonus;
+    private Integer festivityBonus;
+
+    private Integer waterRecovery;
+
+    private Long pruningMaxCurrency;
+
+    boolean ignored;
+
     private String state;
 
     public Potus() {
@@ -59,6 +72,13 @@ public class Potus {
         this.infested = false;
         this.actions = new HashMap<>();
         this.state = States.DEFAULT.toString();
+        this.currencyMultiplier = 1;
+        this.pruningMaxCurrency = 120L;
+        this.permanentBonus = 1;
+        this.eventBonus = 0;
+        this.festivityBonus = 0;
+        this.waterRecovery = 10;
+        this.ignored = false;
     }
 
     public Long getId() {
@@ -129,6 +149,44 @@ public class Potus {
 
     public void setState(GasesAndStates state) { this.state = state.toString(); }
 
+    public Integer getCurrencyMultiplier() { return currencyMultiplier; }
+
+    public void setCurrencyMultiplier(Integer currencyMultiplier) { this.currencyMultiplier = currencyMultiplier; }
+
+    public Integer getPermanentBonus() { return permanentBonus; }
+
+    public void setPermanentBonus(Integer permanentBonus) { this.permanentBonus = permanentBonus; }
+
+    public Integer getEventBonus() { return eventBonus; }
+
+    public void setEventBonus(Integer eventBonus) { this.eventBonus = eventBonus; }
+
+    public Integer getFestivityBonus() { return festivityBonus; }
+
+    public void setFestivityBonus(Integer festivityBonus) { this.festivityBonus = festivityBonus; }
+
+    public Long getPruningMaxCurrency() { return pruningMaxCurrency; }
+
+    public void setPruningMaxCurrency(Long pruningMaxCurrency) { this.pruningMaxCurrency = pruningMaxCurrency; }
+
+    public Integer getWaterRecovery() { return waterRecovery; }
+
+    public void setWaterRecovery(Integer waterRecovery) { this.waterRecovery = waterRecovery; }
+
+    public boolean getIgnored() { return ignored; }
+
+    public void setIgnored(boolean ignored) { this.ignored = ignored; }
+
+
+    public Map<CurrencyGenerators, Integer> getCurrencyGenerators() {
+        Map<CurrencyGenerators, Integer> result = new HashMap<>();
+
+        result.put(CurrencyGenerators.PERMANENT_BONUS, permanentBonus);
+        result.put(CurrencyGenerators.EVENT_BONUS, eventBonus);
+        result.put(CurrencyGenerators.FESTIVITY_BONUS, festivityBonus);
+
+        return result;
+    }
 
 
 }
