@@ -75,7 +75,6 @@ public class GardenController {
             throw new BadRequestException(errors.getAllErrors().get(0).getDefaultMessage());
 
         User user = getUser();
-
         if(user.getGarden() != null)
             throw new ResourceAlreadyExistsException(USER_HAS_GARDEN);
 

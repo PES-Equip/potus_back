@@ -1,20 +1,21 @@
-package com.potus.app.potus;
+package com.potus.app.garden;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
-import com.potus.app.exception.BadRequestException;
+import com.potus.app.garden.controller.GardenController;
+import com.potus.app.garden.model.Garden;
+import com.potus.app.garden.payload.request.GardenCreationRequest;
+import com.potus.app.garden.service.GardenRequestService;
+import com.potus.app.garden.service.GardenService;
 import com.potus.app.potus.controller.PotusController;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.payload.request.PotusActionRequest;
-import com.potus.app.potus.payload.request.PotusEventRequest;
 import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
-import com.potus.app.TestConfig;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,17 +34,18 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.potus.app.potus.utils.PotusUtils.PRUNNING_CURRENCY_BONUS;
+import java.util.Collections;
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-@SpringBootTest(classes = {PotusController.class, TestConfig.class})
+@SpringBootTest(classes = {GardenController.class, TestConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
-public class PotusControllerTests {
+public class GardenControllerTests {
 
     @Autowired
     private WebApplicationContext context;
@@ -58,10 +60,10 @@ public class PotusControllerTests {
     private SecurityContext securityContext;
 
     @MockBean
-    private PotusService potusService;
+    private GardenService gardenService;
 
     @MockBean
-    private PotusEventsService potusEventsService;
+    private GardenRequestService gardenRequestService;
 
     @MockBean
     private UserService userService;
@@ -81,12 +83,20 @@ public class PotusControllerTests {
     }
 
     @Test
-    public void getPotusTest() throws Exception {
-        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
-        final String expectedResponseContent = objectMapper.writeValueAsString(TestUtils.getMockUser().getPotus());
+    public void getGardensTest() throws Exception {
+
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Mockito.when(auth.getPrincipal()).thenReturn(user);
+
+
+        List<Garden> gardens =  Collections.singletonList(user.getGarden().getGarden());
+        Mockito.when(gardenService.getAll()).thenReturn(gardens);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(gardens);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .get("/api/potus")
+                .get("/api/gardens")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -97,155 +107,161 @@ public class PotusControllerTests {
     }
 
     @Test
-    public void doActionOKTest() throws Exception {
-        User mockedUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+    public void createGardensTest() throws Exception {
 
-        PotusActionRequest potusActionRequest = new PotusActionRequest();
-        potusActionRequest.setAction("prune");
 
-        User user = new User(mockedUser.getEmail(),mockedUser.getEmail());
-        user.setPotus(mockedUser.getPotus());
+        User user = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
 
-        user.setCurrency(mockedUser.getCurrency() + PRUNNING_CURRENCY_BONUS);
 
-        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNNING_CURRENCY_BONUS);
-        Mockito.when(userService.addCurrency(any(),any())).thenReturn(user);
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(user);
+        gardenCreationRequest.setName("test");
+
+        user.setGarden(TestUtils.getGarden(user, gardenCreationRequest.getName()));
+
+        Mockito.when(gardenService.existsByName(any())).thenReturn(false);
+        Mockito.when(gardenService.createGarden(any(),any())).thenReturn(user.getGarden());
+        Mockito.when(userService.saveUser(any())).thenReturn(user);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(user.getGarden().getGarden());
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/action")
+                .post("/api/gardens")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusActionRequest));
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
         MvcResult result = this.mockMvc.perform(request)
-                .andExpect(status().isOk())
-                .andExpect(content().json(expectedResponseContent))
-                .andReturn();
-
-    }
-
-    @Test
-    public void doActionIsNullErrorTest() throws Exception {
-        User mockUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusActionRequest potusActionRequest = new PotusActionRequest();
-
-
-        RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/action")
-                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusActionRequest));
-
-        this.mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
-                .andReturn();
-
-
-    }
-
-    @Test
-    public void doActionNotExistsErrorTest() throws Exception {
-        User mockUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusActionRequest potusActionRequest = new PotusActionRequest();
-        potusActionRequest.setAction("YEPAAA");
-
-        RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/action")
-                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusActionRequest));
-
-        this.mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
-                .andReturn();
-
-
-    }
-
-    @Test
-    public void doActionAlreadyDidItErrorTest() throws Exception {
-        User mockUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusActionRequest potusActionRequest = new PotusActionRequest();
-        potusActionRequest.setAction("prune");
-
-
-        Mockito.when(potusService.doFilterAction(any(),any())).thenThrow(new BadRequestException());
-
-        RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/action")
-                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusActionRequest));
-
-        this.mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
-                .andReturn();
-
-    }
-
-    @Test
-    public void potusEventOK() throws Exception {
-
-        User mockUser = TestUtils.getMockNewUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusEventRequest potusEventRequest = new PotusEventRequest();
-        potusEventRequest.setValues(11.0, 11.0);
-
-        Potus potus = new Potus();
-
-        Mockito.when(potusEventsService.doEvent(any(),any(),any())).thenReturn(potus);
-
-        final String expectedResponseContent = objectMapper.writeValueAsString(potus);
-
-        RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/events")
-                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusEventRequest));
-
-        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponseContent))
                 .andReturn();
     }
 
     @Test
-    public void potusEventError() throws Exception {
-
-        User mockUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusEventRequest potusEventRequest = new PotusEventRequest();
+    public void createGardensTestEmptyRequestException() throws Exception {
 
 
+        User user = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/events")
+                .post("/api/gardens")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusEventRequest));
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        this.mockMvc.perform(request)
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andReturn();
+    }
+
+    @Test
+    public void createGardensTestRequestSizeException() throws Exception {
+
+
+        User user = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
+
+        gardenCreationRequest.setName("t");
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+    }
+
+    @Test
+    public void createGardensTestInvalidNameException() throws Exception {
+
+
+
+        User user = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
+
+        gardenCreationRequest.setName("profile");
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andReturn();
+    }
+
+    @Test
+    public void createGardensTestNameAlreadyTakenException() throws Exception {
+
+
+
+        User user = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
+
+        gardenCreationRequest.setName("test");
+
+        Mockito.when(gardenService.existsByName(any())).thenReturn(true);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andReturn();
+    }
+
+    @Test
+    public void createGardensTestUserAlreadyHasGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Mockito.when(auth.getPrincipal()).thenReturn(user);
+
+
+        GardenCreationRequest gardenCreationRequest = new GardenCreationRequest();
+
+        gardenCreationRequest.setName("test");
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenCreationRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isConflict())
                 .andReturn();
     }
 
