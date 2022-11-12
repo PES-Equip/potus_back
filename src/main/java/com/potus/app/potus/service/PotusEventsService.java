@@ -114,7 +114,7 @@ public class PotusEventsService {
 
     private Map<DangerLevel, List<GasesAndStates>> getDangerousGases(List<GasRegistry> gasValues) {
         Map<DangerLevel, List<GasesAndStates>> dangerousGases = new HashMap<>();
-        initializeDangerousGases(dangerousGases);
+            initializeDangerousGases(dangerousGases);
         //Map<GasesAndStates, DangerLevel> dangerousGases = new HashMap<>();
 
         for (GasRegistry gas : gasValues) {

@@ -7,6 +7,7 @@ import com.potus.app.potus.model.CurrencyGenerators;
 import com.potus.app.potus.model.PotusAction;
 import com.potus.app.potus.model.Actions;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.States;
 import com.potus.app.potus.repository.ActionsRepository;
 import com.potus.app.potus.repository.PotusRepository;
 import com.potus.app.potus.utils.PotusUtils;
@@ -47,16 +48,10 @@ public class PotusService {
 
 
     @Transactional
-    public Potus createPotus(){
-        Potus potus = new Potus();
+    public Potus createPotus(String name){
+        Potus potus = new Potus(name);
 
         Map<Actions, PotusAction> actions = PotusUtils.generateDefaultActions();
-    /*
-        actionsRepository.saveAll(actions.values());
-        potus.setActions(actions);
-        potusRepository.save(potus);
-
-     */
         potus.setActions(actions);
         saveFullPotus(potus);
         return potus;
@@ -85,6 +80,11 @@ public class PotusService {
 
             savePotus(potus);
         }
+    }
+
+    @Transactional
+    public void deletePotus(Potus potus){
+        potusRepository.delete(potus);
     }
 
     private void addHealth(Potus potus, Integer actualWater, Integer previousWater) {
@@ -206,4 +206,8 @@ public class PotusService {
         return currency;
     }
 
+    public Potus restartPotus(Potus potus, String name) {
+        potus.initialize(name);
+        return potusRepository.save(potus);
+    }
 }

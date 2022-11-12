@@ -1,6 +1,7 @@
 package com.potus.app.security.filter;
 
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
@@ -19,8 +20,11 @@ import static com.potus.app.user.utils.UserUtils.getUser;
 public class PotusIsDeadFilter extends OncePerRequestFilter {
 
 
-    public PotusIsDeadFilter(){}
+    public PotusIsDeadFilter(PotusRegistryService potusRegistryService){
+        this.potusRegistryService = potusRegistryService;
+    }
 
+    private final PotusRegistryService potusRegistryService;
 
     @Override
     public void doFilterInternal(HttpServletRequest request,
@@ -30,7 +34,13 @@ public class PotusIsDeadFilter extends OncePerRequestFilter {
         User user = getUser();
         Potus potus = user.getPotus();
 
-        if (user.getStatus() == UserStatus.CONFIRMED && ! potus.isAlive()) {
+        String path = request.getRequestURI();
+
+        if(user.getStatus() == UserStatus.CONFIRMED && ! potus.isAlive()) {
+
+            if(! potusRegistryService.existsByUserAndName(user, potus.getName()))
+                potusRegistryService.registryPotus(user);
+
             response.sendError(HttpStatus.BAD_REQUEST.value(), POTUS_IS_DEAD);
             return;
         }

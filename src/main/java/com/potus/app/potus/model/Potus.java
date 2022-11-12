@@ -24,6 +24,10 @@ public class Potus {
     @JsonIgnore
     private Long id;
 
+    @NotNull
+    @NotBlank
+    private String name;
+
     //@Column(columnDefinition = "int check(health >= 0 and health <= 100")
     private Integer health;
 
@@ -41,7 +45,7 @@ public class Potus {
 
     private Boolean alive;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
     @MapKeyEnumerated(EnumType.STRING)
     @JoinColumn(name = "potus_id")
     private Map<Actions, PotusAction> actions;
@@ -60,10 +64,10 @@ public class Potus {
 
     private String state;
 
-    public Potus() {
-
+    public void initialize(String name){
         Date now = new Date();
 
+        this.name = name;
         this.health = PotusUtils.MAX_HEALTH;
         this.waterLevel = PotusUtils.MAX_WATER_LEVEL;
         this.createdDate = now;
@@ -188,6 +192,8 @@ public class Potus {
         return result;
     }
 
-
+    public void setName(String name) {
+        this.name = name;
+    }
 }
 

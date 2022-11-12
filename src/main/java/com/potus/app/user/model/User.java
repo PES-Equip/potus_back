@@ -22,7 +22,7 @@ public class User {
     @Column(columnDefinition = "int check(currency >= 0)")
     private Integer currency;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Potus potus;
 

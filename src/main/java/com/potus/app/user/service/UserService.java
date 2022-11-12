@@ -10,6 +10,9 @@ import com.potus.app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +20,7 @@ import static com.potus.app.user.utils.UserExceptionMessages.*;
 
 @Service
 public class UserService {
+
 
     @Autowired
     UserRepository userRepository;
@@ -50,8 +54,6 @@ public class UserService {
     }
 
     public User setUsername(User user, String username) throws ResourceAlreadyExistsException{
-
-
         try{
             User userExist = findByUsername(username);
             throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN);
@@ -61,8 +63,8 @@ public class UserService {
         return saveUser(user);
     }
 
-    public User createPotus(User user) {
-        Potus potus = potusService.createPotus();
+    public User createPotus(User user, String name) {
+        Potus potus = potusService.createPotus(name);
         user.setPotus(potus);
         return saveUser(user);
     }
@@ -76,4 +78,20 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    @Transactional
+    public User newPotus(User user, String name) {
+        Potus potus = potusService.createPotus(name);
+        user.setPotus(potus);
+        return user;
+    }
+
+
+    /**
+     * DELETES POTUS - REGISTRY - USER
+     * @param user
+     */
+    @Transactional
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+    }
 }
