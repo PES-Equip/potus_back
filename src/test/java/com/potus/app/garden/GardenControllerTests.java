@@ -3,8 +3,11 @@ package com.potus.app.garden;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
+import com.potus.app.exception.*;
 import com.potus.app.garden.controller.GardenController;
 import com.potus.app.garden.model.Garden;
+import com.potus.app.garden.model.GardenMember;
+import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
@@ -13,6 +16,7 @@ import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -37,6 +41,8 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.Collections;
 import java.util.List;
 
+import static com.potus.app.garden.utils.GardenExceptionMessages.GARDEN_DOES_NOT_EXISTS;
+import static com.potus.app.garden.utils.GardenExceptionMessages.USER_HAS_NOT_GARDEN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -156,9 +162,9 @@ public class GardenControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
+                this.mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
                 .andReturn();
     }
 
@@ -181,9 +187,9 @@ public class GardenControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
+        this.mockMvc.perform(request)
                 .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
                 .andReturn();
     }
 
@@ -207,9 +213,9 @@ public class GardenControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
+        this.mockMvc.perform(request)
                 .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
                 .andReturn();
     }
 
@@ -235,9 +241,9 @@ public class GardenControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
+        this.mockMvc.perform(request)
                 .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
                 .andReturn();
     }
 
@@ -259,10 +265,445 @@ public class GardenControllerTests {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(gardenCreationRequest));
 
-        MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
+        this.mockMvc.perform(request)
                 .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
                 .andReturn();
     }
 
+    // GET /{garden}
+
+    @Test
+    public void getGardenTest() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(garden);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void getGardenTestNotFoundException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenThrow(new ResourceNotFoundException(GARDEN_DOES_NOT_EXISTS));
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(garden);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    // DELETE /{garden}
+
+    @Test
+    public void deleteGardenTest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(any())).thenReturn(user.getGarden());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void deleteGardenTestMemberNotOwnerException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( mockUser );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(any())).thenReturn(mockedMember);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void deleteGardenTestNotMemberException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        Garden mockGarden = new Garden("garden");
+        GardenMember mockedMember = new GardenMember(mockGarden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( mockUser );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(any())).thenReturn(mockedMember);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void deleteGardenTesUserWithoutGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(any())).thenThrow(new ResourceNotFoundException(USER_HAS_NOT_GARDEN));
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void deleteGardenTestNotFoundException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenThrow(new ResourceNotFoundException(GARDEN_DOES_NOT_EXISTS));
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    // DELETE /{garden}/{user}
+
+    @Test
+    public void removeUserTest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+
+    @Test
+    public void removeUserTestNotFoundGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenThrow(new ResourceNotFoundException(GARDEN_DOES_NOT_EXISTS));
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestNotFoundUserException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestUserHasNotGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestUserIsNotFromGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Garden mockGarden = new Garden("prove");
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(mockGarden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+mockGarden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestUserHasNotPermissionsFromGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( mockUser );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+user.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+
+    @Test
+    public void removeUserTestTargetUserHasNotGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenThrow(new ResourceNotFoundException());
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestTargetUserIsNotGardenMemberException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        Garden mockGarden = new Garden("prove");
+        GardenMember mockedMember = new GardenMember(mockGarden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeUserTestTargetHasEqualOrHigherRoleException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+        user.getGarden().setRole(GardenRole.ADMIN);
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.ADMIN);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
 }

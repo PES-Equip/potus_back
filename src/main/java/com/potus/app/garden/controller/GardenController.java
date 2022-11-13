@@ -141,8 +141,14 @@ public class GardenController {
 
         User userRequest = userService.findByUsername(user);
         GardenMember memberRequest = gardenService.findByUser(userRequest);
+
+        if(memberRequest.getGarden() != selectedGarden)
+            throw new ResourceNotFoundException(USER_NOT_MEMBER);
+
         if(member.getRole().compareTo(memberRequest.getRole()) < 1)
             throw new ForbiddenException();
+
+
 
         gardenService.removeUser(memberRequest);
     }
