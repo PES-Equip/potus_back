@@ -69,14 +69,6 @@ public class GardenService {
         gardenRepository.save(garden);
     }
 
-    public void removeUser(GardenMember action, GardenMember userRemove) {
-        if(action.getRole().compareTo(userRemove.getRole()) < 1)
-            throw new ForbiddenException();
-
-        removeUser(userRemove);
-    }
-
-
     public void deleteGarden(Garden garden) {
         gardenRepository.delete(garden);
     }
