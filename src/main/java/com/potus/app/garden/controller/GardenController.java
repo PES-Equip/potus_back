@@ -373,6 +373,9 @@ public class GardenController {
 
         User requestUser = userService.findByUsername(user);
 
+        if(requestUser.getGarden() != null)
+            throw new BadRequestException(USER_HAS_GARDEN);
+
         if(gardenRequestService.existsRequest(selectedGarden, requestUser))
             throw new ResourceAlreadyExistsException(REQUEST_ALREADY_EXISTS);
 
