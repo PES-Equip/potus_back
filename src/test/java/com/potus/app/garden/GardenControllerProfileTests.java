@@ -302,4 +302,99 @@ public class GardenControllerProfileTests {
                 .andReturn();
     }
 
+    @Test
+    public void createInvitationTest() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenRequestService.existsRequest(any(),any())).thenReturn(false);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens/profile/requests/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isCreated())
+                .andReturn();
+    }
+
+    @Test
+    public void createInvitationTestGardenNotExistsException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens/profile/requests/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void createInvitationTestAlreadyExistsRequestException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenRequestService.existsRequest(any(),any())).thenReturn(true);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens/profile/requests/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
+
+    @Test
+    public void createInvitationTestUserHasGardenException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUserWithGardenOwner());
+
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+        Garden garden = user.getGarden().getGarden();
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenRequestService.existsRequest(any(),any())).thenReturn(false);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/gardens/profile/requests/"+garden.getName())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andReturn();
+    }
+
+
 }
