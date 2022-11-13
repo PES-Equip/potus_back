@@ -122,7 +122,6 @@ public class PotusControllerTests {
                 .content(objectMapper.writeValueAsString(potusActionRequest));
 
         MvcResult result = this.mockMvc.perform(request)
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponseContent))
                 .andReturn();

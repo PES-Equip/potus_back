@@ -1,5 +1,9 @@
 package com.potus.app.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.potus.app.garden.model.Garden;
+import com.potus.app.garden.model.GardenMember;
 import com.potus.app.potus.model.Potus;
 
 import javax.persistence.*;
@@ -25,6 +29,11 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Potus potus;
+
+    @OneToOne(mappedBy = "user")
+    @JsonIgnoreProperties({"user"})
+    @JsonProperty("garden_info")
+    private GardenMember garden;
 
     public User(){}
 
@@ -74,5 +83,13 @@ public class User {
 
     public void setCurrency(Integer currency) {
         this.currency = currency;
+    }
+
+    public GardenMember getGarden() {
+        return garden;
+    }
+
+    public void setGarden(GardenMember garden) {
+        this.garden = garden;
     }
 }
