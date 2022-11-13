@@ -231,9 +231,7 @@ public class GardenController {
     @ApiOperation(value = "EXIT GARDEN")
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_NO_CONTENT, message = "Exit correctly"),
-            @ApiResponse(code = HTTP_BAD_REQUEST, message = BAD_REQUEST),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
-            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
             @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @DeleteMapping("/profile")
@@ -337,7 +335,7 @@ public class GardenController {
             @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
     })
     @GetMapping("/{garden}/requests")
-    public List<User> getUserGardenRequests(@PathVariable String garden) {
+    public List<User> getGardenRequests(@PathVariable String garden) {
 
         Garden selectedGarden = gardenService.findByName(garden);
 

@@ -10,6 +10,7 @@ import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.garden.controller.GardenController;
 import com.potus.app.garden.model.Garden;
 import com.potus.app.garden.model.GardenMember;
+import com.potus.app.garden.model.GardenRequest;
 import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
@@ -39,6 +40,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -270,6 +272,33 @@ public class GardenControllerProfileTests {
         this.mockMvc.perform(request)
                 .andExpect(status().isNotFound())
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+
+    // REQUESTS
+
+    // GET /profile/requests
+
+    @Test
+    public void getUserGardenRequestsTest() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        List<GardenRequest> list = new ArrayList<>();
+
+        Mockito.when(gardenRequestService.findUserRequests(any())).thenReturn(list);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(list.stream().map(GardenRequest::getGarden).toList());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/gardens/profile/requests")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
                 .andReturn();
     }
 
