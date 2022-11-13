@@ -300,10 +300,11 @@ public class GardenController {
         GardenRequest gardenRequest = gardenRequestService.findRequest(user,selectedGarden);
 
         if(gardenRequest.getType().equals(GROUP_JOIN_REQUEST))
-            throw new BadRequestException(REQUEST_NOT_FOUND);
+            throw new ResourceNotFoundException(REQUEST_NOT_FOUND);
 
 
         GardenMember gardenMember = gardenService.addUser(selectedGarden, user);
+
         gardenRequestService.deleteUserRequests(user);
         return gardenMember;
     }
