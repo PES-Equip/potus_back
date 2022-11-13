@@ -155,7 +155,7 @@ public class GardenController {
 
     @ApiOperation(value = "SET MEMBER ROLE")
     @ApiResponses(value = {
-            @ApiResponse(code = HTTP_OK, message = "Set member role"),
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Set member role"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_FORBIDDEN, message = FORBIDDEN),
             @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
@@ -176,6 +176,9 @@ public class GardenController {
 
         User userRequest = userService.findByUsername(user);
         GardenMember memberRequest = gardenService.findByUser(userRequest);
+
+        if(memberRequest.getGarden() != selectedGarden)
+            throw new ResourceNotFoundException(USER_NOT_MEMBER);
 
         //NO HACE FALTA REALMENTE PERO BUENO
         if (member.equals(memberRequest))

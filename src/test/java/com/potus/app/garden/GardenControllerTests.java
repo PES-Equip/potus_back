@@ -9,6 +9,7 @@ import com.potus.app.garden.model.Garden;
 import com.potus.app.garden.model.GardenMember;
 import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
+import com.potus.app.garden.payload.request.GardenSetRoleRequest;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
 import com.potus.app.potus.controller.PotusController;
@@ -706,4 +707,473 @@ public class GardenControllerTests {
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
                 .andReturn();
     }
+
+
+    // PUT /{garden}/{user} setMemberRole
+
+    @Test
+    public void setMemberRoleTest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleOwnerTest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.OWNER.toString());
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+
+
+    @Test
+    public void setMemberRoleTestEmptyRequest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestBadRoleRequest() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole("yepa");
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestNotFoundGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenThrow(new ResourceNotFoundException(GARDEN_DOES_NOT_EXISTS));
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestNotFoundUserException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenThrow(new ResourceNotFoundException());
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestUserHasNotGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenThrow(new ResourceNotFoundException());
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestUserIsNotFromGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+
+        Garden mockGarden = new Garden("prove");
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(mockGarden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestUserHasNotPermissionsFromGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( mockUser );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+
+    @Test
+    public void setMemberRoleTestTargetUserHasNotGardenException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenThrow(new ResourceNotFoundException());
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestTargetUserIsNotGardenMemberException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+
+        User mockUser = new User("a@a.com", "YEPA");
+        Garden mockGarden = new Garden("prove");
+        GardenMember mockedMember = new GardenMember(mockGarden, mockUser, GardenRole.NORMAL);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestTargetHasEqualOrHigherRoleException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+        user.getGarden().setRole(GardenRole.ADMIN);
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.ADMIN);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.ADMIN.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestUserHasLowerNewRoleException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+        user.getGarden().setRole(GardenRole.ADMIN);
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.ADMIN);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.OWNER.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
+    @Test
+    public void setMemberRoleTestUserIsNotOwnerException() throws Exception {
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        Garden garden = user.getGarden().getGarden();
+        user.getGarden().setRole(GardenRole.ADMIN);
+
+        User mockUser = new User("a@a.com", "YEPA");
+        GardenMember mockedMember = new GardenMember(garden, mockUser, GardenRole.ADMIN);
+
+        Mockito.when(auth.getPrincipal()).thenReturn( user );
+
+        Mockito.when(gardenService.findByName(any())).thenReturn(garden);
+        Mockito.when(gardenService.findByUser(user)).thenReturn(user.getGarden());
+        Mockito.when(gardenService.findByUser(mockUser)).thenReturn(mockedMember);
+        Mockito.when(userService.findByUsername(mockUser.getUsername())).thenReturn(mockUser);
+
+        GardenSetRoleRequest gardenSetRoleRequest = new GardenSetRoleRequest();
+        gardenSetRoleRequest.setRole(GardenRole.OWNER.toString());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/gardens/"+garden.getName()+"/"+mockUser.getUsername())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(gardenSetRoleRequest));
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isForbidden())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ForbiddenException))
+                .andReturn();
+    }
+
 }
