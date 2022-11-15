@@ -1,8 +1,10 @@
 package com.potus.app.security;
 
+import com.potus.app.admin.service.AdminService;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.ConfirmedUserFilter;
+import com.potus.app.security.filter.ExternalTokenFilter;
 import com.potus.app.security.filter.PotusIsDeadFilter;
 import com.potus.app.security.filter.PotusStatesFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ public class FilterConfig {
 
     @Autowired
     PotusRegistryService potusRegistryService;
+
+    @Autowired
+    AdminService adminService;
 
     @Bean
     public FilterRegistrationBean<ConfirmedUserFilter> userNormalFilter(){
@@ -49,6 +54,17 @@ public class FilterConfig {
 
         registrationBean.addUrlPatterns("/api/potus/*");
         registrationBean.setOrder(4);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<ExternalTokenFilter> externalTokenFilter(){
+        FilterRegistrationBean<ExternalTokenFilter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new ExternalTokenFilter(adminService));
+
+        registrationBean.addUrlPatterns("/api/external/*");
+        registrationBean.setOrder(1);
         return registrationBean;
     }
 }
