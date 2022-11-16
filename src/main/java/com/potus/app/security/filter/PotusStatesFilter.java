@@ -27,8 +27,11 @@ public class PotusStatesFilter extends OncePerRequestFilter {
 
     private final PotusService potusService;
 
-    private final RequestMatcher uriMatcher =
-            new AntPathRequestMatcher("/api/user/profile", HttpMethod.GET.name());
+    private final RequestMatcher uriMatcherDELETE =
+            new AntPathRequestMatcher("/api/user/profile", HttpMethod.DELETE.name());
+
+    private final RequestMatcher uriMatcherPOST =
+            new AntPathRequestMatcher("/api/user/profile", HttpMethod.POST.name());
 
     public PotusStatesFilter(PotusService potusService){
         this.potusService = potusService;
@@ -42,7 +45,6 @@ public class PotusStatesFilter extends OncePerRequestFilter {
 
         User user = getUser();
         Potus potus = user.getPotus();
-
         if(user.getStatus() == UserStatus.CONFIRMED) {
             potusService.updatePotusStats(potus);
         }
@@ -52,8 +54,7 @@ public class PotusStatesFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        RequestMatcher matcher = new NegatedRequestMatcher(uriMatcher);
-        return matcher.matches(request);
+        return uriMatcherDELETE.matches(request)  || uriMatcherPOST.matches(request);
     }
 
 }
