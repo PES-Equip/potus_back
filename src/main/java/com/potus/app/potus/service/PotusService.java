@@ -59,7 +59,6 @@ public class PotusService {
 
 
     public void updatePotusStats(Potus potus){
-        System.out.println("before update: " + potus.getIgnored());
         Date now = new Date();
         Date lastModified = potus.getLastModified();
 
@@ -70,13 +69,12 @@ public class PotusService {
 
             Integer damage = subtractWaterLevel(potus,diff.intValue());
 
-            if (previousWater >= MIN_WATER_FOR_RECOVERY && potus.getHealth() < MAX_HEALTH) addHealth(potus, potus.getWaterLevel(), previousWater);
+            if (previousWater >= MIN_WATER_FOR_RECOVERY && potus.getHealth() < MAX_HEALTH) {
+                addHealth(potus, potus.getWaterLevel(), previousWater);
+            }
 
             subtractHealth(potus,damage);
             if (!(potus.getWaterLevel() == 0 && damage == 0 )) potus.setLastModified(now);
-            else System.out.println("That's the case you are looking for " + potus.getLastModified());
-
-            System.out.println("after update: " + potus.getIgnored());
 
             savePotus(potus);
         }
@@ -88,10 +86,18 @@ public class PotusService {
     }
 
     private void addHealth(Potus potus, Integer actualWater, Integer previousWater) {
+
+        Integer addedHealth;
         Integer health;
 
-        if (actualWater < 90) health = previousWater - MIN_WATER_FOR_RECOVERY * HEALTH_RECOVERY;
-        else health = previousWater - actualWater * HEALTH_RECOVERY;
+        if (actualWater < 90) addedHealth = (previousWater - MIN_WATER_FOR_RECOVERY) * HEALTH_RECOVERY;
+        else addedHealth = (previousWater - actualWater) * HEALTH_RECOVERY;
+
+        health = potus.getHealth() + addedHealth;
+
+
+        if (health > 100) health = 100;
+        potus.setHealth(health);
     }
 
     public Integer subtractWaterLevel(Potus potus, Integer debt){
@@ -116,7 +122,6 @@ public class PotusService {
         if (current <= 0 && !potus.getIgnored()) {
             current = 1;
             potus.setIgnored(true);
-            System.out.println("ignored");
         }
 
 
@@ -179,7 +184,6 @@ public class PotusService {
         doAction(action);
         saveFullPotus(potus);
 
-        System.out.println("currency : " +currency);
         return currency;
     }
 
