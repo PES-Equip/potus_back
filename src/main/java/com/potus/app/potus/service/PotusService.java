@@ -59,7 +59,6 @@ public class PotusService {
 
 
     public void updatePotusStats(Potus potus){
-        //System.out.println("before update: " + potus.getIgnored());
         Date now = new Date();
         Date lastModified = potus.getLastModified();
 
@@ -70,17 +69,12 @@ public class PotusService {
 
             Integer damage = subtractWaterLevel(potus,diff.intValue());
 
-            //System.out.println("before health conditional");
             if (previousWater >= MIN_WATER_FOR_RECOVERY && potus.getHealth() < MAX_HEALTH) {
-                //System.out.println("health conditional");
                 addHealth(potus, potus.getWaterLevel(), previousWater);
             }
 
             subtractHealth(potus,damage);
             if (!(potus.getWaterLevel() == 0 && damage == 0 )) potus.setLastModified(now);
-            //else System.out.println("That's the case you are looking for " + potus.getLastModified());
-
-            //System.out.println("after update: " + potus.getIgnored());
 
             savePotus(potus);
         }
@@ -92,8 +86,6 @@ public class PotusService {
     }
 
     private void addHealth(Potus potus, Integer actualWater, Integer previousWater) {
-        //System.out.println("previous Water: " + previousWater);
-        //System.out.println("actual Water: " + actualWater);
 
         Integer addedHealth;
         Integer health;
@@ -101,14 +93,11 @@ public class PotusService {
         if (actualWater < 90) addedHealth = (previousWater - MIN_WATER_FOR_RECOVERY) * HEALTH_RECOVERY;
         else addedHealth = (previousWater - actualWater) * HEALTH_RECOVERY;
 
-        //System.out.println("Added Health: " + addedHealth);
         health = potus.getHealth() + addedHealth;
 
-        //System.out.println("Health : " + health);
 
         if (health > 100) health = 100;
         potus.setHealth(health);
-        //System.out.println("YEPA");
     }
 
     public Integer subtractWaterLevel(Potus potus, Integer debt){
@@ -133,7 +122,6 @@ public class PotusService {
         if (current <= 0 && !potus.getIgnored()) {
             current = 1;
             potus.setIgnored(true);
-            //System.out.println("ignored");
         }
 
 
@@ -196,7 +184,6 @@ public class PotusService {
         doAction(action);
         saveFullPotus(potus);
 
-        //System.out.println("currency : " +currency);
         return currency;
     }
 
