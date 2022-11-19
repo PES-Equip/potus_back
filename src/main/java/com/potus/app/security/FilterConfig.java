@@ -67,4 +67,18 @@ public class FilterConfig {
         registrationBean.setOrder(1);
         return registrationBean;
     }
+
+    /*
+    @Bean
+    public FilterRegistrationBean<AdminTokenFilter> adminTokenFilter(){
+        FilterRegistrationBean<ExternalTokenFilter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new ExternalTokenFilter(adminService));
+
+        registrationBean.addUrlPatterns("/api/external/*");
+        registrationBean.setOrder(1);
+        return registrationBean;
+    }
+    */
+
 }

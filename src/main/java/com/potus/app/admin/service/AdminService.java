@@ -3,13 +3,16 @@ package com.potus.app.admin.service;
 import com.potus.app.admin.model.APIToken;
 import com.potus.app.admin.repository.APITokenRepository;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.exception.ResourceNotFoundException;
+import com.potus.app.user.model.User;
+import com.potus.app.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.List;
 
-import static com.potus.app.admin.utils.AdminExceptionMessages.TOKEN_NAME_ALREADY_EXISTS;
+import static com.potus.app.admin.utils.AdminExceptionMessages.*;
 import static com.potus.app.admin.utils.AdminUtils.ABC;
 import static com.potus.app.admin.utils.AdminUtils.APITOKEN_LEN;
 
@@ -18,6 +21,9 @@ public class AdminService {
 
     @Autowired
     APITokenRepository apiTokenRepository;
+
+    @Autowired
+    UserService userService;
 
     private static SecureRandom random = new SecureRandom();
 
@@ -50,7 +56,38 @@ public class AdminService {
         return apiTokenRepository.save(token);
     }
 
+    public void deleteToken(String name) {
+        APIToken token = findByName(name);
+        apiTokenRepository.delete(token);
+    }
+
     public List<APIToken> getAllTokens() {
         return apiTokenRepository.findAll();
+    }
+
+    public APIToken findByName(String name) {
+        return apiTokenRepository.findByName(name).orElseThrow(() -> new ResourceNotFoundException(TOKEN_DOES_NOT_EXISTS));
+    }
+
+    public User addAdmin(String username) {
+        User user = userService.findByUsername(username);
+
+        if (user.getAdmin()) {
+            throw new ResourceAlreadyExistsException(USER_IS_ALREADY_ADMIN);
+        }
+
+        userService.addAdmin(user);
+        return user;
+    }
+
+    public User deleteAdmin(String username) {
+        User user = userService.findByUsername(username);
+
+        if (!user.getAdmin()) {
+            throw new ResourceAlreadyExistsException(USER_IS_NOT_AN_ADMIN);
+        }
+
+        userService.deleteAdmin(user);
+        return user;
     }
 }

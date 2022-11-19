@@ -78,6 +78,17 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    public void addAdmin(User user) {
+        user.setAdmin(Boolean.TRUE);
+        saveUser(user);
+    }
+
+    public void deleteAdmin(User user) {
+        user.setAdmin(Boolean.FALSE);
+        saveUser(user);
+    }
+
+
     @Transactional
     public User newPotus(User user, String name) {
         Potus potus = potusService.createPotus(name);
