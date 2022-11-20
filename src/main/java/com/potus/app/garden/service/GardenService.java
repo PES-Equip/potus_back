@@ -110,4 +110,8 @@ public class GardenService {
         member.setRole(role);
         gardenMemberRepository.save(member);
     }
+
+    public List<GardenMember> getMembers(Garden garden) {
+        return gardenMemberRepository.findByGarden(garden);
+    }
 }
