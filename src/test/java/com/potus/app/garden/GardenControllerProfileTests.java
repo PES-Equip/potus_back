@@ -9,6 +9,7 @@ import com.potus.app.garden.model.*;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
 import com.potus.app.garden.payload.request.GardenSetRoleRequest;
+import com.potus.app.garden.payload.response.GardenMemberResponse;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
 import com.potus.app.user.model.User;
@@ -133,6 +134,57 @@ public class GardenControllerProfileTests {
                 .andReturn();
     }
 
+    // /profile/members
+
+    @Test
+    public void getMembersGardenTest() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+        List<GardenMember> members = Collections.singletonList(user.getGarden());
+
+        Mockito.when(gardenService.findByUser(any())).thenReturn(user.getGarden());
+        Mockito.when(gardenService.getMembers(any())).thenReturn(members);
+
+        List<GardenMemberResponse> response = Collections.singletonList(new GardenMemberResponse(user.getUsername(),user.getGarden().getRole()));
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(response);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/gardens/profile/members")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void getMembersGardenTestUserHasNotGardenException() throws Exception {
+
+        Mockito.when(auth.getPrincipal()).thenReturn( TestUtils.getMockUser());
+
+        User user = TestUtils.getMockUserWithGardenOwner();
+
+
+
+        Mockito.when(gardenService.findByUser(any())).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/gardens/profile/members")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
 
     // PUT /profile editGardenDescription
 
