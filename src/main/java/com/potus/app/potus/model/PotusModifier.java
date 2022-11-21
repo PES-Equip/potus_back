@@ -12,11 +12,12 @@ public class PotusModifier {
     @JsonIgnore
     private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="potus_id", referencedColumnName = "id")
     private Potus potus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
+    @JoinColumn(name="modifier_id", referencedColumnName = "id")
     private Modifier modifier;
 
     private Integer level;

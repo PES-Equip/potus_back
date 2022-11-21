@@ -20,16 +20,13 @@ public class Modifier {
     @NotBlank
     private String name;
 
-    @OneToMany(mappedBy="modifier",orphanRemoval = true)
-    private Set<PotusModifier> potusModifiers;
-
     private ModifierType type;
 
-    private Double value;
+    private Double val;
 
     private Double price;
 
-    boolean buff;
+    private boolean buff;
 
     public Long getId() { return id; }
 
@@ -47,11 +44,15 @@ public class Modifier {
 
     public void setBuff(boolean buff) { this.buff = buff; }
 
-    public Double getValue() { return value; }
-
-    public void setValue(Double value) { this.value = value; }
-
     public Double getPrice() { return price; }
 
     public void setPrice(Double price) { this.price = price; }
+
+    public Double getValue() {
+        return val;
+    }
+
+    public void setValue(Double val) {
+        this.val = val;
+    }
 }
