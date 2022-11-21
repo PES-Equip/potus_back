@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.potus.app.potus.utils.EventsUtils.getStateValue;
 
@@ -60,6 +61,14 @@ public class Potus {
     private Integer waterRecovery;
 
     private Long pruningMaxCurrency;
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "potus_id")
+    private Set<PotusModifier> buffs;
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "potus_id")
+    private Set<PotusModifier> debuffs;
 
     boolean ignored;
 
