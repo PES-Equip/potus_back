@@ -52,7 +52,7 @@ public class AdminController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_CONFLICT, message = "A token with the given name already exists"),
     })
-    @PostMapping(value = "/token")
+    @PostMapping(value = "/tokens")
     @ResponseStatus(HttpStatus.CREATED)
     public APIToken createToken(@RequestBody @Valid CreateAPITokenRequest body, Errors errors) {
 
@@ -68,7 +68,7 @@ public class AdminController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_NOT_FOUND, message = "Token not found"),
     })
-    @DeleteMapping(value = "/token/{token}")
+    @DeleteMapping(value = "/tokens/{token}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteToken(@PathVariable String token) {
 
