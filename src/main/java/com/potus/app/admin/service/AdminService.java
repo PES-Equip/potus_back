@@ -41,9 +41,13 @@ public class AdminService {
         return sb.toString();
     }
 
+    public boolean existsByName(String name){
+        return apiTokenRepository.existsByName(name);
+    }
+
     public APIToken createToken(String name){
 
-        if(apiTokenRepository.existsByName(name))
+        if(existsByName(name))
             throw new ResourceAlreadyExistsException(TOKEN_NAME_ALREADY_EXISTS);
 
         String newTokenValue = generateToken();

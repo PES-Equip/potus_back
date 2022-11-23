@@ -1,5 +1,6 @@
 package com.potus.app;
 
+import com.potus.app.admin.model.APIToken;
 import com.potus.app.airquality.model.*;
 import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.garden.model.Garden;
@@ -62,6 +63,10 @@ public class TestUtils {
         region.setRegistry(GasMapMock);
 
         return region;
+    }
+
+    public static APIToken getMockTokens(){
+        return new APIToken("yepa", "wenawaxaonthesama");
     }
 
 
