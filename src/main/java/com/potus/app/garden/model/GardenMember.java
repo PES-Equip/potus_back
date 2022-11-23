@@ -17,7 +17,7 @@ public class GardenMember {
 
     @ManyToOne
     @JoinColumn(name="garden_id", referencedColumnName = "id")
-    @JsonIgnoreProperties({"members"})
+    @JsonIgnoreProperties({"members", "members_num"})
     private Garden garden;
 
     @JsonIgnoreProperties({"potus", "currency", "id", "email", "status", "garden"})
