@@ -1,10 +1,11 @@
 package com.potus.app.airquality.controller;
 
 
+
 import com.potus.app.airquality.model.Region;
 import com.potus.app.airquality.model.Regions;
-import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.airquality.utils.AirQualityUtils;
+import com.potus.app.exception.BadRequestException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -12,26 +13,27 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static com.potus.app.exception.GeneralExceptionMessages.UNAUTHENTICATED;
-import static java.net.HttpURLConnection.HTTP_OK;
-import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+import com.potus.app.airquality.service.AirQualityService;
+
+import static com.potus.app.exception.GeneralExceptionMessages.*;
+import static java.net.HttpURLConnection.*;
+import static java.net.HttpURLConnection.HTTP_CONFLICT;
 
 
 @RestController
-@RequestMapping(value="/api/external/airquality")
-@Api(tags= "External",value = "External endpoints")
-public class ExternalAPIController {
+@RequestMapping(value="/api/airquality")
+@Api(tags= "Air Quality",value = "Air Quality endpoints")
+
+public class AirQualityController {
 
     @Autowired
     private Environment env;
@@ -62,4 +64,6 @@ public class ExternalAPIController {
     public Region getRegion(@RequestParam(value = "latitude") Double latitude , @RequestParam(value = "length") Double length) {
         return airQualityService.getRegion(latitude,length);
     }
+
+
 }
