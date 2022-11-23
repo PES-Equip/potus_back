@@ -5,6 +5,7 @@ import com.potus.app.admin.repository.APITokenRepository;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.user.model.User;
+import com.potus.app.user.repository.UserRepository;
 import com.potus.app.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class AdminService {
     APITokenRepository apiTokenRepository;
 
     @Autowired
-    UserService userService;
+    UserRepository userRepository;
 
     private static SecureRandom random = new SecureRandom();
 
@@ -60,8 +61,7 @@ public class AdminService {
         return apiTokenRepository.save(token);
     }
 
-    public void deleteToken(String name) {
-        APIToken token = findByName(name);
+    public void deleteToken(APIToken token) {
         apiTokenRepository.delete(token);
     }
 
@@ -73,25 +73,23 @@ public class AdminService {
         return apiTokenRepository.findByName(name).orElseThrow(() -> new ResourceNotFoundException(TOKEN_DOES_NOT_EXISTS));
     }
 
-    public User addAdmin(String username) {
-        User user = userService.findByUsername(username);
+    public User addAdmin(User user) {
 
         if (user.getAdmin()) {
             throw new ResourceAlreadyExistsException(USER_IS_ALREADY_ADMIN);
         }
 
-        userService.addAdmin(user);
-        return user;
+        user.setAdmin(true);
+        return userRepository.save(user);
     }
 
-    public User deleteAdmin(String username) {
-        User user = userService.findByUsername(username);
+    public User deleteAdmin(User user) {
 
         if (!user.getAdmin()) {
             throw new ResourceAlreadyExistsException(USER_IS_NOT_AN_ADMIN);
         }
 
-        userService.deleteAdmin(user);
-        return user;
+        user.setAdmin(false);
+        return userRepository.save(user);
     }
 }

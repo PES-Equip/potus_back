@@ -33,7 +33,7 @@ public class UserService {
     @Autowired
     PotusService potusService;
 
-    Logger logger = LoggerFactory.getLogger(AirQualityService.class);
+    Logger logger = LoggerFactory.getLogger(UserService.class);
 
 
     public List<User> getAll() {
@@ -86,15 +86,6 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    public void addAdmin(User user) {
-        user.setAdmin(Boolean.TRUE);
-        saveUser(user);
-    }
-
-    public void deleteAdmin(User user) {
-        user.setAdmin(Boolean.FALSE);
-        saveUser(user);
-    }
 
     public void addAdmins() {
         List<String> adminMails = UserUtils.adminUsers();

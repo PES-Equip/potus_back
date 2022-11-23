@@ -12,8 +12,10 @@ import com.potus.app.airquality.controller.AirQualityController;
 import com.potus.app.airquality.model.Region;
 import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,6 +63,9 @@ public class AdminControllerTests {
 
     @MockBean
     private AdminService adminService;
+
+    @MockBean
+    private UserService userService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -145,5 +150,127 @@ public class AdminControllerTests {
                 .andReturn();
     }
 
+    @Test
+    public void deleteTokenTests() throws Exception {
 
+        String token = "test";
+
+        APIToken apiToken = new APIToken(token, "test");
+
+
+        Mockito.when(adminService.findByName(any())).thenReturn(apiToken);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/admin/token/"+token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                    .andReturn();
+    }
+
+    @Test
+    public void deleteTokenNotExistsTokenExceptionTests() throws Exception {
+
+        String token = "test";
+
+        Mockito.when(adminService.findByName(any())).thenThrow(new ResourceNotFoundException());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/admin/token/"+token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+
+    @Test
+    public void deleteAdminTests() throws Exception {
+
+        String user = "test";
+        User mockedUser = TestUtils.getMockUser();
+
+        Mockito.when(userService.findByUsername(any())).thenReturn(mockedUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/admin/"+user)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void deleteAdminAlreadyIsNotAdminExceptionTests() throws Exception {
+
+        String user = "test";
+        User mockedUser = TestUtils.getMockUser();
+
+        Mockito.when(userService.findByUsername(any())).thenReturn(mockedUser);
+
+        Mockito.when(adminService.deleteAdmin(any())).thenThrow(new ResourceAlreadyExistsException());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/admin/"+user)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
+
+
+    @Test
+    public void addAdminTests() throws Exception {
+
+        String user = "test";
+        User mockedUser = TestUtils.getMockUser();
+
+        Mockito.when(userService.findByUsername(any())).thenReturn(mockedUser);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/admin/"+user)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andReturn();
+    }
+
+    @Test
+    public void addAdminAlreadyIsAdminExceptionTests() throws Exception {
+
+        String user = "test";
+        User mockedUser = TestUtils.getMockUser();
+
+        Mockito.when(userService.findByUsername(any())).thenReturn(mockedUser);
+
+        Mockito.when(adminService.addAdmin(any())).thenThrow(new ResourceAlreadyExistsException());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/admin/"+user)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
 }

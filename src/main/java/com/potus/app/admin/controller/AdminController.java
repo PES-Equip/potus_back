@@ -7,6 +7,7 @@ import com.potus.app.admin.service.AdminService;
 import com.potus.app.airquality.model.Region;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,6 +32,9 @@ public class AdminController {
 
     @Autowired
     AdminService adminService;
+
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "GET ALL THE TOKENS")
     @ApiResponses(value = {
@@ -64,10 +68,12 @@ public class AdminController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_NOT_FOUND, message = "Token not found"),
     })
-    @DeleteMapping(value = "/token/delete")
+    @DeleteMapping(value = "/token/{token}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteToken(@RequestParam(value = "name") String nameToken) {
-        adminService.deleteToken(nameToken);
+    public void deleteToken(@PathVariable String token) {
+
+        APIToken selectedToken = adminService.findByName(token);
+        adminService.deleteToken(selectedToken);
     }
 
     @ApiOperation(value = "ADD AN ADMIN")
@@ -78,12 +84,12 @@ public class AdminController {
             @ApiResponse(code = HTTP_CONFLICT, message = "User is already admin"),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping(value = "/add")
-    public User addAdmin(@RequestBody @Valid AddAdminRequest body, Errors errors) {
-        if(errors.hasErrors())
-            throw new BadRequestException(errors.getAllErrors().get(0).getDefaultMessage());
+    @PostMapping(value = "/{user}")
+    public void addAdmin(@PathVariable String user) {
 
-        return adminService.addAdmin(body.getName());
+        User selectedUser = userService.findByUsername(user);
+
+        adminService.addAdmin(selectedUser);
     }
 
     @ApiOperation(value = "DELETE AN ADMIN")
@@ -93,10 +99,12 @@ public class AdminController {
             @ApiResponse(code = HTTP_NOT_FOUND, message = "User not found"),
             @ApiResponse(code = HTTP_CONFLICT, message = "User is not admin"),
     })
-    @ResponseStatus(HttpStatus.OK)
-    @DeleteMapping(value = "/delete")
-    public User deleteAdmin(@RequestParam(value = "name") String nameUser) {
-        return adminService.deleteAdmin(nameUser);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/{user}")
+    public void deleteAdmin(@PathVariable String user) {
+
+        User selectedUser = userService.findByUsername(user);
+        adminService.deleteAdmin(selectedUser);
     }
 
 
