@@ -114,7 +114,7 @@ public class AdminControllerTests {
         final String expectedResponseContent = objectMapper.writeValueAsString(mockToken);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/admin/token")
+                .post("/api/admin/tokens")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -137,7 +137,7 @@ public class AdminControllerTests {
         Mockito.when(adminService.createToken(any())).thenThrow(new ResourceAlreadyExistsException());
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/admin/token")
+                .post("/api/admin/tokens")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +162,7 @@ public class AdminControllerTests {
 
 
         RequestBuilder request = MockMvcRequestBuilders
-                .delete("/api/admin/token/"+token)
+                .delete("/api/admin/tokens/"+token)
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON);
 
@@ -180,7 +180,7 @@ public class AdminControllerTests {
         Mockito.when(adminService.findByName(any())).thenThrow(new ResourceNotFoundException());
 
         RequestBuilder request = MockMvcRequestBuilders
-                .delete("/api/admin/token/"+token)
+                .delete("/api/admin/tokens/"+token)
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
                 .accept(MediaType.APPLICATION_JSON);
 
