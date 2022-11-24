@@ -4,6 +4,7 @@ import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.potus.model.Actions;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
@@ -21,6 +22,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+
+import java.util.List;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
@@ -42,6 +45,7 @@ public class PotusController {
 
     @Autowired
     private PotusEventsService potusEventsService;
+
 
 
     @ApiOperation(value = "GET POTUS")
@@ -95,4 +99,28 @@ public class PotusController {
 
         return potusEventsService.doEvent(user.getPotus(), latitude, length);
     }
+
+    @ApiOperation(value = "GET POTUS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User potus"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/buffs")
+    public List<PotusModifier> getPotusBuffs() {
+        Potus potus = getUser().getPotus();
+
+        return potus.getBuffs().stream().toList();
+    }
+
+    @ApiOperation(value = "GET POTUS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User potus"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/debuffs")
+    public List<PotusModifier> getPotusDebuffs() {
+        Potus potus = getUser().getPotus();
+        return potus.getDebuffs().stream().toList();
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.potus.app.potus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.repository.ModifierRepository;
 import com.potus.app.potus.service.ModifierService;
 import com.potus.app.potus.service.PotusService;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static com.potus.app.potus.utils.EventsUtils.getStateValue;
+import static com.potus.app.potus.utils.PotusExceptionMessages.POTUS_MODIFIER_DOES_NOT_EXISTS;
 
 
 @Entity
@@ -65,11 +67,13 @@ public class Potus {
     private Long pruningMaxCurrency;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "potus_id")
+    @JoinColumn(name = "buff_id")
+    @JsonIgnore
     private Set<PotusModifier> buffs;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
-    @JoinColumn(name = "potus_id")
+    @JoinColumn(name = "debuff_id")
+    @JsonIgnore
     private Set<PotusModifier> debuffs;
 
     boolean ignored;
@@ -218,6 +222,27 @@ public class Potus {
         result.put(CurrencyGenerators.FESTIVITY_BONUS, festivityBonus);
 
         return result;
+    }
+
+    public Set<PotusModifier> getBuffs() {
+        return buffs;
+    }
+
+    public PotusModifier getBuff(String name){
+       return buffs.stream().filter(buff ->buff.getModifier().getName().equals(name)).findFirst()
+               .orElseThrow(() -> new ResourceNotFoundException(POTUS_MODIFIER_DOES_NOT_EXISTS));
+    }
+
+    public void setBuffs(Set<PotusModifier> buffs) {
+        this.buffs = buffs;
+    }
+
+    public Set<PotusModifier> getDebuffs() {
+        return debuffs;
+    }
+
+    public void setDebuffs(Set<PotusModifier> debuffs) {
+        this.debuffs = debuffs;
     }
 
     public void setName(String name) {

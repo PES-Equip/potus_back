@@ -14,6 +14,7 @@ public class PotusModifier {
 
     @ManyToOne
     @JoinColumn(name="potus_id", referencedColumnName = "id")
+    @JsonIgnore
     private Potus potus;
 
     @ManyToOne

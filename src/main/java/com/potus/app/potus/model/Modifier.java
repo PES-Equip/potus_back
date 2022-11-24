@@ -23,6 +23,7 @@ public class Modifier {
 
     private ModifierType type;
 
+
     private Double val;
 
     private Double price;
@@ -67,4 +68,5 @@ public class Modifier {
     public void setValue(Double val) {
         this.val = val;
     }
+
 }

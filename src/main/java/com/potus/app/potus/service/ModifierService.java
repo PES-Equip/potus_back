@@ -25,38 +25,24 @@ public class ModifierService {
     }
 
     public List<Modifier> getBuffs() {
-        List<Modifier> result = new ArrayList<>();
-        List<Modifier> modifiers = findAll();
-
-        for (Modifier modifier : modifiers) {
-            if (modifier.isBuff()) result.add(modifier);
-        }
-
-        return result;
+        return modifierRepository.findByBuff(true);
     }
 
     public List<Modifier> getDebuffs() {
-        List<Modifier> result = new ArrayList<>();
-        List<Modifier> modifiers = findAll();
-
-        for (Modifier modifier : modifiers) {
-            if (!modifier.isBuff()) result.add(modifier);
-        }
-
-        return result;
+        return modifierRepository.findByBuff(false);
     }
 
     public List<Modifier> initializeModifiers() {
         List<Modifier> modifiers = new ArrayList<>();
 
         modifiers.add(new Modifier("WATER_INCREASE", ModifierType.WATERING_MODIFIER, 1.0, 120.0, true));
-        modifiers.add(new Modifier("WATER_DECREASE", ModifierType.WATERING_MODIFIER, 5.0, -1.0, false));
-        modifiers.add(new Modifier("WATERING_TIME", ModifierType.WATERING_TIME, 240.0, -1.0, false));
+        modifiers.add(new Modifier("WATER_DECREASE", ModifierType.WATERING_MODIFIER, 5.0, null, false));
+        modifiers.add(new Modifier("WATERING_TIME", ModifierType.WATERING_TIME,  240.0, null, false));
         modifiers.add(new Modifier("PRUNE_CURRENCY_BUFF", ModifierType.PRUNE_CURRENCY_GENERATION, 1.0, 120.0, true));
-        modifiers.add(new Modifier("PRUNE_CURRENCY_DEBUFF", ModifierType.PRUNE_CURRENCY_GENERATION, 0.5, -1.0, false));
-        modifiers.add(new Modifier("PRUNE_MAX_CURRENCY_BUFF", ModifierType.MAX_CURRENCY_GENERATION, 120.0, 240.0, true));
-        modifiers.add(new Modifier("HEALTH_FASTER_REDUCTION", ModifierType.HEALTH_REDUCTION, 2.0, -1.0, false));
-        modifiers.add(new Modifier("HEALTH_REDUCED_GENERATION", ModifierType.HEALTH_GENERATION, 2.0, -1.0, false));
+        modifiers.add(new Modifier("PRUNE_CURRENCY_DEBUFF", ModifierType.PRUNE_CURRENCY_GENERATION, 0.5, null, false));
+        modifiers.add(new Modifier("PRUNE_MAX_CURRENCY_BUFF", ModifierType.MAX_CURRENCY_GENERATION,120.0, 240.0, true));
+        modifiers.add(new Modifier("HEALTH_FASTER_REDUCTION", ModifierType.HEALTH_REDUCTION,2.0, -1.0, false));
+        modifiers.add(new Modifier("HEALTH_REDUCED_GENERATION", ModifierType.HEALTH_GENERATION, 2.0, null, false));
 
         logger.info("Initialized all bonuses");
 

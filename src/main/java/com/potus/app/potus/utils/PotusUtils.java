@@ -1,15 +1,10 @@
 package com.potus.app.potus.utils;
 
-import com.potus.app.potus.model.CurrencyGenerators;
-import com.potus.app.potus.model.PotusAction;
-import com.potus.app.potus.model.Actions;
+import com.potus.app.potus.model.*;
 
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.lang.Math;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public final class PotusUtils {
@@ -59,6 +54,16 @@ public final class PotusUtils {
         }
 
         return result;
+    }
+
+    public static Set<PotusModifier> generatePotusModifiers(Potus potus, List<Modifier> modifiers){
+        Set<PotusModifier> potusModifiers = new HashSet<>();
+
+        modifiers.forEach(modifier -> {
+            potusModifiers.add(new PotusModifier(potus,modifier,1));
+        });
+
+        return potusModifiers;
     }
 
     public static String getActionRemainingTime (Long now, Long actionDate, PotusAction action) {

@@ -4,7 +4,9 @@ package com.potus.app.user.service;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.service.PotusService;
+import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
 import com.potus.app.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,4 +96,16 @@ public class UserService {
     public void deleteUser(User user) {
         userRepository.delete(user);
     }
+
+    public void upgradeModifier(User user, PotusModifier selectedModifier) {
+
+        Double price = ModifierUtils.getCurrentPrice(selectedModifier.getModifier().getPrice(),selectedModifier.getLevel());
+
+        if(user.getCurrency() < price)
+            throw new ResourceAlreadyExistsException(USER_HAS_NOT_ENOUGH_CURRENCY);
+
+        potusService.upgradeModifier(selectedModifier);
+        user.setCurrency((int) (user.getCurrency() - price));
+    }
+
 }

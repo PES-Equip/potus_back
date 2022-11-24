@@ -145,7 +145,6 @@ public class UserController {
 
         User user = getUser();
 
-        List<Modifier> modifierBuffs = modifierService.getBuffs();
 
         if(user.getPotus().isAlive())
             throw new ResourceAlreadyExistsException(POTUS_ALREADY_ALIVE);
@@ -153,7 +152,7 @@ public class UserController {
         if(potusRegistryService.existsByUserAndName(user, body.getName()))
             throw new ResourceAlreadyExistsException(POTUS_NAME_ALREADY_EXISTS);
 
-        return potusService.restartPotus(user.getPotus(), body.getName(), modifierBuffs);
+        return potusService.restartPotus(user.getPotus(), body.getName());
     }
 
     @ApiOperation(value = "GET POTUS REGISTRIES")
