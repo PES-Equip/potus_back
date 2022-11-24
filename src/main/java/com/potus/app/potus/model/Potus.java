@@ -1,17 +1,18 @@
 package com.potus.app.potus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.potus.app.potus.repository.ModifierRepository;
+import com.potus.app.potus.service.ModifierService;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.potus.app.potus.utils.EventsUtils.getStateValue;
 
@@ -19,6 +20,7 @@ import static com.potus.app.potus.utils.EventsUtils.getStateValue;
 @Entity
 @Table(name="potus")
 public class Potus {
+
 
 
     @Id
@@ -100,6 +102,11 @@ public class Potus {
         this.festivityBonus = 0;
         this.waterRecovery = 10;
         this.ignored = false;
+
+    }
+
+    public void initializeBuffs(Set<PotusModifier> buffs){
+        this.buffs = buffs;
     }
 
     public String getName() {

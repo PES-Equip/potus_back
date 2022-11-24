@@ -3,9 +3,11 @@ package com.potus.app.user.controller;
 
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.potus.model.Modifier;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.PotusRegistry;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
+import com.potus.app.potus.service.ModifierService;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
@@ -44,6 +46,9 @@ public class UserController {
 
     @Autowired
     private PotusService potusService;
+
+    @Autowired
+    private ModifierService modifierService;
 
     @ApiOperation(value = "GET USERS")
     @ApiResponses(value = {
@@ -140,13 +145,15 @@ public class UserController {
 
         User user = getUser();
 
+        List<Modifier> modifierBuffs = modifierService.getBuffs();
+
         if(user.getPotus().isAlive())
             throw new ResourceAlreadyExistsException(POTUS_ALREADY_ALIVE);
 
         if(potusRegistryService.existsByUserAndName(user, body.getName()))
             throw new ResourceAlreadyExistsException(POTUS_NAME_ALREADY_EXISTS);
 
-        return potusService.restartPotus(user.getPotus(), body.getName());
+        return potusService.restartPotus(user.getPotus(), body.getName(), modifierBuffs);
     }
 
     @ApiOperation(value = "GET POTUS REGISTRIES")

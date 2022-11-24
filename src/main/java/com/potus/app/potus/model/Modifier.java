@@ -1,6 +1,7 @@
 package com.potus.app.potus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.potus.app.potus.service.ModifierService;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -27,6 +28,17 @@ public class Modifier {
     private Double price;
 
     private boolean buff;
+
+
+    public Modifier() {}
+
+    public Modifier(String name, ModifierType type, Double val, Double price, boolean buff) {
+        this.name = name;
+        this.type = type;
+        this.val = val;
+        this.price = price;
+        this.buff = buff;
+    }
 
     public Long getId() { return id; }
 

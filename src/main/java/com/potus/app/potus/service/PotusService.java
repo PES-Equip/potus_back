@@ -3,13 +3,10 @@ package com.potus.app.potus.service;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.GeneralExceptionMessages;
 import com.potus.app.exception.TooManyRequestsException;
-import com.potus.app.potus.model.CurrencyGenerators;
-import com.potus.app.potus.model.PotusAction;
-import com.potus.app.potus.model.Actions;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.States;
+import com.potus.app.potus.model.*;
 import com.potus.app.potus.repository.ActionsRepository;
 import com.potus.app.potus.repository.PotusRepository;
+import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.potus.utils.PotusUtils;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
@@ -19,11 +16,10 @@ import com.potus.app.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static com.potus.app.potus.utils.ModifierUtils.createBuffs;
 import static com.potus.app.potus.utils.PotusExceptionMessages.ACTION_ALREADY_DID_IT;
 import static com.potus.app.potus.utils.PotusUtils.*;
 
@@ -210,8 +206,13 @@ public class PotusService {
         return currency;
     }
 
-    public Potus restartPotus(Potus potus, String name) {
+    public Potus restartPotus(Potus potus, String name, List<Modifier> modifierBuffs) {
         potus.initialize(name);
+
+        Set<PotusModifier> buffs = ModifierUtils.createBuffs(potus, modifierBuffs);
+
+        potus.initializeBuffs(buffs);
+
         return potusRepository.save(potus);
     }
 }

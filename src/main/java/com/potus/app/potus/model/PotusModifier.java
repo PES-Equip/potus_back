@@ -22,6 +22,16 @@ public class PotusModifier {
 
     private Integer level;
 
+
+
+    public PotusModifier() {}
+
+    public PotusModifier(Potus potus, Modifier modifier, Integer level) {
+        this.potus = potus;
+        this.modifier = modifier;
+        this.level = level;
+    }
+
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }

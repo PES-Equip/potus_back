@@ -372,7 +372,7 @@ public class UserControllerTests {
 
         Potus potus = new Potus(potusCreationRequest.getName());
         Mockito.when(potusRegistryService.existsByUserAndName(any(),any())).thenReturn(false);
-        Mockito.when(potusService.restartPotus(any(),any())).thenReturn(potus);
+        Mockito.when(potusService.restartPotus(any(),any(), any())).thenReturn(potus);
 
         final String expectedResponseContent = objectMapper.writeValueAsString(potus);
 
