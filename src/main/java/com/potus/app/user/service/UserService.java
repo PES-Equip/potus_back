@@ -1,15 +1,25 @@
 package com.potus.app.user.service;
 
 
+import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.service.PotusService;
+import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
 import com.potus.app.user.repository.UserRepository;
+import com.potus.app.user.utils.UserUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,11 +28,15 @@ import static com.potus.app.user.utils.UserExceptionMessages.*;
 @Service
 public class UserService {
 
+
     @Autowired
     UserRepository userRepository;
 
     @Autowired
     PotusService potusService;
+
+    Logger logger = LoggerFactory.getLogger(UserService.class);
+
 
     public List<User> getAll() {
         return userRepository.findAll();
@@ -50,8 +64,6 @@ public class UserService {
     }
 
     public User setUsername(User user, String username) throws ResourceAlreadyExistsException{
-
-
         try{
             User userExist = findByUsername(username);
             throw new ResourceAlreadyExistsException(USERNAME_ALREADY_TAKEN);
@@ -61,8 +73,8 @@ public class UserService {
         return saveUser(user);
     }
 
-    public User createPotus(User user) {
-        Potus potus = potusService.createPotus();
+    public User createPotus(User user, String name) {
+        Potus potus = potusService.createPotus(name);
         user.setPotus(potus);
         return saveUser(user);
     }
@@ -74,6 +86,63 @@ public class UserService {
 
     public User saveUser(User newUser){
         return userRepository.save(newUser);
+    }
+
+
+    public void addAdmins() {
+        List<String> adminMails = UserUtils.adminUsers();
+
+        for(String mail : adminMails) {
+            try {
+                User user = findByEmail(mail);
+
+                if (!user.getAdmin()){
+                    user.setAdmin(Boolean.TRUE);
+                    saveUser(user);
+                    logger.info("Admin user with email "+mail+" is now an admin.");
+                }
+            }
+            catch (ResourceNotFoundException ignore){
+                logger.info("Admin user with email "+mail+" haven't been created yet");
+            }
+        }
+    }
+
+    public User checkAdmin(User user) {
+        List<String> adminMails = UserUtils.adminUsers();
+        if (adminMails.contains(user.getEmail())) {
+            user.setAdmin(Boolean.TRUE);
+        }
+        return user;
+    }
+
+
+    @Transactional
+    public User newPotus(User user, String name) {
+        Potus potus = potusService.createPotus(name);
+        user.setPotus(potus);
+        return user;
+    }
+
+
+    /**
+     * DELETES POTUS - REGISTRY - USER
+     * @param user
+     */
+    @Transactional
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+    }
+
+    public void upgradeModifier(User user, PotusModifier selectedModifier) {
+
+        Double price = ModifierUtils.getCurrentPrice(selectedModifier.getModifier().getPrice(),selectedModifier.getLevel());
+
+        if(user.getCurrency() < price)
+            throw new ResourceAlreadyExistsException(USER_HAS_NOT_ENOUGH_CURRENCY);
+
+        potusService.upgradeModifier(selectedModifier);
+        user.setCurrency((int) (user.getCurrency() - price));
     }
 
 }

@@ -1,25 +1,17 @@
-package com.potus.app.potus;
+package com.potus.app.airquality;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
+import com.potus.app.airquality.controller.AirQualityController;
 import com.potus.app.airquality.service.AirQualityService;
-import com.potus.app.exception.BadRequestException;
-import com.potus.app.exception.ResourceAlreadyExistsException;
-import com.potus.app.potus.controller.PotusActionsController;
-import com.potus.app.potus.controller.PotusEventsController;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.States;
-import com.potus.app.potus.payload.request.PotusEventRequest;
-import com.potus.app.potus.service.PotusEventsService;
-import com.potus.app.potus.service.PotusService;
-import com.potus.app.user.model.User;
-import com.potus.app.user.payload.request.UsernameRequest;
+import com.potus.app.garden.service.GardenRequestService;
+import com.potus.app.garden.service.GardenService;
+import com.potus.app.potus.controller.PotusController;
 import com.potus.app.user.service.UserService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,24 +28,30 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
+import com.potus.app.airquality.model.Region;
+import org.springframework.util.MultiValueMap;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = {PotusEventsController.class, TestConfig.class})
+@SpringBootTest(classes = {AirQualityController.class, TestConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles(profiles = "test")
-public class PotusEventsControllerTests {
-
+public class AirQualityControllerTests {
     @Autowired
     private WebApplicationContext context;
 
-
     private MockMvc mockMvc;
-
 
     @MockBean
     private Authentication auth;
@@ -62,11 +60,6 @@ public class PotusEventsControllerTests {
 
     @MockBean
     private AirQualityService airQualityService;
-    @MockBean
-    private PotusEventsService potusEventsService;
-
-    @MockBean
-    private UserService userService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -83,26 +76,16 @@ public class PotusEventsControllerTests {
     }
 
     @Test
-    public void potusEventOK() throws Exception {
+    public void getRegionsTest() throws Exception {
+        List<Region> mockRegions = Stream.of(TestUtils.getMockRegion()).toList();
+        Mockito.when(airQualityService.findAll()).thenReturn(mockRegions);
 
-        User mockUser = TestUtils.getMockNewUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusEventRequest potusEventRequest = new PotusEventRequest();
-        potusEventRequest.setValues(11.0, 11.0);
-
-        Potus potus = new Potus();
-
-        Mockito.when(potusEventsService.doEvent(any(),any(),any())).thenReturn(potus);
-
-        final String expectedResponseContent = objectMapper.writeValueAsString(potus);
+        final String expectedResponseContent = objectMapper.writeValueAsString(mockRegions);
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/events")
+                .get("/api/airquality/regions")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusEventRequest));
+                .accept(MediaType.APPLICATION_JSON);
 
         MvcResult result = this.mockMvc.perform(request)
                 .andExpect(status().isOk())
@@ -111,24 +94,26 @@ public class PotusEventsControllerTests {
     }
 
     @Test
-    public void potusEventError() throws Exception {
+    public void getRegionTest() throws Exception {
+        Region mockRegion = TestUtils.getMockRegion();
+        Mockito.when(airQualityService.getRegion(any(),any())).thenReturn(mockRegion);
 
-        User mockUser = TestUtils.getMockUser();
-        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
-
-        PotusEventRequest potusEventRequest = new PotusEventRequest();
-
+        final String expectedResponseContent = objectMapper.writeValueAsString(mockRegion);
+        MultiValueMap<String,String> params = new LinkedMultiValueMap<>();
+        params.add("latitude", "0.0");
+        params.add("length", "0.0");
 
         RequestBuilder request = MockMvcRequestBuilders
-                .post("/api/potus/events")
+                .get("/api/airquality/region")
+                .queryParams(params)
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(potusEventRequest));
+                .accept(MediaType.APPLICATION_JSON);
 
-        this.mockMvc.perform(request)
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
                 .andReturn();
     }
+
+
 }

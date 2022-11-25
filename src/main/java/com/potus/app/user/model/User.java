@@ -1,5 +1,9 @@
 package com.potus.app.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.potus.app.garden.model.Garden;
+import com.potus.app.garden.model.GardenMember;
 import com.potus.app.potus.model.Potus;
 
 import javax.persistence.*;
@@ -18,13 +22,20 @@ public class User {
     @Column(unique = true)
     private String username;
 
+    private Boolean isAdmin;
+
 
     @Column(columnDefinition = "int check(currency >= 0)")
     private Integer currency;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private Potus potus;
+
+    @OneToOne(mappedBy = "user")
+    @JsonIgnoreProperties({"user"})
+    @JsonProperty("garden_info")
+    private GardenMember garden;
 
     public User(){}
 
@@ -34,6 +45,7 @@ public class User {
         this.email = email;
         this.username = username;
         this.currency = 0;
+        isAdmin = false;
     }
 
     public Long getId() {
@@ -68,11 +80,27 @@ public class User {
         return  UserStatus.CONFIRMED;
     }
 
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
+    }
+
     public Integer getCurrency() {
         return currency;
     }
 
     public void setCurrency(Integer currency) {
         this.currency = currency;
+    }
+
+    public GardenMember getGarden() {
+        return garden;
+    }
+
+    public void setGarden(GardenMember garden) {
+        this.garden = garden;
     }
 }

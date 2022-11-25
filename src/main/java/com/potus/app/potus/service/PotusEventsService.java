@@ -8,6 +8,7 @@ import com.potus.app.potus.model.GasesAndStates;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.States;
 import com.potus.app.potus.repository.PotusRepository;
+import com.potus.app.potus.utils.EventsUtils;
 import com.potus.app.potus.utils.PotusUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.potus.app.potus.utils.EventsUtils.*;
 
 
 @Service
@@ -28,17 +31,33 @@ public class PotusEventsService {
 
 
     public Potus doEvent (Potus potus, Double latitude, Double length) {
-        List<Region> closestRegions = getClosestRegions(latitude, length);
 
-        List<GasRegistry> gasValues = getGasValues(closestRegions);
+        GasesAndStates state = checkFestivity(potus);
 
-        Map<DangerLevel, List<GasesAndStates>> dangerousGases = getDangerousGases(gasValues);
+        if (state == States.DEFAULT) {
+            potus.setFestivityBonus(PotusUtils.FESTIVITY_DEFAULT_CURRENCY);
 
-        GasesAndStates state = chooseDangerousGas(dangerousGases);
+            List<Region> closestRegions = getClosestRegions(latitude, length);
+
+            List<GasRegistry> gasValues = getGasValues(closestRegions);
+
+
+            Map<DangerLevel, List<GasesAndStates>> dangerousGases = getDangerousGases(gasValues);
+
+            System.out.println(state);
+
+            state = chooseDangerousGas(dangerousGases);
+        }
+        else assignFestivityBonus(potus, state);
 
         applyState(potus, state);
 
         return potusRepository.save(potus);
+    }
+
+    private void assignFestivityBonus(Potus potus, GasesAndStates state) {
+        potus.setFestivityBonus(PotusUtils.FESTIVITY_ADDITIONAL_CURRENCY);
+
     }
 
     private void applyState (Potus potus, GasesAndStates state) {
@@ -47,122 +66,97 @@ public class PotusEventsService {
         System.out.println("Potus State: " + potus.getState());
     }
 
+    private GasesAndStates checkFestivity(Potus potus) {
+        GasesAndStates resultantState = States.DEFAULT;
+
+        String date = EventsUtils.getDate();
+
+        String month = (date.substring(5, 7));
+        Integer day = Integer.valueOf(date.substring(8, 10));
+
+        System.out.println(month);
+        System.out.println(day);
+
+        Map<String, GasesAndStates> festivitiesMonth = EventsUtils.getMonthFestivities(month);
+
+        boolean festivityFound = false;
+        Iterator<Map.Entry<String, GasesAndStates>> iterator = festivitiesMonth.entrySet().iterator();
+
+        while (iterator.hasNext() && !festivityFound) {
+            Map.Entry<String, GasesAndStates> entry = iterator.next();
+
+            if (day >= Integer.parseInt(entry.getKey().substring(EventsUtils.StringPositionDay1Beginning, EventsUtils.StringPositionDay1Ending)) &&
+            day <= Integer.parseInt(entry.getKey().substring(EventsUtils.StringPositionDay2Beginning, EventsUtils.StringPositionDay2Ending))) {
+                festivityFound = true;
+                resultantState = entry.getValue();
+            }
+        }
+
+        return resultantState;
+    }
+
     private GasesAndStates chooseDangerousGas(Map<DangerLevel, List<GasesAndStates>> dangerousGases) {
         Random rand = new SecureRandom();
         GasesAndStates randomGas = States.DEFAULT;
 
-        for (List<GasesAndStates> gasList: dangerousGases.values()) {
-            randomGas = gasList.get(rand.nextInt(gasList.size()));
-            if (randomGas != States.DEFAULT) break;
-        }
+        Map<DangerLevel, List<GasesAndStates>> sortedMap = new TreeMap<>(dangerousGases);
 
+        System.out.println(sortedMap);
+
+        boolean found = false;
+        Iterator<List<GasesAndStates>> iterator = sortedMap.values().iterator();
+        while(! found && iterator.hasNext()){
+            List<GasesAndStates> gasList = iterator.next();
+            if(gasList.size() > 0){
+                randomGas = gasList.get(rand.nextInt(gasList.size()));
+                found = true;
+            }
+        }
         return randomGas;
     }
 
+
     private Map<DangerLevel, List<GasesAndStates>> getDangerousGases(List<GasRegistry> gasValues) {
         Map<DangerLevel, List<GasesAndStates>> dangerousGases = new HashMap<>();
-        initializeDangerousGases(dangerousGases);
+        //initializeDangerousGases(dangerousGases);
         //Map<GasesAndStates, DangerLevel> dangerousGases = new HashMap<>();
 
-        for (GasRegistry gas : gasValues) {
+        List<GasRegistry> dangerousGasesList = gasValues.stream().filter(gasRegistry ->
+                !gasRegistry.getDangerLevel().equals(DangerLevel.NoDanger)).toList();
 
-            determineDangerousness(gas.getName(), gas.getValue(), dangerousGases);
+        for (DangerLevel danger : DangerLevel.values()) {
 
+            List<Gases> values = gasValues.stream().filter(gasRegistry ->
+                    gasRegistry.getDangerLevel().equals(danger)).map(GasRegistry::getName).toList();
+
+            dangerousGases.put(danger, new ArrayList<>(values));
         }
 
         return dangerousGases;
-    }
-
-    private void initializeDangerousGases(Map<DangerLevel, List<GasesAndStates>> dangerousGases) {
-        for (DangerLevel danger : DangerLevel.values()) {
-            dangerousGases.put(danger, new ArrayList<>());
-            dangerousGases.get(danger).add(States.DEFAULT);
-        }
-
-    }
-
-    private void determineDangerousness(Gases gasName, Double gasValue, Map<DangerLevel, List<GasesAndStates>> dangerousGases) {
-        if (gasValue != null) {
-            switch(gasName) {
-                case NO2, NOX:
-                    if (gasValue >= 25 && gasValue < 50) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 50 && gasValue < 100) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 100 && gasValue < 200) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 200) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case O3:
-                    if (gasValue >= 60 && gasValue < 120) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 120 && gasValue < 180) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 180 && gasValue < 240) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 240) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case PM1:
-                    if (gasValue >= 10 && gasValue < 20) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 20 && gasValue < 30) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 30 && gasValue < 60) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 60) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case PM2_5:
-                    if (gasValue >= 5 && gasValue < 15) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 15 && gasValue < 25) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 25 && gasValue < 50) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 50) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case PM10:
-                    if (gasValue >= 15 && gasValue < 30) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 30 && gasValue < 50) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 50 && gasValue < 80) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 80) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case SO2:
-                    if (gasValue >= 40 && gasValue < 80) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 80 && gasValue < 120) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 120 && gasValue < 240) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 240) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case CO:
-                    if (gasValue >= 4 && gasValue < 8) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 8 && gasValue < 12) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 12 && gasValue < 24) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 24) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case C6H6:
-                    if (gasValue >= 1.7 && gasValue < 3.4) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 3.4 && gasValue < 7) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 7 && gasValue < 15) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 15) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                case Hg:
-                    if (gasValue >= 10 && gasValue < 20) dangerousGases.get(DangerLevel.Low).add(gasName);
-                    else if (gasValue >= 20 && gasValue < 40) dangerousGases.get(DangerLevel.Moderate).add(gasName);
-                    else if (gasValue >= 40 && gasValue < 80) dangerousGases.get(DangerLevel.High).add(gasName);
-                    else if (gasValue >= 80) dangerousGases.get(DangerLevel.Hazardous).add(gasName);
-                    break;
-                default:
-                    break;
-            }
-        }
-
     }
 
     private List<GasRegistry> getGasValues(List<Region> closestRegions) {
         List<Gases> remainingGases = AirQualityUtils.getGases();
         List<Gases> remainingGasesCopy = new ArrayList<>(remainingGases);
         List<GasRegistry> result = new ArrayList<>();
+        int counter = 0;
 
-        for (Region region : closestRegions) {
-            Map<Gases, GasRegistry> regionGases = region.getRegistry();
+        Iterator<Region> iterator = closestRegions.iterator();
+        while (iterator.hasNext() && counter < 3) {
+            Map<Gases, GasRegistry> regionGases = iterator.next().getRegistry();
 
             for (Gases remainingGas : remainingGases) {
                 GasRegistry gasValues = regionGases.get(remainingGas);
-                if (gasValues != null) {
+                System.out.println(gasValues.getValue());
+                if (gasValues.getValue() != null) {
                     remainingGasesCopy.remove(remainingGas);
                     result.add(gasValues);
                 }
             }
-            remainingGases = remainingGasesCopy;
 
-            if (remainingGases.isEmpty()) break;
+            remainingGases = new ArrayList<>(remainingGasesCopy);
+            counter += 1;
+
         }
 
         for (GasRegistry g : result) {

@@ -6,7 +6,11 @@ import com.potus.app.security.CustomSession;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -21,7 +25,13 @@ import static com.potus.app.user.utils.UserUtils.getUser;
 
 public class PotusStatesFilter extends OncePerRequestFilter {
 
-    private PotusService potusService;
+    private final PotusService potusService;
+
+    private final RequestMatcher uriMatcherDELETE =
+            new AntPathRequestMatcher("/api/user/profile", HttpMethod.DELETE.name());
+
+    private final RequestMatcher uriMatcherPOST =
+            new AntPathRequestMatcher("/api/user/profile", HttpMethod.POST.name());
 
     public PotusStatesFilter(PotusService potusService){
         this.potusService = potusService;
@@ -35,17 +45,16 @@ public class PotusStatesFilter extends OncePerRequestFilter {
 
         User user = getUser();
         Potus potus = user.getPotus();
-
-
         if(user.getStatus() == UserStatus.CONFIRMED) {
             potusService.updatePotusStats(potus);
-
-            if (!potus.isAlive()) {
-                response.sendError(HttpStatus.BAD_REQUEST.value(), POTUS_IS_DEAD);
-                return;
-            }
         }
+
         filterChain.doFilter(request,response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return uriMatcherDELETE.matches(request)  || uriMatcherPOST.matches(request);
     }
 
 }

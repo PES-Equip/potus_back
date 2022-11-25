@@ -4,5 +4,6 @@ public enum DangerLevel {
     Hazardous,
     High,
     Moderate,
-    Low
+    Low,
+    NoDanger
 }
