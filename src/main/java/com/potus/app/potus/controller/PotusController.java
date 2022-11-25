@@ -8,6 +8,7 @@ import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
+import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
 import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
@@ -100,7 +103,7 @@ public class PotusController {
         return potusEventsService.doEvent(user.getPotus(), latitude, length);
     }
 
-    @ApiOperation(value = "GET POTUS")
+    @ApiOperation(value = "GET BUFFS")
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "User potus"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
@@ -108,11 +111,10 @@ public class PotusController {
     @GetMapping("/buffs")
     public List<PotusModifier> getPotusBuffs() {
         Potus potus = getUser().getPotus();
-
         return potus.getBuffs().stream().toList();
     }
 
-    @ApiOperation(value = "GET POTUS")
+    @ApiOperation(value = "GET DEBUFFS")
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "User potus"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
@@ -121,6 +123,36 @@ public class PotusController {
     public List<PotusModifier> getPotusDebuffs() {
         Potus potus = getUser().getPotus();
         return potus.getDebuffs().stream().toList();
+    }
+
+    @ApiOperation(value = "GET POTUS STORE")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User potus"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/store")
+    public List<PotusModifierStoreResponse> getPotusStore() {
+        Potus potus = getUser().getPotus();
+        Set<PotusModifier> buffs = potus.getBuffs();
+
+        List<PotusModifierStoreResponse> response = new ArrayList<>();
+        buffs.forEach(buff ->{
+            response.add(new PotusModifierStoreResponse(buff));
+        });
+        return response;
+    }
+
+    @ApiOperation(value = "GET POTUS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User potus"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PostMapping("/store/buy/{modifier}")
+    public void purchaseModifier(@PathVariable String modifier) {
+        User user = getUser();
+        Potus potus = user.getPotus();
+        PotusModifier selectedModifier = potus.getBuff(modifier);
+        userService.upgradeModifier(user,selectedModifier);
     }
 
 }
