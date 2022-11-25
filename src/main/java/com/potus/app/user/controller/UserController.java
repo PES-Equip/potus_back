@@ -75,6 +75,7 @@ public class UserController {
         if(user.getStatus() != UserStatus.NEW)
             throw new ResourceAlreadyExistsException(USER_PROFILE_ALREADY_EXISTS);
 
+        user = userService.checkAdmin(user);
         userService.setUsername(user, username);
         return userService.createPotus(user, "potus");
     }

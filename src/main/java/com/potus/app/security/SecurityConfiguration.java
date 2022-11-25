@@ -21,6 +21,7 @@ public class SecurityConfiguration {
     @Order(1)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+                .antMatchers("/api/external/**").permitAll()
                 .antMatchers("/api/**").fullyAuthenticated()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

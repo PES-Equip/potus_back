@@ -22,6 +22,8 @@ public class User {
     @Column(unique = true)
     private String username;
 
+    private Boolean isAdmin;
+
 
     @Column(columnDefinition = "int check(currency >= 0)")
     private Integer currency;
@@ -43,6 +45,7 @@ public class User {
         this.email = email;
         this.username = username;
         this.currency = 0;
+        isAdmin = false;
     }
 
     public Long getId() {
@@ -75,6 +78,14 @@ public class User {
             return UserStatus.NEW;
 
         return  UserStatus.CONFIRMED;
+    }
+
+    public Boolean getAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 
     public Integer getCurrency() {

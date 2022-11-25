@@ -11,6 +11,7 @@ import com.potus.app.garden.model.GardenRole;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
 import com.potus.app.garden.payload.request.GardenSetRoleRequest;
+import com.potus.app.garden.payload.response.GardenMemberResponse;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
 import com.potus.app.user.model.User;
@@ -25,6 +26,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -240,6 +242,26 @@ public class GardenController {
         User user = getUser();
         GardenMember member =  gardenService.findByUser(user);
         gardenService.removeUser(member);
+    }
+
+    @ApiOperation(value = "GET GARDEN MEMBERS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Garden"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/profile/members")
+    public List<GardenMemberResponse> getGardenMembers(){
+        User user = getUser();
+        GardenMember member = gardenService.findByUser(user);
+        Garden garden = member.getGarden();
+        List<GardenMember> members = gardenService.getMembers(garden);
+        List<GardenMemberResponse> response = new ArrayList<>();
+
+        members.forEach(m -> {
+            response.add(new GardenMemberResponse(m.getUser().getUsername(),m.getRole()));
+        });
+
+        return response;
     }
 
     // REQUESTS

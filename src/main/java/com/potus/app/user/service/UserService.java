@@ -1,6 +1,7 @@
 package com.potus.app.user.service;
 
 
+import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.model.Potus;
@@ -9,8 +10,12 @@ import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
 import com.potus.app.user.repository.UserRepository;
+import com.potus.app.user.utils.UserUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -29,6 +34,9 @@ public class UserService {
 
     @Autowired
     PotusService potusService;
+
+    Logger logger = LoggerFactory.getLogger(UserService.class);
+
 
     public List<User> getAll() {
         return userRepository.findAll();
@@ -79,6 +87,35 @@ public class UserService {
     public User saveUser(User newUser){
         return userRepository.save(newUser);
     }
+
+
+    public void addAdmins() {
+        List<String> adminMails = UserUtils.adminUsers();
+
+        for(String mail : adminMails) {
+            try {
+                User user = findByEmail(mail);
+
+                if (!user.getAdmin()){
+                    user.setAdmin(Boolean.TRUE);
+                    saveUser(user);
+                    logger.info("Admin user with email "+mail+" is now an admin.");
+                }
+            }
+            catch (ResourceNotFoundException ignore){
+                logger.info("Admin user with email "+mail+" haven't been created yet");
+            }
+        }
+    }
+
+    public User checkAdmin(User user) {
+        List<String> adminMails = UserUtils.adminUsers();
+        if (adminMails.contains(user.getEmail())) {
+            user.setAdmin(Boolean.TRUE);
+        }
+        return user;
+    }
+
 
     @Transactional
     public User newPotus(User user, String name) {

@@ -19,6 +19,8 @@ public final class UserExceptionMessages {
         return "User (" + o + ") not found";
     }
 
+    public static final String USER_MUST_BE_ADMIN = "User must be admin to access admin endpoints";
+
 
 
     private UserExceptionMessages(){
