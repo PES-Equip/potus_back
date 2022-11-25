@@ -20,14 +20,12 @@ public class ChatController {
     @MessageMapping("/message/{garden}")
     @SendTo("/chatroom/{garden}")
     public ChatMessage receiveMessage(@DestinationVariable String garden, @Payload ChatMessage message){
-        System.out.println(garden);
         return message;
     }
 
     @MessageMapping("/private-message")
     public ChatMessage recMessage(@Payload ChatMessage message){
         simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);
-        System.out.println(message.toString());
         return message;
     }
 
