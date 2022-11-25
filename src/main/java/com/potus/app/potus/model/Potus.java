@@ -1,23 +1,28 @@
 package com.potus.app.potus.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.potus.app.exception.ResourceNotFoundException;
+import com.potus.app.potus.repository.ModifierRepository;
+import com.potus.app.potus.service.ModifierService;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.potus.app.potus.utils.EventsUtils.getStateValue;
+import static com.potus.app.potus.utils.PotusExceptionMessages.POTUS_MODIFIER_DOES_NOT_EXISTS;
 
 
 @Entity
 @Table(name="potus")
 public class Potus {
+
 
 
     @Id
@@ -61,6 +66,16 @@ public class Potus {
 
     private Long pruningMaxCurrency;
 
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "buff_id")
+    @JsonIgnore
+    private Set<PotusModifier> buffs;
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "debuff_id")
+    @JsonIgnore
+    private Set<PotusModifier> debuffs;
+
     boolean ignored;
 
     private String state;
@@ -91,6 +106,11 @@ public class Potus {
         this.festivityBonus = 0;
         this.waterRecovery = 10;
         this.ignored = false;
+
+    }
+
+    public void initializeBuffs(Set<PotusModifier> buffs){
+        this.buffs = buffs;
     }
 
     public String getName() {
@@ -202,6 +222,27 @@ public class Potus {
         result.put(CurrencyGenerators.FESTIVITY_BONUS, festivityBonus);
 
         return result;
+    }
+
+    public Set<PotusModifier> getBuffs() {
+        return buffs;
+    }
+
+    public PotusModifier getBuff(String name){
+       return buffs.stream().filter(buff ->buff.getModifier().getName().equals(name)).findFirst()
+               .orElseThrow(() -> new ResourceNotFoundException(POTUS_MODIFIER_DOES_NOT_EXISTS));
+    }
+
+    public void setBuffs(Set<PotusModifier> buffs) {
+        this.buffs = buffs;
+    }
+
+    public Set<PotusModifier> getDebuffs() {
+        return debuffs;
+    }
+
+    public void setDebuffs(Set<PotusModifier> debuffs) {
+        this.debuffs = debuffs;
     }
 
     public void setName(String name) {

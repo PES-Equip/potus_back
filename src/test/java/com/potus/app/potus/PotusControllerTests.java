@@ -3,10 +3,15 @@ package com.potus.app.potus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.controller.PotusController;
+import com.potus.app.potus.model.Modifier;
+import com.potus.app.potus.model.ModifierType;
 import com.potus.app.potus.model.Potus;
+import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
+import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
 import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
@@ -33,8 +38,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import static com.potus.app.potus.utils.PotusUtils.PRUNNING_CURRENCY_BONUS;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -248,5 +259,162 @@ public class PotusControllerTests {
                 .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof BadRequestException))
                 .andReturn();
     }
+
+
+    @Test
+    public void getPotusBuffsTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setBuffs(modifiers);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(modifiers.stream().toList());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/potus/buffs")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void getPotusDebuffsTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., false);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setDebuffs(modifiers);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(modifiers.stream().toList());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/potus/debuffs")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void getPotusStoreTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setBuffs(modifiers);
+
+        List<PotusModifierStoreResponse> potusModifierStoreResponses = new ArrayList<>();
+        modifiers.forEach(buff ->{
+            potusModifierStoreResponses.add(new PotusModifierStoreResponse(buff));
+        });
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(potusModifierStoreResponses);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/potus/store")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void buyUpgradePotusModifierTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setBuffs(modifiers);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/potus/store/buy/TEST")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
+
+    @Test
+    public void buyUpgradePotusModifierNotExistsTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setBuffs(modifiers);
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/potus/store/buy/ADEU")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void buyUpgradePotusModifierNotMoneyTest() throws Exception {
+
+        User mockedUser = TestUtils.getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
+
+        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
+
+        mockedUser.getPotus().setBuffs(modifiers);
+
+        doThrow(new ResourceNotFoundException()).when(userService).upgradeModifier(any(),any());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/potus/store/buy/ADEU")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+ // no money
+    // not found
+    // ok
+
 
 }

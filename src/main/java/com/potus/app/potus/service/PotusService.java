@@ -3,13 +3,12 @@ package com.potus.app.potus.service;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.GeneralExceptionMessages;
 import com.potus.app.exception.TooManyRequestsException;
-import com.potus.app.potus.model.CurrencyGenerators;
-import com.potus.app.potus.model.PotusAction;
-import com.potus.app.potus.model.Actions;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.States;
+import com.potus.app.potus.model.*;
 import com.potus.app.potus.repository.ActionsRepository;
+import com.potus.app.potus.repository.ModifierRepository;
+import com.potus.app.potus.repository.PotusModifierRepository;
 import com.potus.app.potus.repository.PotusRepository;
+import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.potus.utils.PotusUtils;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
@@ -19,10 +18,9 @@ import com.potus.app.user.service.UserService;
 
 import javax.transaction.Transactional;
 import java.security.SecureRandom;
-import java.util.Date;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
 
 import static com.potus.app.potus.utils.PotusExceptionMessages.ACTION_ALREADY_DID_IT;
 import static com.potus.app.potus.utils.PotusUtils.*;
@@ -35,6 +33,12 @@ public class PotusService {
 
     @Autowired
     ActionsRepository actionsRepository;
+
+    @Autowired
+    ModifierRepository modifierRepository;
+
+    @Autowired
+    PotusModifierRepository potusModifierRepository;
 
 
     public Potus savePotus(Potus potus){
@@ -54,6 +58,13 @@ public class PotusService {
         Map<Actions, PotusAction> actions = PotusUtils.generateDefaultActions();
         potus.setActions(actions);
         saveFullPotus(potus);
+
+        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+
+        potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
+
+        potusModifierRepository.saveAll(potus.getBuffs());
+        savePotus(potus);
         return potus;
     }
 
@@ -210,8 +221,27 @@ public class PotusService {
         return currency;
     }
 
+    @Transactional
     public Potus restartPotus(Potus potus, String name) {
         potus.initialize(name);
+
+        List<PotusModifier> potusModifiers = potusModifierRepository.findByPotus(potus);
+        potusModifierRepository.deleteAll(potusModifiers);
+
+        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+
+        potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
+
+        potusModifierRepository.saveAll(potus.getBuffs());
         return potusRepository.save(potus);
+    }
+
+    public List<PotusModifier> getPotusBuffs(Potus potus) {
+        return potusModifierRepository.findByPotus(potus);
+    }
+
+    public void upgradeModifier(PotusModifier selectedModifier) {
+        selectedModifier.setLevel(selectedModifier.getLevel() + 1);
+        potusModifierRepository.save(selectedModifier);
     }
 }

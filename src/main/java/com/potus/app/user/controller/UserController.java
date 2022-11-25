@@ -141,6 +141,7 @@ public class UserController {
 
         User user = getUser();
 
+
         if(user.getPotus().isAlive())
             throw new ResourceAlreadyExistsException(POTUS_ALREADY_ALIVE);
 

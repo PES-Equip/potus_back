@@ -13,6 +13,8 @@ public final class UserExceptionMessages {
     public static final String USERNAME_ALREADY_TAKEN = "Username already taken";
 
     public static final String USER_MUST_CONFIRM_FIRST = "User must confirm first";
+
+    public static final String USER_HAS_NOT_ENOUGH_CURRENCY = "User has not enough currency";
     public static String userNotFound(Object o){
         return "User (" + o + ") not found";
     }

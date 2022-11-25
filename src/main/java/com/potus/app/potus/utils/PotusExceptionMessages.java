@@ -22,6 +22,7 @@ public final class PotusExceptionMessages {
 
     public static final String MAXED_OUT_BONUS = " The bonus is already maxed out";
 
+    public static final String POTUS_MODIFIER_DOES_NOT_EXISTS = "Potus modifier does not exists";
 
     private PotusExceptionMessages(){
     }
