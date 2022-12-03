@@ -11,6 +11,9 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.Date;
+import java.util.UUID;
+
 @Controller
 public class ChatController {
 
@@ -20,6 +23,8 @@ public class ChatController {
     @MessageMapping("/message/{garden}")
     @SendTo("/chatroom/{garden}")
     public ChatMessage receiveMessage(@DestinationVariable String garden, @Payload ChatMessage message){
+        message.setId(UUID.randomUUID().toString());
+        message.setDate(new Date().toString());
         return message;
     }
 
