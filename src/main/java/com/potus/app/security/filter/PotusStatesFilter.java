@@ -3,8 +3,10 @@ package com.potus.app.security.filter;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.CustomSession;
+import com.potus.app.user.model.Trophy;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
+import com.potus.app.user.service.TrophyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static com.potus.app.potus.utils.PotusExceptionMessages.POTUS_IS_DEAD;
+import static com.potus.app.user.model.TrophyType.GARDEN_TIME;
+import static com.potus.app.user.model.TrophyType.POTUS_TIME;
 import static com.potus.app.user.utils.UserExceptionMessages.USER_MUST_CONFIRM_FIRST;
 import static com.potus.app.user.utils.UserUtils.getUser;
 
@@ -27,14 +31,17 @@ public class PotusStatesFilter extends OncePerRequestFilter {
 
     private final PotusService potusService;
 
+    private final TrophyService trophyService;
+
     private final RequestMatcher uriMatcherDELETE =
             new AntPathRequestMatcher("/api/user/profile", HttpMethod.DELETE.name());
 
     private final RequestMatcher uriMatcherPOST =
             new AntPathRequestMatcher("/api/user/profile", HttpMethod.POST.name());
 
-    public PotusStatesFilter(PotusService potusService){
+    public PotusStatesFilter(PotusService potusService, TrophyService trophyService){
         this.potusService = potusService;
+        this.trophyService = trophyService;
     }
 
 
@@ -47,6 +54,10 @@ public class PotusStatesFilter extends OncePerRequestFilter {
         Potus potus = user.getPotus();
         if(user.getStatus() == UserStatus.CONFIRMED) {
             potusService.updatePotusStats(potus);
+            trophyService.updateTrophyDateBased(user,POTUS_TIME, potus.getCreatedDate());
+            if(user.getGarden() != null){
+                trophyService.updateTrophyDateBased(user, GARDEN_TIME, user.getGarden().getCreatedDate());
+            }
         }
 
         filterChain.doFilter(request,response);

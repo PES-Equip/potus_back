@@ -16,6 +16,7 @@ import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,6 +74,9 @@ public class PotusControllerTests {
 
     @MockBean
     private PotusEventsService potusEventsService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private UserService userService;

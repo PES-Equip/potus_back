@@ -11,6 +11,7 @@ import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
 import com.potus.app.user.payload.request.UsernameRequest;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,6 +46,9 @@ public class UserController {
     @Autowired
     private PotusService potusService;
 
+    @Autowired
+    private TrophyService trophyService;
+
     @ApiOperation(value = "GET USERS")
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "User"),
@@ -77,6 +81,7 @@ public class UserController {
 
         user = userService.checkAdmin(user);
         userService.setUsername(user, username);
+        trophyService.initUserTrophies(user);
         return userService.createPotus(user, "potus");
     }
 

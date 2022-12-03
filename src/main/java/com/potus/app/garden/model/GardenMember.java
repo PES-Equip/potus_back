@@ -3,8 +3,10 @@ package com.potus.app.garden.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.potus.app.user.model.User;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name="garden_members")
@@ -27,6 +29,11 @@ public class GardenMember {
 
     private GardenRole role;
 
+    @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
+
+
     public GardenMember() {
     }
 
@@ -34,6 +41,7 @@ public class GardenMember {
         this.garden = garden;
         this.user = user;
         this.role = role;
+        this.createdDate = new Date();
     }
 
     public Garden getGarden() {
@@ -50,5 +58,13 @@ public class GardenMember {
 
     public void setRole(GardenRole role) {
         this.role = role;
+    }
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
     }
 }

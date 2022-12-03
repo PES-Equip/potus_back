@@ -13,6 +13,7 @@ import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.controller.UserController;
 import com.potus.app.user.model.User;
 import com.potus.app.user.payload.request.UsernameRequest;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,6 +67,9 @@ public class UserControllerTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private PotusService potusService;

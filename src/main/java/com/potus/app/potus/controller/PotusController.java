@@ -12,7 +12,9 @@ import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
 import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
+import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,8 +32,7 @@ import java.util.Set;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
-import static com.potus.app.user.utils.UserUtils.getActionFormatted;
-import static com.potus.app.user.utils.UserUtils.getUser;
+import static com.potus.app.user.utils.UserUtils.*;
 import static java.net.HttpURLConnection.*;
 import static java.net.HttpURLConnection.HTTP_CONFLICT;
 
@@ -48,6 +49,9 @@ public class PotusController {
 
     @Autowired
     private PotusEventsService potusEventsService;
+
+    @Autowired
+    private TrophyService trophyService;
 
 
 
@@ -75,10 +79,14 @@ public class PotusController {
             throw new BadRequestException(ACTION_IS_NULL);
 
         Actions action = getActionFormatted(body.getAction());
+        TrophyType type = getTrophyTypeFormatted(body.getAction());
         User user = getUser();
         Potus potus = user.getPotus();
 
         Integer reward = potusService.doFilterAction(potus,action);
+        trophyService.updateTrophy(user, type, 1);
+        trophyService.updateTrophy(user, TrophyType.CURRENCY, reward);
+        trophyService.updateTrophy(user, TrophyType.TOTAL_CURRENCY, reward);
         return userService.addCurrency(user, reward);
     }
 
@@ -153,6 +161,8 @@ public class PotusController {
         Potus potus = user.getPotus();
         PotusModifier selectedModifier = potus.getBuff(modifier);
         userService.upgradeModifier(user,selectedModifier);
+        trophyService.updateTrophy(user, TrophyType.UPGRADES, 1);
+        trophyService.conditionalUpdateTrophy(user, TrophyType.UPGRADES, selectedModifier.getLevel());
     }
 
 }
