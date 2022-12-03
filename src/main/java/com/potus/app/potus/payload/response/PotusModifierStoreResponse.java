@@ -1,7 +1,7 @@
 package com.potus.app.potus.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.potus.app.potus.model.ModifierType;
+import com.potus.app.potus.model.ModifierEffectType;
 import com.potus.app.potus.model.PotusModifier;
 
 import static com.potus.app.potus.utils.ModifierUtils.getCurrentPrice;
@@ -11,7 +11,7 @@ public class PotusModifierStoreResponse {
 
     private String name;
     private Double value;
-    private ModifierType type;
+    private ModifierEffectType type;
     @JsonProperty("next_value")
     private Double nextValue;
     private Integer level;
@@ -28,7 +28,7 @@ public class PotusModifierStoreResponse {
         this.nextValue = getCurrentValue(potusModifier.getModifier().getValue(),level + 1);
         this.price = getCurrentPrice(potusModifier.getModifier().getPrice(), level);
     }
-    public PotusModifierStoreResponse(String name, Double value, ModifierType type, Double nextValue, Integer level, Double price) {
+    public PotusModifierStoreResponse(String name, Double value, ModifierEffectType type, Double nextValue, Integer level, Double price) {
         this.name = name;
         this.value = value;
         this.type = type;
@@ -54,11 +54,11 @@ public class PotusModifierStoreResponse {
         this.value = value;
     }
 
-    public ModifierType getType() {
+    public ModifierEffectType getType() {
         return type;
     }
 
-    public void setType(ModifierType type) {
+    public void setType(ModifierEffectType type) {
         this.type = type;
     }
 

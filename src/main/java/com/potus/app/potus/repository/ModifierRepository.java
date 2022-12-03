@@ -1,7 +1,7 @@
 package com.potus.app.potus.repository;
 
 import com.potus.app.potus.model.Modifier;
-import com.potus.app.potus.model.PotusAction;
+import com.potus.app.potus.model.ModifierEffectType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +11,5 @@ import java.util.List;
 public interface ModifierRepository extends JpaRepository<Modifier, Long> {
 
     List<Modifier> findByBuff(boolean buff);
+    List<Modifier> findByTypeAndBuff(ModifierEffectType type, boolean buff);
 }

@@ -4,9 +4,9 @@ package com.potus.app.potus.service;
 import com.potus.app.airquality.model.*;
 import com.potus.app.airquality.repository.RegionRepository;
 import com.potus.app.airquality.utils.AirQualityUtils;
-import com.potus.app.potus.model.GasesAndStates;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.States;
+import com.potus.app.potus.model.*;
+import com.potus.app.potus.repository.ModifierRepository;
+import com.potus.app.potus.repository.PotusModifierRepository;
 import com.potus.app.potus.repository.PotusRepository;
 import com.potus.app.potus.utils.EventsUtils;
 import com.potus.app.potus.utils.PotusUtils;
@@ -17,7 +17,7 @@ import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.potus.app.potus.utils.EventsUtils.*;
+import static com.potus.app.potus.utils.PotusUtils.generatePotusModifiers;
 
 
 @Service
@@ -28,6 +28,12 @@ public class PotusEventsService {
 
     @Autowired
     RegionRepository regionRepository;
+
+    @Autowired
+    ModifierRepository modifierRepository;
+
+    @Autowired
+    PotusModifierRepository potusModifierRepository;
 
 
     public Potus doEvent (Potus potus, Double latitude, Double length) {
@@ -47,12 +53,55 @@ public class PotusEventsService {
             System.out.println(state);
 
             state = chooseDangerousGas(dangerousGases);
+
+            addDebuffs(potus, state);
         }
         else assignFestivityBonus(potus, state);
 
         applyState(potus, state);
 
         return potusRepository.save(potus);
+    }
+
+    private void addDebuffs(Potus potus, GasesAndStates state) {
+        List<Modifier> chosenDebuffs = selectDebuffs(state);
+
+        potus.setDebuffs(generatePotusModifiers(potus,chosenDebuffs));
+
+        potusModifierRepository.saveAll(potus.getDebuffs());
+    }
+
+    private List<Modifier> selectDebuffs(GasesAndStates state) {
+        List<Modifier> chosenDebuffs;
+
+        if (Gases.NO2.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.WATERING_MODIFIER, false));
+        } else if (Gases.NOX.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.WATERING_TIME, false));
+        } else if (Gases.O3.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.HEALTH_GENERATION, false));
+        } else if (Gases.PM1.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.PRUNE_CURRENCY_GENERATION, false));
+        } else if (Gases.PM2_5.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.PRUNE_CURRENCY_GENERATION, false));
+        } else if (Gases.PM10.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.PRUNE_CURRENCY_GENERATION, false));
+        } else if (Gases.SO2.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.WATERING_MODIFIER, false));
+        } else if (Gases.CO.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.HEALTH_REDUCTION, false));
+        } else if (Gases.C6H6.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.HEALTH_GENERATION, false));
+        } else if (Gases.Hg.equals(state)) {
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByTypeAndBuff(ModifierEffectType.HEALTH_REDUCTION, false));
+        }
+        else chosenDebuffs = new ArrayList<>();
+
+        for(Modifier m : chosenDebuffs) {
+            System.out.println(m.getName() + " " + m.getValue());
+        }
+
+        return chosenDebuffs;
     }
 
     private void assignFestivityBonus(Potus potus, GasesAndStates state) {

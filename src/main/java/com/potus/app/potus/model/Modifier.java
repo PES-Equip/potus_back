@@ -1,12 +1,8 @@
 package com.potus.app.potus.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.potus.app.potus.service.ModifierService;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Entity
 @Table(name="modifiers")
@@ -21,7 +17,7 @@ public class Modifier {
     @NotBlank
     private String name;
 
-    private ModifierType type;
+    private ModifierEffectType type;
 
 
     private Double val;
@@ -33,7 +29,7 @@ public class Modifier {
 
     public Modifier() {}
 
-    public Modifier(String name, ModifierType type, Double val, Double price, boolean buff) {
+    public Modifier(String name, ModifierEffectType type, Double val, Double price, boolean buff) {
         this.name = name;
         this.type = type;
         this.val = val;
@@ -49,9 +45,9 @@ public class Modifier {
 
     public void setName(String name) { this.name = name; }
 
-    public ModifierType getType() { return type; }
+    public ModifierEffectType getType() { return type; }
 
-    public void setType(ModifierType type) { this.type = type; }
+    public void setType(ModifierEffectType type) { this.type = type; }
 
     public boolean isBuff() { return buff; }
 

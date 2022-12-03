@@ -12,14 +12,16 @@ public final class PotusUtils {
     public static final Integer MAX_HEALTH = 100;
     public static final Integer MIN_HEALTH = 0;
     public static final Integer HEALTH_RECOVERY = 2;
+    public static final Double HEALTH_REDUCTION_TIME = 7.0;
 
     public static final Integer MAX_WATER_LEVEL = 100;
     public static final Integer MIN_WATER_FOR_RECOVERY = 90;
     public static final Integer MIN_WATER_LEVEL = 0;
 
     public static final Integer WATERING_BONUS = 25;
+    public static final Integer WATER_RECOVERY = 9;
 
-    public static final Integer PRUNNING_CURRENCY_BONUS = 2;
+    public static final Integer PRUNING_CURRENCY_BONUS = 2;
     public static final Integer FESTIVITY_DEFAULT_CURRENCY = 0;
     public static final Integer FESTIVITY_ADDITIONAL_CURRENCY = 1;
 
@@ -98,12 +100,10 @@ public final class PotusUtils {
         return time;
     }
 
-    public static Integer getCurrencyMultiplier(Map<CurrencyGenerators, Integer> currencyMultipliers, Integer multiplier) {
-        Integer result = 0;
+    public static Integer getCurrencyMultiplier(Potus potus) {
+        Integer result = ModifierUtils.getModifierValue(potus, ModifierEffectType.PRUNE_CURRENCY_GENERATION).intValue();
+        Integer multiplier = 1;
 
-        for (Integer  currency: currencyMultipliers.values()) {
-            result += currency;
-        }
         return result * multiplier;
     }
 
