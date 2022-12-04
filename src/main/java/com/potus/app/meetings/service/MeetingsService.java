@@ -12,10 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.potus.app.meetings.utils.MeetingsUtils.*;
 
@@ -29,8 +26,13 @@ public class MeetingsService {
     @Autowired
     AirQualityService airQualityService;
 
-    public List<Meeting> processMeetingsInformation() {
+    public List<Meeting> findAll() {
+        List<Meeting> sortedMeetings = meetingsRepository.findAll();
+        sortedMeetings.sort(Comparator.comparing(Meeting::getStartDate));
+        return sortedMeetings;
+    }
 
+    public void updateMeetingsInformation() {
         Object[] MeetingsInformationList = MeetingsUtils.getMeetingsInformation();
         List<Meeting> meetings = new ArrayList<>();
         if(MeetingsInformationList != null) {
@@ -79,10 +81,31 @@ public class MeetingsService {
                     Meeting meetingCreated = new Meeting(id, startDate, endDate, region,
                             address, city, title, subtitle, url);
                     meetings.add(meetingCreated);
+                    meetingsRepository.save(meetingCreated);
                 }
             }
         }
-        return meetings;
+    }
+
+    public void deleteOldMeetings() {
+        List<Meeting> meetings = findAll();
+    }
+
+    public List<Meeting> getMeetingDateInterval(String StartDate, String EndDate) throws ParseException {
+        List<Meeting> meetingsDateInterval = new ArrayList<>();
+        List<Meeting> meetings = findAll();
+        Date StartDateParsed = new SimpleDateFormat(DATE_PATTERN)
+                .parse(String.valueOf(StartDate));
+        Date EndDateParsed = new SimpleDateFormat(DATE_PATTERN)
+                .parse(String.valueOf(EndDate));
+
+        for(Meeting meeting: meetings) {
+            if((StartDateParsed.before(meeting.getStartDate()) || StartDateParsed.equals(meeting.getStartDate())) &&
+                    (EndDateParsed.after(meeting.getEndDate()) || EndDateParsed.equals(meeting.getEndDate())))
+                meetingsDateInterval.add(meeting);
+        }
+        meetingsDateInterval.sort(Comparator.comparing(Meeting::getStartDate));
+        return meetingsDateInterval;
     }
 
 }
