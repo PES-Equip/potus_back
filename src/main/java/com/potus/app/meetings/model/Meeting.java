@@ -1,5 +1,7 @@
 package com.potus.app.meetings.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.potus.app.airquality.model.Region;
 
 import javax.persistence.*;
@@ -12,10 +14,13 @@ public class Meeting {  //filter by tags_categor_es (concerts,exposicions, teatr
     @Id
     private Long id; //codi (needs to parse)
 
+    @JsonProperty("start_date")
     private Date startDate; //data_inici (needs to parse)
 
+    @JsonProperty("end_date")
     private Date endDate; //data_fi (needs to parse)
 
+    @JsonIgnoreProperties(value = {"registry"})
     @ManyToOne
     @JoinColumn(name = "region_id")
     private Region region; //calculated by latitud and longitud
