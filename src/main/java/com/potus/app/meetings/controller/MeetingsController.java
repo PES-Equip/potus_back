@@ -37,4 +37,9 @@ public class MeetingsController {
     public List<Meeting> getMeetingsDateInterval(@PathVariable String start_date, @PathVariable String end_date) throws ParseException {
         return meetingsService.getMeetingDateInterval(start_date, end_date);
     }
+
+    @GetMapping(value="/try")
+    public void aaaa() {
+        meetingsService.deleteOldMeetings();
+    }
 }

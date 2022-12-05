@@ -89,6 +89,13 @@ public class MeetingsService {
 
     public void deleteOldMeetings() {
         List<Meeting> meetings = findAll();
+        for(Meeting meeting : meetings) {
+            Date endDateParsed = meeting.getEndDate();
+            Date now = new Date(System.currentTimeMillis());
+            if(now.after(endDateParsed)) {
+                meetingsRepository.delete(meeting);
+            }
+        }
     }
 
     public List<Meeting> getMeetingDateInterval(String StartDate, String EndDate) throws ParseException {
