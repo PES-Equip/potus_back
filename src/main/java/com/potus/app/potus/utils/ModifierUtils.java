@@ -1,9 +1,7 @@
 package com.potus.app.potus.utils;
 
 
-import com.potus.app.potus.model.ModifierEffectType;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.PotusModifier;
+import com.potus.app.potus.model.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +10,7 @@ import java.util.Set;
 
 public final class ModifierUtils {
 
-    public static final Integer MODIFIERS_QUANTITY = 8;
+    public static final Integer MODIFIERS_QUANTITY = 10;
 
     public static Double getCurrentValue(Double initialValue, Integer level){
 
@@ -30,8 +28,8 @@ public final class ModifierUtils {
     public static Double getModifierValue(Potus potus, ModifierEffectType type) {
         Double value = 0.0;
 
-        Map<Boolean, PotusModifier> buffs = findPotusModifiersByType(potus, type, true);
-        Map<Boolean, PotusModifier> debuffs = findPotusModifiersByType(potus, type, false);
+        Map<ModifierType, PotusModifier> buffs = findPotusModifiersByType(potus, type, true);
+        Map<ModifierType, PotusModifier> debuffs = findPotusModifiersByType(potus, type, false);
 
         switch (type) {
             case WATERING_MODIFIER:
@@ -49,9 +47,16 @@ public final class ModifierUtils {
                 }
                 break;
             case PRUNE_CURRENCY_GENERATION:
+                Integer multiplier = 1;
                 for (PotusModifier modifier : buffs.values()) {
-                    if (modifier != null) value = value + getCurrentValue(modifier.getModifier().getValue(), modifier.getLevel()).intValue();
+                    if (modifier != null) {
+                        if (!modifier.getModifier().getModifierType().equals(ModifierType.TEMPORAL_BUFF))
+                            value = value + getCurrentValue(modifier.getModifier().getValue(), modifier.getLevel()).intValue();
+                        else multiplier = modifier.getModifier().getValue().intValue();
+
+                    }
                 }
+                value = value * multiplier;
                 for (PotusModifier modifier : debuffs.values()) {
                     if (modifier != null) value = value * modifier.getModifier().getValue();
                 }
@@ -80,22 +85,36 @@ public final class ModifierUtils {
         return value;
     }
 
-    public static Map<Boolean, PotusModifier> findPotusModifiersByType(Potus potus, ModifierEffectType type, boolean isBuff) {
-        Map<Boolean, PotusModifier> requestedModifiers = new HashMap<>();
-        Map<Boolean, Set<PotusModifier>> modifiers = new HashMap<>();
+    public static Map<ModifierType, PotusModifier> findPotusModifiersByType(Potus potus, ModifierEffectType type, boolean isBuff) {
+        Map<ModifierType, PotusModifier> requestedModifiers = new HashMap<>();
+        Map<ModifierType, Set<PotusModifier>> modifiers = new HashMap<>();
 
         if (isBuff) {
             Set<PotusModifier> buffs = potus.getBuffs();
-            modifiers.put(Boolean.TRUE, buffs);
+
+            for (PotusModifier buff : buffs) {
+                if (buff.getModifier().getType().equals(type)) {
+                    if (buff.getModifier().getModifierType().equals(ModifierType.PERMANENT_BUFF))
+                        requestedModifiers.put(ModifierType.PERMANENT_BUFF, buff);
+                    else if (buff.getModifier().getModifierType().equals(ModifierType.TEMPORAL_BUFF))
+                        requestedModifiers.put(ModifierType.PERMANENT_BUFF, buff);
+                    else requestedModifiers.put(ModifierType.FESTIVITY_BUFF, buff);
+                }
+            }
         }
         else {
             Set<PotusModifier> debuffs = potus.getDebuffs();
-            modifiers.put(Boolean.FALSE, debuffs);
+            for (PotusModifier debuff : debuffs) {
+                if (debuff.getModifier().getType().equals(type)) {
+                    if (debuff.getModifier().getModifierType().equals(ModifierType.TEMPORAL_DEBUFF))
+                        requestedModifiers.put(ModifierType.TEMPORAL_DEBUFF, debuff);
+                }
+            }
         }
-
+/*
         Iterator<PotusModifier>  setIterator;
 
-        for (Map.Entry<Boolean, Set<PotusModifier>> entry : modifiers.entrySet()) {
+        for (Map.Entry<ModifierType, Set<PotusModifier>> entry : modifiers.entrySet()) {
             boolean found = false;
             PotusModifier modifier = null;
             setIterator = entry.getValue().iterator();
@@ -107,7 +126,9 @@ public final class ModifierUtils {
                 }
             }
             requestedModifiers.put(entry.getKey(), modifier);
-        }
+        } */
+
+        if (requestedModifiers.size() != 0) System.out.println(requestedModifiers);
 
         return requestedModifiers;
     }

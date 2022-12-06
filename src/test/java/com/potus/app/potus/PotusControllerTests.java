@@ -5,10 +5,7 @@ import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.controller.PotusController;
-import com.potus.app.potus.model.Modifier;
-import com.potus.app.potus.model.ModifierEffectType;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.PotusModifier;
+import com.potus.app.potus.model.*;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
 import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
@@ -267,7 +264,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -292,7 +289,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., false);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.TEMPORAL_DEBUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setDebuffs(modifiers);
@@ -317,7 +314,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -347,7 +344,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -370,7 +367,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -394,7 +391,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);

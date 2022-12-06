@@ -54,7 +54,7 @@ public class PotusService {
         potus.setActions(actions);
         saveFullPotus(potus);
 
-        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+        List<Modifier> buffModifiers = modifierRepository.findByType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 
@@ -230,7 +230,7 @@ public class PotusService {
                         (now.getTime() - action.getLastTime().getTime()),
                 TimeUnit.MILLISECONDS) / PRUNING_ACTION_TIME);
 
-        Integer multiplier = getCurrencyMultiplier(potus);
+        Integer multiplier = ModifierUtils.getModifierValue(potus, ModifierEffectType.PRUNE_CURRENCY_GENERATION).intValue();
 
         System.out.println("Generated currency: " + currency);
         System.out.println("Multiplier: " + multiplier);
@@ -261,7 +261,7 @@ public class PotusService {
         List<PotusModifier> potusModifiers = potusModifierRepository.findByPotus(potus);
         potusModifierRepository.deleteAll(potusModifiers);
 
-        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+        List<Modifier> buffModifiers = modifierRepository.findByType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 

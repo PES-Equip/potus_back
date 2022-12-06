@@ -26,13 +26,13 @@ public final class PotusUtils {
     public static final Integer FESTIVITY_ADDITIONAL_CURRENCY = 1;
 
     // 14 mins in secs
-    public static final Long TIME_REDUCTION = 840L;
+    public static final Long TIME_REDUCTION = 10L;//840L;
 
 
     //30 minutes in seconds
     public static final Long ACTION_TIME = 30L;//1800L;
     public static final Long PRUNING_ACTION_TIME = 60L;
-    public static final Long WATERING_ACTION_TIME = 1800L;
+    public static final Long WATERING_ACTION_TIME = 10L;//1800L;
 
 
 

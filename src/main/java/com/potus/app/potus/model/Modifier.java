@@ -24,17 +24,17 @@ public class Modifier {
 
     private Double price;
 
-    private boolean buff;
+    private ModifierType modifierType;
 
 
     public Modifier() {}
 
-    public Modifier(String name, ModifierEffectType type, Double val, Double price, boolean buff) {
+    public Modifier(String name, ModifierEffectType type, Double val, Double price, ModifierType modifierType) {
         this.name = name;
         this.type = type;
         this.val = val;
         this.price = price;
-        this.buff = buff;
+        this.modifierType = modifierType;
     }
 
     public Long getId() { return id; }
@@ -49,9 +49,9 @@ public class Modifier {
 
     public void setType(ModifierEffectType type) { this.type = type; }
 
-    public boolean isBuff() { return buff; }
+    public ModifierType getModifierType() { return modifierType; }
 
-    public void setBuff(boolean buff) { this.buff = buff; }
+    public void setBuff(ModifierType modifierType) { this.modifierType = modifierType; }
 
     public Double getPrice() { return price; }
 
