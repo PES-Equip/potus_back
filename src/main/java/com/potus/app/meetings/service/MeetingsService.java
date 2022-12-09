@@ -1,19 +1,24 @@
 package com.potus.app.meetings.service;
 
 import com.potus.app.airquality.model.Region;
+import com.potus.app.airquality.model.Regions;
 import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.meetings.model.Meeting;
 import com.potus.app.meetings.repository.MeetingsRepository;
+import com.potus.app.meetings.utils.MeetingsExceptionMessages;
 import com.potus.app.meetings.utils.MeetingsUtils;
+import static com.potus.app.meetings.utils.MeetingsExceptionMessages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.potus.app.exception.ResourceNotFoundException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.potus.app.admin.utils.AdminExceptionMessages.TOKEN_DOES_NOT_EXISTS;
 import static com.potus.app.meetings.utils.MeetingsUtils.*;
 
 @Service
@@ -92,8 +97,9 @@ public class MeetingsService {
         for(Meeting meeting : meetings) {
             Date endDateParsed = meeting.getEndDate();
             Date now = new Date(System.currentTimeMillis());
+
             if(now.after(endDateParsed)) {
-                meetingsRepository.delete(meeting);
+                System.out.println("Deleted the meeting" +meeting.getId());
             }
         }
     }
@@ -115,6 +121,16 @@ public class MeetingsService {
         return meetingsDateInterval;
     }
 
+
+    public List<Meeting> getMeetingsLatLen(Double latitude, Double length) {
+        Region region = airQualityService.getRegion(latitude, length);
+        List<Meeting> meetings = findAll();
+        List<Meeting> meetingsRegion = new ArrayList<>();
+        for(Meeting meeting: meetings) {
+            if(meeting.getRegion() == region) meetingsRegion.add(meeting);
+        }
+        return meetingsRegion;
+    }
 }
 
 

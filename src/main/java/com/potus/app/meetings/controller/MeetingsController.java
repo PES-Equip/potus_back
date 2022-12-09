@@ -28,18 +28,28 @@ public class MeetingsController {
         return meetingsService.findAll();
     }
 
+    // THIS HAVE TO BE MOVED TO THE SCHEDULER - this is only to test that update works
+    @GetMapping(value="/delete")
+    public void aaaa() {
+        meetingsService.deleteOldMeetings();
+    }
+
     @GetMapping(value="")
     public List<Meeting> getMeetings() throws ParseException {
         return meetingsService.findAll();
     }
 
-    @GetMapping(value="/{start_date}&{end_date}")
+    @GetMapping(value="/date_interval/{start_date}&{end_date}")
     public List<Meeting> getMeetingsDateInterval(@PathVariable String start_date, @PathVariable String end_date) throws ParseException {
         return meetingsService.getMeetingDateInterval(start_date, end_date);
     }
 
-    @GetMapping(value="/try")
-    public void aaaa() {
-        meetingsService.deleteOldMeetings();
+    @GetMapping(value="/region/{latitude}&{length}")
+    public List<Meeting> getClosedMeetingsLatitudeAndLength(@PathVariable Double latitude, @PathVariable Double length) {
+        return meetingsService.getMeetingsLatLen(latitude,length);
     }
+
+
+
+
 }
