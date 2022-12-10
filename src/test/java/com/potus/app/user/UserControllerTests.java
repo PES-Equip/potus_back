@@ -5,6 +5,7 @@ import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.PotusRegistry;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
@@ -491,5 +492,71 @@ public class UserControllerTests {
 
     }
 
+
+    @Test
+    public void getTrophiesOk() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
+
+        Mockito.when(trophyService.findUser(any())).thenReturn(List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(List.of());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/profile/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getUserTrophiesOk() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(userService.findById(any())).thenReturn(mockUser);
+
+        Mockito.when(trophyService.findUser(any())).thenReturn(List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(List.of());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/1/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getUserTrophiesNotFoundException() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(userService.findById(any())).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/1/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect( result ->  Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+
+    }
 
 }

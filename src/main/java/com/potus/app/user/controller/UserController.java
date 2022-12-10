@@ -177,14 +177,27 @@ public class UserController {
         return potusRegistryService.findByUser(getUser());
     }
 
-    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiOperation(value = "GET USER TROPHIES")
     @ApiResponses(value = {
-            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_OK, message = "User trophies "),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @GetMapping("/profile/trophies")
     public List<UserTrophy> getTrophies(){
         return trophyService.findUser(getUser());
+    }
+
+
+    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/{userId}/trophies")
+    public List<UserTrophy> getUserTrophies(@PathVariable Long userId){
+
+        User user = userService.findById(userId);
+        return trophyService.findUser(user);
     }
 
 
