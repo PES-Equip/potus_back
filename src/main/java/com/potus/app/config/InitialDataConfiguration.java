@@ -5,6 +5,8 @@ import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.potus.model.Modifier;
 import com.potus.app.potus.service.ModifierService;
 import com.potus.app.potus.utils.ModifierUtils;
+import com.potus.app.user.model.Trophy;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +33,15 @@ public class InitialDataConfiguration {
     @Autowired
     UserService userService;
 
+    @Autowired
+    TrophyService trophyService;
+
     @Bean
     CommandLineRunner runner(){
         userService.addAdmins();
         List<Region> regions = airQualityService.findAll();
         List<Modifier> modifiers = modifierService.findAll();
+        List<Trophy> trophies = trophyService.findAll();
 
         if(regions.size() == 0) {
             logger.info("Initializing regions");
@@ -48,6 +54,15 @@ public class InitialDataConfiguration {
             modifierService.initializeModifiers();
             
         }
+
+        if(trophies.size() == 0){
+            logger.info("Initializing trophies");
+            trophyService.initTrophies();
+            logger.info("Ended initialization");
+        }
+
+
+
 
         return null;
     }

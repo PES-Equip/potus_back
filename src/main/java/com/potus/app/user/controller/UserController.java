@@ -10,7 +10,9 @@ import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.model.UserStatus;
+import com.potus.app.user.model.UserTrophy;
 import com.potus.app.user.payload.request.UsernameRequest;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,12 +20,15 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
@@ -44,6 +49,9 @@ public class UserController {
 
     @Autowired
     private PotusService potusService;
+
+    @Autowired
+    private TrophyService trophyService;
 
     @ApiOperation(value = "GET USERS")
     @ApiResponses(value = {
@@ -77,6 +85,7 @@ public class UserController {
 
         user = userService.checkAdmin(user);
         userService.setUsername(user, username);
+        trophyService.initUserTrophies(user);
         return userService.createPotus(user, "potus");
     }
 
@@ -86,8 +95,15 @@ public class UserController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @GetMapping("/profile")
-    public User getProfile(){
-        return getUser();
+    public ResponseEntity<Map<String,Object>> getProfile(){
+
+        User user = getUser();
+        List<UserTrophy> trophies = trophyService.getLevelUpTrophies(user);
+        Map<String,Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("trophies",trophies);
+
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "CHANGE USERNAME")
@@ -159,6 +175,29 @@ public class UserController {
     @GetMapping("/profile/history")
     public List<PotusRegistry> getPotusRegistry(){
         return potusRegistryService.findByUser(getUser());
+    }
+
+    @ApiOperation(value = "GET USER TROPHIES")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User trophies "),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/profile/trophies")
+    public List<UserTrophy> getTrophies(){
+        return trophyService.findUser(getUser());
+    }
+
+
+    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/{userId}/trophies")
+    public List<UserTrophy> getUserTrophies(@PathVariable Long userId){
+
+        User user = userService.findById(userId);
+        return trophyService.findUser(user);
     }
 
 

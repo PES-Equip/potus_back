@@ -21,7 +21,7 @@ public final class UserExceptionMessages {
 
     public static final String USER_MUST_BE_ADMIN = "User must be admin to access admin endpoints";
 
-
+    public static final String TROPHY_DOES_NOT_EXISTS = "Trophy does not exists";
 
     private UserExceptionMessages(){
     }
