@@ -37,7 +37,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.potus.app.TestUtils.getMockUser;
 import static com.potus.app.TestUtils.getMockUserWithDeadPotus;
@@ -98,7 +100,11 @@ public class UserControllerTests {
 
         Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(TestUtils.getMockUser());
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("user", TestUtils.getMockUser());
+        responseMap.put("trophies", List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .get("/api/user/profile")

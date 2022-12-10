@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface UserTrophyRepository extends JpaRepository<UserTrophy, Long> {
 
-    List<UserTrophy> findByUser(TrophyType type);
+    List<UserTrophy> findByUser(User user);
 
     Optional<UserTrophy> findByUserAndTrophy(User user, Trophy trophy);
 

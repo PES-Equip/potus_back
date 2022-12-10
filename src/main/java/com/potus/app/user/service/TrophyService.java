@@ -10,7 +10,6 @@ import com.potus.app.user.repository.UserTrophyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -44,7 +43,7 @@ public class TrophyService {
     }
 
     public Trophy findTrophyByType(TrophyType type){
-        return trophyRepository.findByType(type).orElseThrow(() -> new ResourceNotFoundException(TROPHY_DOES_NOT_EXISTS));
+        return trophyRepository.findByName(type).orElseThrow(() -> new ResourceNotFoundException(TROPHY_DOES_NOT_EXISTS));
     }
 
     public List<Trophy> findAll() {
@@ -74,13 +73,10 @@ public class TrophyService {
         UserTrophy trophy = findUserTrophyByType(user,type);
 
         int updatedCurrent = trophy.getCurrent() + amount;
-        int diff = trophy.getNextLevel() - updatedCurrent;
+        int diff = updatedCurrent - trophy.getNextLevel();
 
-        if(diff < 0){
-            trophy.setCurrent(updatedCurrent);
-        }
-        else{
-            trophy.setCurrent(diff);
+        trophy.setCurrent(updatedCurrent);
+        if (diff >= 0) {
             trophy.upgradeLevel();
         }
         userTrophyRepository.save(trophy);
@@ -89,14 +85,12 @@ public class TrophyService {
     public void conditionalUpdateTrophy(User user, TrophyType type, Integer updatedCurrent) {
         UserTrophy trophy = findUserTrophyByType(user,type);
 
-        if(trophy.getCurrent() < updatedCurrent){
-            int diff = trophy.getNextLevel() - updatedCurrent;
 
-            if(diff < 0){
-                trophy.setCurrent(updatedCurrent);
-            }
-            else{
-                trophy.setCurrent(diff);
+        if(trophy.getCurrent() < updatedCurrent){
+            int diff = updatedCurrent - trophy.getNextLevel();
+
+            trophy.setCurrent(updatedCurrent);
+            if (diff >= 0) {
                 trophy.upgradeLevel();
             }
             userTrophyRepository.save(trophy);
@@ -111,16 +105,27 @@ public class TrophyService {
 
         if(diff > 0){
 
-            int levelNeeded = 0;
-            for(int i = 1; i < trophy.getLevel(); ++i){
-                levelNeeded += calculateTrophyNextLevel(trophy.getTrophy().getBase(), i);
-            }
-            levelNeeded += trophy.getCurrent();
-            if(diff - levelNeeded > 0){
-                updateTrophy(user, type,diff);
+
+            if(diff - trophy.getCurrent() > 0){
+                updateTrophy(user, type,diff - trophy.getCurrent());
             }
 
         }
 
+    }
+
+    public List<UserTrophy> findUser(User user) {
+        return userTrophyRepository.findByUser(user);
+    }
+
+    public List<UserTrophy> getLevelUpTrophies(User user) {
+        List<UserTrophy> trophies = findUser(user);
+
+        List<UserTrophy> result = trophies.stream().filter(UserTrophy::isUpgraded).toList();
+
+        result.forEach((trophy)->{
+            trophy.setUpgraded(false);
+        });
+        return userTrophyRepository.saveAll(result);
     }
 }

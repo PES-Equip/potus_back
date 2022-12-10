@@ -14,6 +14,7 @@ import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
+import com.potus.app.user.model.UserTrophy;
 import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
@@ -21,14 +22,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
@@ -73,7 +73,7 @@ public class PotusController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @PostMapping("/action")
-    public User doAction(@RequestBody @Valid PotusActionRequest body, Errors errors){
+    public ResponseEntity<Map<String, Object>> doAction(@RequestBody @Valid PotusActionRequest body, Errors errors){
 
         if(errors.hasErrors())
             throw new BadRequestException(ACTION_IS_NULL);
@@ -87,7 +87,14 @@ public class PotusController {
         trophyService.updateTrophy(user, type, 1);
         trophyService.updateTrophy(user, TrophyType.CURRENCY, reward);
         trophyService.updateTrophy(user, TrophyType.TOTAL_CURRENCY, reward);
-        return userService.addCurrency(user, reward);
+        user = userService.addCurrency(user, reward);
+
+        List<UserTrophy> trophies = trophyService.getLevelUpTrophies(user);
+        Map<String,Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("trophies",trophies);
+
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "POTUS EVENT")
@@ -156,13 +163,14 @@ public class PotusController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @PostMapping("/store/buy/{modifier}")
-    public void purchaseModifier(@PathVariable String modifier) {
+    public List<UserTrophy> purchaseModifier(@PathVariable String modifier) {
         User user = getUser();
         Potus potus = user.getPotus();
         PotusModifier selectedModifier = potus.getBuff(modifier);
         userService.upgradeModifier(user,selectedModifier);
         trophyService.updateTrophy(user, TrophyType.UPGRADES, 1);
         trophyService.conditionalUpdateTrophy(user, TrophyType.UPGRADES, selectedModifier.getLevel());
+        return trophyService.getLevelUpTrophies(user);
     }
 
 }

@@ -39,10 +39,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.potus.app.potus.utils.PotusUtils.PRUNNING_CURRENCY_BONUS;
 import static org.mockito.ArgumentMatchers.any;
@@ -124,11 +121,16 @@ public class PotusControllerTests {
 
         user.setCurrency(mockedUser.getCurrency() + PRUNNING_CURRENCY_BONUS);
 
+
+
         Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNNING_CURRENCY_BONUS);
         Mockito.when(userService.addCurrency(any(),any())).thenReturn(user);
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(user);
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("user", user);
+        responseMap.put("trophies", List.of());
 
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
         RequestBuilder request = MockMvcRequestBuilders
                 .post("/api/potus/action")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))

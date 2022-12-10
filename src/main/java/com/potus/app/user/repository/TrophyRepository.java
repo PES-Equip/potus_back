@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface TrophyRepository extends JpaRepository<Trophy, Long> {
 
-    Optional<Trophy> findByType(TrophyType type);
+    Optional<Trophy> findByName(TrophyType name);
 
 }

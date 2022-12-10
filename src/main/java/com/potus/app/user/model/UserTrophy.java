@@ -1,5 +1,6 @@
 package com.potus.app.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -13,6 +14,7 @@ import static com.potus.app.user.utils.UserUtils.calculateTrophyNextLevel;
 
 @Entity
 @Table(name="user_trophies")
+@JsonIgnoreProperties(value = { "user" })
 public class UserTrophy {
 
     @Id
@@ -24,6 +26,7 @@ public class UserTrophy {
     @ManyToOne
     @JoinColumn(name = "trophy_id")
     private Trophy trophy;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -39,6 +42,8 @@ public class UserTrophy {
 
     private Date updatedDate;
 
+    private boolean upgraded;
+
 
     public UserTrophy() {
     }
@@ -47,9 +52,10 @@ public class UserTrophy {
         this.trophy = trophy;
         this.user = user;
         this.level = 1;
-        this.current = 0;
+        this.current = getNextLevel() - 1;
         this.levelDates = new ArrayList<>();
         this.updatedDate = new Date();
+        this.upgraded = false;
     }
 
     public int getLevel() {
@@ -59,6 +65,7 @@ public class UserTrophy {
     public void upgradeLevel(){
         ++level;
         levelDates.add(new Date());
+        upgraded = true;
     }
     public void setLevel(int level) {
         this.level = level;
@@ -90,6 +97,7 @@ public class UserTrophy {
         return current == getNextLevel();
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -112,5 +120,13 @@ public class UserTrophy {
 
     public void setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public boolean isUpgraded() {
+        return upgraded;
+    }
+
+    public void setUpgraded(boolean upgraded) {
+        this.upgraded = upgraded;
     }
 }
