@@ -12,7 +12,10 @@ import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.controller.UserController;
+import com.potus.app.user.model.Trophy;
+import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
+import com.potus.app.user.payload.request.RankingResponse;
 import com.potus.app.user.payload.request.UsernameRequest;
 import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
@@ -555,6 +558,36 @@ public class UserControllerTests {
         this.mockMvc.perform(request)
                 .andExpect(status().isNotFound())
                 .andExpect( result ->  Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getRankingOK() throws Exception {
+
+
+        User mockUser = getMockUser();
+
+        Trophy trophy = new Trophy(5, TrophyType.CURRENCY);
+        Mockito.when(trophyService.findTrophyByType(any())).thenReturn(trophy);
+        Mockito.when(trophyService.getRanking(any())).thenReturn(List.of());
+
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("trophy", trophy);
+
+        responseMap.put("ranking", List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/ranking")
+                .queryParam("ranking", trophy.getName().toString())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
                 .andReturn();
 
     }

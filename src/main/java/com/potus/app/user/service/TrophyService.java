@@ -1,10 +1,7 @@
 package com.potus.app.user.service;
 
 import com.potus.app.exception.ResourceNotFoundException;
-import com.potus.app.user.model.Trophy;
-import com.potus.app.user.model.TrophyType;
-import com.potus.app.user.model.User;
-import com.potus.app.user.model.UserTrophy;
+import com.potus.app.user.model.*;
 import com.potus.app.user.repository.TrophyRepository;
 import com.potus.app.user.repository.UserTrophyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.potus.app.user.utils.UserExceptionMessages.TROPHY_DOES_NOT_EXISTS;
 import static com.potus.app.user.utils.UserUtils.calculateTrophyNextLevel;
@@ -128,4 +126,11 @@ public class TrophyService {
         });
         return userTrophyRepository.saveAll(result);
     }
+
+    public List<UserTrophy> getRanking(Trophy ranking) {
+        List<UserTrophy> userTrophies = userTrophyRepository.findByTrophy(ranking);
+        userTrophies.sort(UserTrophy::compareTo);
+        return userTrophies.stream().limit(50).collect(Collectors.toList());
+    }
+
 }

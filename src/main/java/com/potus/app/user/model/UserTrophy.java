@@ -52,7 +52,7 @@ public class UserTrophy {
         this.trophy = trophy;
         this.user = user;
         this.level = 1;
-        this.current = getNextLevel() - 1;
+        this.current = 0;
         this.levelDates = new ArrayList<>();
         this.updatedDate = new Date();
         this.upgraded = false;
@@ -128,5 +128,14 @@ public class UserTrophy {
 
     public void setUpgraded(boolean upgraded) {
         this.upgraded = upgraded;
+    }
+
+    public int compareTo(UserTrophy trophy2) {
+
+
+        if(level > trophy2.level || (level == trophy2.level && current > trophy2.current))
+            return -1;
+
+        return 1;
     }
 }

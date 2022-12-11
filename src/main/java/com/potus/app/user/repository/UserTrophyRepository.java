@@ -17,4 +17,5 @@ public interface UserTrophyRepository extends JpaRepository<UserTrophy, Long> {
 
     Optional<UserTrophy> findByUserAndTrophy(User user, Trophy trophy);
 
+    List<UserTrophy> findByTrophy(Trophy trophy);
 }

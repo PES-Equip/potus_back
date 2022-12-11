@@ -8,9 +8,8 @@ import com.potus.app.potus.model.PotusRegistry;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
-import com.potus.app.user.model.User;
-import com.potus.app.user.model.UserStatus;
-import com.potus.app.user.model.UserTrophy;
+import com.potus.app.user.model.*;
+import com.potus.app.user.payload.request.RankingResponse;
 import com.potus.app.user.payload.request.UsernameRequest;
 import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
@@ -26,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +198,27 @@ public class UserController {
 
         User user = userService.findById(userId);
         return trophyService.findUser(user);
+    }
+
+    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping("/ranking")
+    public ResponseEntity<Map<String,Object>> getRanking(@RequestParam TrophyType ranking){
+
+       Trophy selectedTrophy = trophyService.findTrophyByType(ranking);
+       List<UserTrophy> trophies = trophyService.getRanking(selectedTrophy);
+
+       Map<String,Object> response = new HashMap<>();
+       response.put("trophy", selectedTrophy);
+       List<RankingResponse> rankingResponses = new ArrayList<>();
+       trophies.forEach( trophy -> {
+            rankingResponses.add(new RankingResponse(trophy.getUser().getId(), trophy.getUser().getUsername(), trophy.getLevel(), trophy.getCurrent()));
+       });
+       response.put("ranking", rankingResponses);
+       return ResponseEntity.ok(response);
     }
 
 
