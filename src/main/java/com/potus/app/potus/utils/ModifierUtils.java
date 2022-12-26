@@ -93,7 +93,7 @@ public final class ModifierUtils {
             Set<PotusModifier> buffs = potus.getBuffs();
 
             for (PotusModifier buff : buffs) {
-                if (buff.getModifier().getType().equals(type)) {
+                if (buff.getModifier().getModifierEffectType().equals(type)) {
                     if (buff.getModifier().getModifierType().equals(ModifierType.PERMANENT_BUFF))
                         requestedModifiers.put(ModifierType.PERMANENT_BUFF, buff);
                     else if (buff.getModifier().getModifierType().equals(ModifierType.TEMPORAL_BUFF))
@@ -105,7 +105,7 @@ public final class ModifierUtils {
         else {
             Set<PotusModifier> debuffs = potus.getDebuffs();
             for (PotusModifier debuff : debuffs) {
-                if (debuff.getModifier().getType().equals(type)) {
+                if (debuff.getModifier().getModifierEffectType().equals(type)) {
                     if (debuff.getModifier().getModifierType().equals(ModifierType.TEMPORAL_DEBUFF))
                         requestedModifiers.put(ModifierType.TEMPORAL_DEBUFF, debuff);
                 }
@@ -143,7 +143,7 @@ public final class ModifierUtils {
 
         while (buffsIterator.hasNext() && !found) {
             PotusModifier currentDebuff = buffsIterator.next();
-            if (currentDebuff.getModifier().getType().equals(type)) {
+            if (currentDebuff.getModifier().getModifierEffectType().equals(type)) {
                 potusBuff = currentDebuff;
                 found = true;
             }
@@ -161,7 +161,7 @@ public final class ModifierUtils {
 
         while (debuffsIterator.hasNext() && !found) {
             PotusModifier currentDebuff = debuffsIterator.next();
-            if (currentDebuff.getModifier().getType().equals(type)) {
+            if (currentDebuff.getModifier().getModifierEffectType().equals(type)) {
                 potusDebuff = currentDebuff;
                 found = true;
             }

@@ -24,7 +24,7 @@ public class PotusModifierStoreResponse {
         this.level = potusModifier.getLevel();
         this.name = potusModifier.getModifier().getName();
         this.value = getCurrentValue(potusModifier.getModifier().getValue(),level);
-        this.type = potusModifier.getModifier().getType();
+        this.type = potusModifier.getModifier().getModifierEffectType();
         this.nextValue = getCurrentValue(potusModifier.getModifier().getValue(),level + 1);
         this.price = getCurrentPrice(potusModifier.getModifier().getPrice(), level);
     }

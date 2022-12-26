@@ -54,7 +54,7 @@ public class PotusService {
         potus.setActions(actions);
         saveFullPotus(potus);
 
-        List<Modifier> buffModifiers = modifierRepository.findByType(ModifierType.PERMANENT_BUFF);
+        List<Modifier> buffModifiers = modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 
@@ -261,7 +261,7 @@ public class PotusService {
         List<PotusModifier> potusModifiers = potusModifierRepository.findByPotus(potus);
         potusModifierRepository.deleteAll(potusModifiers);
 
-        List<Modifier> buffModifiers = modifierRepository.findByType(ModifierType.PERMANENT_BUFF);
+        List<Modifier> buffModifiers = modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 

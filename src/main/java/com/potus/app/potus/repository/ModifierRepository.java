@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface ModifierRepository extends JpaRepository<Modifier, Long> {
 
-    List<Modifier> findByType(ModifierType modifierType);
-    List<Modifier> findByEffectTypeAndType(ModifierEffectType type, ModifierType modifierType);
+    List<Modifier> findByModifierType(ModifierType modifierType);
+    List<Modifier> findByModifierEffectTypeAndModifierType(ModifierEffectType modifierEffectType, ModifierType modifierType);
 }

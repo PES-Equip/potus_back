@@ -26,11 +26,11 @@ public class ModifierService {
     }
 
     public List<Modifier> getPermanentBuffs() {
-        return modifierRepository.findByType(ModifierType.PERMANENT_BUFF);
+        return modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
     }
 
     public List<Modifier> getDebuffs() {
-        return modifierRepository.findByType(ModifierType.TEMPORAL_DEBUFF);
+        return modifierRepository.findByModifierType(ModifierType.TEMPORAL_DEBUFF);
     }
 
     public List<Modifier> initializeModifiers() {

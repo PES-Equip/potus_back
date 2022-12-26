@@ -17,7 +17,7 @@ public class Modifier {
     @NotBlank
     private String name;
 
-    private ModifierEffectType type;
+    private ModifierEffectType modifierEffectType;
 
 
     private Double val;
@@ -29,9 +29,9 @@ public class Modifier {
 
     public Modifier() {}
 
-    public Modifier(String name, ModifierEffectType type, Double val, Double price, ModifierType modifierType) {
+    public Modifier(String name, ModifierEffectType modifierEffectType, Double val, Double price, ModifierType modifierType) {
         this.name = name;
-        this.type = type;
+        this.modifierEffectType = modifierEffectType;
         this.val = val;
         this.price = price;
         this.modifierType = modifierType;
@@ -45,9 +45,9 @@ public class Modifier {
 
     public void setName(String name) { this.name = name; }
 
-    public ModifierEffectType getType() { return type; }
+    public ModifierEffectType getModifierEffectType() { return modifierEffectType; }
 
-    public void setType(ModifierEffectType type) { this.type = type; }
+    public void setModifierEffectType(ModifierEffectType modifierEffectType) { this.modifierEffectType = modifierEffectType; }
 
     public ModifierType getModifierType() { return modifierType; }
 

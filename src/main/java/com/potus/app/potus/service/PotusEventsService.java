@@ -59,14 +59,29 @@ public class PotusEventsService {
 
             addDebuffs(potus, state);
         }
-        else assignFestivityBonus(potus, state);
+        else addFestivityBuffs(potus, state);
 
         applyState(potus, state);
 
         return potusRepository.save(potus);
     }
 
-    private void addFestivityBuffs(Potus potus, States aDefault) {
+    private void addFestivityBuffs(Potus potus, GasesAndStates state) {
+        Set<PotusModifier> potusCurrentBuffs = potus.getBuffs();
+
+        if (state.equals(States.DEFAULT)) {
+            potusCurrentBuffs.removeIf(potusModifier ->
+                    potusModifier.getModifier().getModifierType().equals(ModifierType.FESTIVITY_BUFF));
+        }
+        else {
+            List<Modifier> eventModifiers = modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.PRUNE_CURRENCY_GENERATION,
+                    ModifierType.FESTIVITY_BUFF);
+            Set<PotusModifier> eventBuffs = PotusUtils.generatePotusModifiers(potus, eventModifiers);
+
+            potusCurrentBuffs.addAll(eventBuffs);
+        }
+
+        potus.setBuffs(potusCurrentBuffs);
     }
 
     private void addDebuffs(Potus potus, GasesAndStates state) {
@@ -81,25 +96,25 @@ public class PotusEventsService {
         List<Modifier> chosenDebuffs;
 
         if (Gases.NO2.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.WATERING_MODIFIER, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.WATERING_MODIFIER, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.NOX.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.WATERING_TIME, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.WATERING_TIME, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.O3.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.HEALTH_GENERATION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.HEALTH_GENERATION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.PM1.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.PM2_5.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.PM10.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.PRUNE_CURRENCY_GENERATION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.SO2.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.WATERING_MODIFIER, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.WATERING_MODIFIER, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.CO.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.HEALTH_REDUCTION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.HEALTH_REDUCTION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.C6H6.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.HEALTH_GENERATION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.HEALTH_GENERATION, ModifierType.TEMPORAL_DEBUFF));
         } else if (Gases.Hg.equals(state)) {
-            chosenDebuffs = new ArrayList<>(modifierRepository.findByEffectTypeAndType(ModifierEffectType.HEALTH_REDUCTION, ModifierType.TEMPORAL_DEBUFF));
+            chosenDebuffs = new ArrayList<>(modifierRepository.findByModifierEffectTypeAndModifierType(ModifierEffectType.HEALTH_REDUCTION, ModifierType.TEMPORAL_DEBUFF));
         }
         else chosenDebuffs = new ArrayList<>();
 
