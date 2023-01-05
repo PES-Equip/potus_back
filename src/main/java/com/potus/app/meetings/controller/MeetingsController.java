@@ -21,19 +21,6 @@ public class MeetingsController {
     @Autowired
     private MeetingsService meetingsService;
 
-    // THIS HAVE TO BE MOVED TO THE SCHEDULER - this is only to test that update works
-    @GetMapping(value="information")
-    public List<Meeting> updateMeetings() throws ParseException {
-        meetingsService.updateMeetingsInformation();
-        return meetingsService.findAll();
-    }
-
-    // THIS HAVE TO BE MOVED TO THE SCHEDULER - this is only to test that update works
-    @GetMapping(value="/delete")
-    public void aaaa() {
-        meetingsService.deleteOldMeetings();
-    }
-
     @GetMapping(value="")
     public List<Meeting> getMeetings() throws ParseException {
         return meetingsService.findAll();
