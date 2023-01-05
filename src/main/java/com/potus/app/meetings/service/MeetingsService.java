@@ -80,11 +80,10 @@ public class MeetingsService {
 
                 String title = String.valueOf(meeting.get(TITLE));
                 String subtitle = String.valueOf(meeting.get(SUBTITLE));
-                String url = "www.google.com";
 
                 if(add) {
                     Meeting meetingCreated = new Meeting(id, startDate, endDate, region,
-                            address, city, title, subtitle, url);
+                            address, city, title, subtitle);
                     meetings.add(meetingCreated);
                     meetingsRepository.save(meetingCreated);
                 }
@@ -100,6 +99,7 @@ public class MeetingsService {
 
             if(now.after(endDateParsed)) {
                 System.out.println("Deleted the meeting" +meeting.getId());
+                meetingsRepository.delete(meeting);
             }
         }
     }

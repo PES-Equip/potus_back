@@ -32,7 +32,6 @@ public class Meeting {  //filter by tags_categor_es (concerts,exposicions, teatr
 
     private String subtitle; //subt_tol
 
-    private String url;
 
     public Region getRegion() {
         return region;
@@ -42,7 +41,7 @@ public class Meeting {  //filter by tags_categor_es (concerts,exposicions, teatr
         this.region = region;
     }
 
-    public Meeting(Long id, Date startDate, Date endDate, Region region, String address, String city, String title, String subtitle, String url) {
+    public Meeting(Long id, Date startDate, Date endDate, Region region, String address, String city, String title, String subtitle) {
         this.id = id;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -51,7 +50,6 @@ public class Meeting {  //filter by tags_categor_es (concerts,exposicions, teatr
         this.city = city;
         this.title = title;
         this.subtitle = subtitle;
-        this.url = url;
     }
 
     public Meeting() {
@@ -110,11 +108,4 @@ public class Meeting {  //filter by tags_categor_es (concerts,exposicions, teatr
         this.subtitle = subtitle;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
 }
