@@ -36,6 +36,11 @@ public class MeetingsController {
         return meetingsService.getMeetingsLatLen(latitude,length);
     }
 
+    @GetMapping(value="/update")
+    public void updateMeetings() {
+        meetingsService.updateMeetingsInformation();
+    }
+
 
 
 

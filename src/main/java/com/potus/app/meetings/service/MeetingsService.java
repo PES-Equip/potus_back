@@ -131,6 +131,16 @@ public class MeetingsService {
         }
         return meetingsRegion;
     }
+
+    public Meeting getMeetingById(Long meetingId) {
+        List<Meeting> meetings = findAll();
+
+        for(Meeting meeting : meetings) {
+            if(Objects.equals(meeting.getId(), meetingId)) return meeting;
+        }
+
+        throw  new ResourceNotFoundException(MEETING_DOES_NOT_EXISTS);
+    }
 }
 
 
