@@ -91,8 +91,8 @@ public class Potus {
         Date now = new Date();
 
         this.name = name;
-        this.health = 75;//this.health = PotusUtils.MAX_HEALTH;
-        this.waterLevel = 0;//this.waterLevel = PotusUtils.MAX_WATER_LEVEL;
+        this.health = PotusUtils.MAX_HEALTH;
+        this.waterLevel = PotusUtils.MAX_WATER_LEVEL;
         this.createdDate = now;
         this.lastModified = now;
         this.alive = true;
