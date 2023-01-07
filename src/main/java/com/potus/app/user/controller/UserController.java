@@ -36,6 +36,7 @@ import static com.potus.app.user.utils.UserExceptionMessages.*;
 import static com.potus.app.user.utils.UserUtils.getUser;
 import static java.net.HttpURLConnection.*;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping(value="/api/user")
 @Api(tags= "User",value = "User endpoints")
