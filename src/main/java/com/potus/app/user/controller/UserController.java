@@ -171,6 +171,7 @@ public class UserController {
 
 
     })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addMeeting(@PathVariable Long meetingId) {
         User user = getUser();
         userService.addMeeting(user, meetingId);
@@ -184,6 +185,7 @@ public class UserController {
             @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
 
     })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMeeting(@PathVariable Long meetingId) {
         User user = getUser();
         userService.deleteMeeting(user, meetingId);
