@@ -267,6 +267,7 @@ public class PotusService {
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
         potus.setActions(actions);
+        actionsRepository.saveAll(actions.values());
         potusModifierRepository.saveAll(potus.getBuffs());
         return potusRepository.save(potus);
     }
