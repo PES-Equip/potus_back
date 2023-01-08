@@ -206,6 +206,7 @@ public class UserController {
     public void deleteMeeting(@PathVariable Long meetingId) {
         User user = getUser();
         userService.deleteMeeting(user, meetingId);
+    }
 
     @ApiOperation(value = "GET USER TROPHIES")
     @ApiResponses(value = {
