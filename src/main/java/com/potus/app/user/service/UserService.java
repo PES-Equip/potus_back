@@ -10,7 +10,10 @@ import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
+import com.potus.app.user.model.UserTrophy;
+import com.potus.app.user.repository.TrophyRepository;
 import com.potus.app.user.repository.UserRepository;
+import com.potus.app.user.repository.UserTrophyRepository;
 import com.potus.app.user.utils.UserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,14 @@ public class UserService {
 
     @Autowired
     MeetingsService meetingsService;
+
+    @Autowired
+    TrophyRepository trophyRepository;
+
+    @Autowired
+    UserTrophyRepository userTrophyRepository;
+
+
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 

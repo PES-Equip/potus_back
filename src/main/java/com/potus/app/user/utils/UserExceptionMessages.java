@@ -26,7 +26,7 @@ public final class UserExceptionMessages {
 
 
 
-
+    public static final String TROPHY_DOES_NOT_EXISTS = "Trophy does not exists";
 
     private UserExceptionMessages(){
     }
