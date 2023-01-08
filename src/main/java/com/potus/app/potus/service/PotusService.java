@@ -261,10 +261,13 @@ public class PotusService {
         List<PotusModifier> potusModifiers = potusModifierRepository.findByPotus(potus);
         potusModifierRepository.deleteAll(potusModifiers);
 
+        Map<Actions, PotusAction> actions = PotusUtils.generateDefaultActions();
+
         List<Modifier> buffModifiers = modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
-
+        potus.setActions(actions);
+        actionsRepository.saveAll(actions.values());
         potusModifierRepository.saveAll(potus.getBuffs());
         return potusRepository.save(potus);
     }
