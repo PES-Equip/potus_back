@@ -28,11 +28,14 @@ public class ChatController {
         return message;
     }
 
+    /*
     @MessageMapping("/private-message")
     public ChatMessage recMessage(@Payload ChatMessage message){
         simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);
         return message;
     }
+    */
+
 
 
 }

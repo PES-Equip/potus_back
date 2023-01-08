@@ -178,6 +178,35 @@ public class UserController {
         return potusRegistryService.findByUser(getUser());
     }
 
+    @ApiOperation(value = "ADD MEETING")
+    @PostMapping("/meeting/{meetingId}")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Meeting added"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+            @ApiResponse(code = HTTP_CONFLICT, message = CONFLICT),
+
+
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addMeeting(@PathVariable Long meetingId) {
+        User user = getUser();
+        userService.addMeeting(user, meetingId);
+    }
+
+    @ApiOperation(value = "DELETE MEETING")
+    @DeleteMapping("/meeting/{meetingId}")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Meeting deleted"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteMeeting(@PathVariable Long meetingId) {
+        User user = getUser();
+        userService.deleteMeeting(user, meetingId);
+
     @ApiOperation(value = "GET USER TROPHIES")
     @ApiResponses(value = {
             @ApiResponse(code = HTTP_OK, message = "User trophies "),
@@ -220,6 +249,7 @@ public class UserController {
        });
        response.put("ranking", rankingResponses);
        return ResponseEntity.ok(response);
+
     }
 
 
