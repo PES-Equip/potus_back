@@ -1,12 +1,8 @@
 package com.potus.app.potus.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.potus.app.potus.service.ModifierService;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Entity
 @Table(name="modifiers")
@@ -21,24 +17,24 @@ public class Modifier {
     @NotBlank
     private String name;
 
-    private ModifierType type;
+    private ModifierEffectType modifierEffectType;
 
 
     private Double val;
 
     private Double price;
 
-    private boolean buff;
+    private ModifierType modifierType;
 
 
     public Modifier() {}
 
-    public Modifier(String name, ModifierType type, Double val, Double price, boolean buff) {
+    public Modifier(String name, ModifierEffectType modifierEffectType, Double val, Double price, ModifierType modifierType) {
         this.name = name;
-        this.type = type;
+        this.modifierEffectType = modifierEffectType;
         this.val = val;
         this.price = price;
-        this.buff = buff;
+        this.modifierType = modifierType;
     }
 
     public Long getId() { return id; }
@@ -49,13 +45,13 @@ public class Modifier {
 
     public void setName(String name) { this.name = name; }
 
-    public ModifierType getType() { return type; }
+    public ModifierEffectType getModifierEffectType() { return modifierEffectType; }
 
-    public void setType(ModifierType type) { this.type = type; }
+    public void setModifierEffectType(ModifierEffectType modifierEffectType) { this.modifierEffectType = modifierEffectType; }
 
-    public boolean isBuff() { return buff; }
+    public ModifierType getModifierType() { return modifierType; }
 
-    public void setBuff(boolean buff) { this.buff = buff; }
+    public void setBuff(ModifierType modifierType) { this.modifierType = modifierType; }
 
     public Double getPrice() { return price; }
 

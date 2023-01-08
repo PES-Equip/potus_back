@@ -10,19 +10,14 @@ import com.potus.app.potus.repository.PotusModifierRepository;
 import com.potus.app.potus.repository.PotusRepository;
 import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.potus.utils.PotusUtils;
-import com.potus.app.user.model.User;
-import com.potus.app.user.model.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.potus.app.user.service.UserService;
 
 import javax.transaction.Transactional;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
-import static com.potus.app.potus.utils.PotusExceptionMessages.ACTION_ALREADY_DID_IT;
 import static com.potus.app.potus.utils.PotusUtils.*;
 
 @Service
@@ -59,7 +54,7 @@ public class PotusService {
         potus.setActions(actions);
         saveFullPotus(potus);
 
-        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+        List<Modifier> buffModifiers = modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 
@@ -74,8 +69,12 @@ public class PotusService {
         Date lastModified = potus.getLastModified();
 
         Integer previousWater = potus.getWaterLevel();
+        Long debuffTimeReduction = ModifierUtils.getModifierValue(potus, ModifierEffectType.WATERING_TIME).longValue();
 
-        Long diff = TimeUnit.SECONDS.convert(Math.abs(now.getTime() - lastModified.getTime()),TimeUnit.MILLISECONDS)/TIME_REDUCTION;
+        //System.out.println("Time : " + (TIME_REDUCTION + debuffTimeReduction));
+
+        Long diff = TimeUnit.SECONDS.convert(Math.abs(now.getTime() - lastModified.getTime()),TimeUnit.MILLISECONDS)/
+                (TIME_REDUCTION + debuffTimeReduction);
         if (diff > 0){
 
             Integer damage = subtractWaterLevel(potus,diff.intValue());
@@ -98,14 +97,23 @@ public class PotusService {
 
     private void addHealth(Potus potus, Integer actualWater, Integer previousWater) {
 
-        Integer addedHealth;
+        Double addedHealth;
         Integer health;
+        Double healthGenerationDebuff = ModifierUtils.getModifierValue(potus, ModifierEffectType.HEALTH_GENERATION);
 
-        if (actualWater < 90) addedHealth = (previousWater - MIN_WATER_FOR_RECOVERY) * HEALTH_RECOVERY;
-        else addedHealth = (previousWater - actualWater) * HEALTH_RECOVERY;
+        System.out.println("Previous health: " + potus.getHealth());
+        System.out.println("Health Generation Debuff : " + healthGenerationDebuff);
+        System.out.println("Expected Healths: " + (previousWater - MIN_WATER_FOR_RECOVERY) * HEALTH_RECOVERY +
+                " " + (previousWater - actualWater) * HEALTH_RECOVERY);
 
-        health = potus.getHealth() + addedHealth;
+        if (actualWater < 90) addedHealth = ((previousWater - MIN_WATER_FOR_RECOVERY) * HEALTH_RECOVERY) * healthGenerationDebuff;
+        else addedHealth = ((previousWater - actualWater) * HEALTH_RECOVERY) * healthGenerationDebuff;
 
+        System.out.println("Real Added Health: " + addedHealth);
+
+        health = potus.getHealth() + addedHealth.intValue();
+
+        System.out.println("Health: " + health);
 
         if (health > 100) health = 100;
         potus.setHealth(health);
@@ -120,7 +128,17 @@ public class PotusService {
 
         if(current < 0){
             potus.setWaterLevel(0);
-            result = Math.abs(current) / 7;
+
+            Double healthReductionDebuff = ModifierUtils.getModifierValue(potus, ModifierEffectType.HEALTH_REDUCTION);
+            Double healthReduction = HEALTH_REDUCTION_TIME * healthReductionDebuff;
+
+            System.out.println("Health Reduction Debuff: " + healthReductionDebuff);
+            System.out.println("Health Reduction: " + healthReduction);
+
+            result = (Math.abs(current) / healthReduction.intValue());
+
+            System.out.println("Damage Without Reduction: " + (Math.abs(current) / HEALTH_REDUCTION_TIME));
+            System.out.println("Damage With Reduction: " + result);
         }
         return result;
     }
@@ -152,11 +170,18 @@ public class PotusService {
 
         doAction(action);
 
-        int waterLevel = potus.getWaterLevel() + potus.getWaterRecovery() + getRandomWateringBonus();
+        System.out.println("Current water level: " + potus.getWaterLevel());
+        System.out.println("Water recovery constant: " + WATER_RECOVERY);
+        System.out.println("Modifier: " + ModifierUtils.getModifierValue(potus, ModifierEffectType.WATERING_MODIFIER).intValue());
+
+        int waterLevel = potus.getWaterLevel() + WATER_RECOVERY + getRandomWateringBonus() +
+                ModifierUtils.getModifierValue(potus, ModifierEffectType.WATERING_MODIFIER).intValue();
 
         if(waterLevel > 100)
             waterLevel = 100;
 
+
+        System.out.println("New Water Level: " + waterLevel);
         potus.setWaterLevel(waterLevel);
         saveFullPotus(potus);
 
@@ -205,9 +230,17 @@ public class PotusService {
                         (now.getTime() - action.getLastTime().getTime()),
                 TimeUnit.MILLISECONDS) / PRUNING_ACTION_TIME);
 
-        Integer multiplier = getCurrencyMultiplier(potus.getCurrencyGenerators(), potus.getCurrencyMultiplier());
+        Integer multiplier = ModifierUtils.getModifierValue(potus, ModifierEffectType.PRUNE_CURRENCY_GENERATION).intValue();
+
+        System.out.println("Generated currency: " + currency);
+        System.out.println("Multiplier: " + multiplier);
+        System.out.println("Total currency: " + (currency * multiplier));
+
         currency = currency * multiplier;
-        if (currency > potus.getPruningMaxCurrency()) currency = potus.getPruningMaxCurrency();
+        Integer maxCurrency = ModifierUtils.getModifierValue(potus, ModifierEffectType.MAX_CURRENCY_GENERATION).intValue();
+        System.out.println("Maximum currency generating allowed: " + maxCurrency);
+
+        if (currency > maxCurrency) currency = potus.getPruningMaxCurrency();
 
         return currency.intValue();
     }
@@ -228,7 +261,7 @@ public class PotusService {
         List<PotusModifier> potusModifiers = potusModifierRepository.findByPotus(potus);
         potusModifierRepository.deleteAll(potusModifiers);
 
-        List<Modifier> buffModifiers = modifierRepository.findByBuff(true);
+        List<Modifier> buffModifiers = modifierRepository.findByModifierType(ModifierType.PERMANENT_BUFF);
 
         potus.setBuffs(generatePotusModifiers(potus,buffModifiers));
 

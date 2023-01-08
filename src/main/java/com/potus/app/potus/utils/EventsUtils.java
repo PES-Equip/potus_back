@@ -2,10 +2,13 @@ package com.potus.app.potus.utils;
 
 import com.potus.app.airquality.model.Gases;
 import com.potus.app.potus.model.GasesAndStates;
+import com.potus.app.potus.model.Modifier;
 import com.potus.app.potus.model.States;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.potus.app.potus.model.States.*;
@@ -145,5 +148,7 @@ public final class EventsUtils {
 
         return result;
     }
+
+
 }
 
