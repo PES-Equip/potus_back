@@ -5,9 +5,8 @@ import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ConflictException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceNotFoundException;
-import com.potus.app.garden.model.Garden;
-import com.potus.app.garden.model.GardenMember;
-import com.potus.app.garden.model.GardenRole;
+import com.potus.app.garden.model.*;
+import com.potus.app.garden.repository.ChatMessageRepository;
 import com.potus.app.garden.repository.GardenMemberRepository;
 import com.potus.app.garden.repository.GardenRepository;
 import com.potus.app.garden.utils.GardenExceptionMessages;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
@@ -30,6 +30,9 @@ public class GardenService {
 
     @Autowired
     GardenMemberRepository gardenMemberRepository;
+
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
 
     public List<Garden> getAll(){
         return gardenRepository.findAll();
@@ -113,5 +116,10 @@ public class GardenService {
 
     public List<GardenMember> getMembers(Garden garden) {
         return gardenMemberRepository.findByGarden(garden);
+    }
+
+
+    public ChatMessage saveChatMessage(ChatMessageDTO message, User user, String room){
+        return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus()));
     }
 }
