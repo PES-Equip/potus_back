@@ -117,7 +117,7 @@ public class PotusControllerTests {
         user.setPotus(mockedUser.getPotus());
 
         user.setCurrency(mockedUser.getCurrency() + PRUNING_CURRENCY_BONUS);
-        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNNING_CURRENCY_BONUS);
+        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNING_CURRENCY_BONUS);
         Mockito.when(userService.addCurrency(any(),any())).thenReturn(user);
 
         Map<String,Object> responseMap = new HashMap<>();
