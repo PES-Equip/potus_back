@@ -104,17 +104,13 @@ public class MeetingsService {
         }
     }
 
-    public List<Meeting> getMeetingDateInterval(String StartDate, String EndDate) throws ParseException {
+    public List<Meeting> getMeetingDateInterval(Date StartDate, Date EndDate){
         List<Meeting> meetingsDateInterval = new ArrayList<>();
         List<Meeting> meetings = findAll();
-        Date StartDateParsed = new SimpleDateFormat(DATE_PATTERN)
-                .parse(String.valueOf(StartDate));
-        Date EndDateParsed = new SimpleDateFormat(DATE_PATTERN)
-                .parse(String.valueOf(EndDate));
 
         for(Meeting meeting: meetings) {
-            if((StartDateParsed.before(meeting.getStartDate()) || StartDateParsed.equals(meeting.getStartDate())) &&
-                    (EndDateParsed.after(meeting.getEndDate()) || EndDateParsed.equals(meeting.getEndDate())))
+            if((StartDate.before(meeting.getStartDate()) || StartDate.equals(meeting.getStartDate())) &&
+                    (EndDate.after(meeting.getEndDate()) || EndDate.equals(meeting.getEndDate())))
                 meetingsDateInterval.add(meeting);
         }
         meetingsDateInterval.sort(Comparator.comparing(Meeting::getStartDate));

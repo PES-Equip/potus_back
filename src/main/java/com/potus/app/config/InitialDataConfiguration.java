@@ -2,6 +2,8 @@ package com.potus.app.config;
 
 import com.potus.app.airquality.model.Region;
 import com.potus.app.airquality.service.AirQualityService;
+import com.potus.app.meetings.model.Meeting;
+import com.potus.app.meetings.service.MeetingsService;
 import com.potus.app.potus.model.Modifier;
 import com.potus.app.potus.service.ModifierService;
 import com.potus.app.potus.utils.ModifierUtils;
@@ -31,11 +33,15 @@ public class InitialDataConfiguration {
     @Autowired
     UserService userService;
 
+    @Autowired
+    MeetingsService meetingsService;
+
     @Bean
     CommandLineRunner runner(){
         userService.addAdmins();
         List<Region> regions = airQualityService.findAll();
         List<Modifier> modifiers = modifierService.findAll();
+        List<Meeting> meetings = meetingsService.findAll();
 
         if(regions.size() == 0) {
             logger.info("Initializing regions");
@@ -47,6 +53,12 @@ public class InitialDataConfiguration {
             logger.info("Adding modifiers");
             modifierService.initializeModifiers();
             
+        }
+
+        if(meetings.size() == 0){
+            logger.info("Initialize meetings");
+            meetingsService.updateMeetingsInformation();
+            logger.info("Initialized meetings");
         }
 
         return null;
