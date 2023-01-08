@@ -92,4 +92,27 @@ public class AdminService {
         user.setAdmin(false);
         return userRepository.save(user);
     }
+
+    public APIToken findByToken(Long id) {
+        return apiTokenRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(TOKEN_DOES_NOT_EXISTS));
+    }
+
+    public APIToken refreshToken(APIToken token) {
+        String newTokenValue = generateToken();
+
+        while(existsToken(newTokenValue))
+            newTokenValue = generateToken();
+
+        token.setToken(newTokenValue);
+        return apiTokenRepository.save(token);
+    }
+
+    public APIToken renameToken(APIToken token, String name) {
+
+        if(existsByName(name))
+            throw new ResourceAlreadyExistsException(TOKEN_NAME_ALREADY_EXISTS);
+
+        token.setName(name);
+        return apiTokenRepository.save(token);
+    }
 }

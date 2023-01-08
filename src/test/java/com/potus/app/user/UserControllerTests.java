@@ -3,16 +3,26 @@ package com.potus.app.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.potus.app.TestConfig;
 import com.potus.app.TestUtils;
+import com.potus.app.admin.model.APIToken;
+import com.potus.app.admin.payload.request.CreateAPITokenRequest;
+import com.potus.app.airquality.model.Region;
+import com.potus.app.airquality.model.Regions;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
+import com.potus.app.exception.ResourceNotFoundException;
+import com.potus.app.meetings.model.Meeting;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.PotusRegistry;
 import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.controller.UserController;
+import com.potus.app.user.model.Trophy;
+import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
+import com.potus.app.user.payload.request.RankingResponse;
 import com.potus.app.user.payload.request.UsernameRequest;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,13 +46,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.potus.app.TestUtils.getMockUser;
 import static com.potus.app.TestUtils.getMockUserWithDeadPotus;
 import static com.potus.app.user.utils.UserExceptionMessages.*;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -66,6 +80,9 @@ public class UserControllerTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private PotusService potusService;
@@ -94,7 +111,11 @@ public class UserControllerTests {
 
         Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(TestUtils.getMockUser());
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("user", TestUtils.getMockUser());
+        responseMap.put("trophies", List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
 
         RequestBuilder request = MockMvcRequestBuilders
                 .get("/api/user/profile")
@@ -481,5 +502,224 @@ public class UserControllerTests {
 
     }
 
+    @Test
+    public void addMeetingTestOk() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void addMeetingTestNotFound() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        doThrow(new ResourceNotFoundException()).when(userService).addMeeting(any(),any());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void addMeetingTestAlreadyAdded() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        doThrow(new ResourceAlreadyExistsException()).when(userService).addMeeting(any(),any());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeMeetingTestOk() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void removeMeetingTestNotFound() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        doThrow(new ResourceNotFoundException()).when(userService).deleteMeeting(any(),any());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
+    public void removeMeetingTestAlreadyAdded() throws Exception {
+
+        Meeting meeting = new Meeting(15L, new Date(), new Date(), null, "test", "test", "test", "test");
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        doThrow(new ResourceAlreadyExistsException()).when(userService).deleteMeeting(any(),any());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .delete("/api/user/meeting/"+ meeting.getId())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
+
+    @Test
+    public void getTrophiesOk() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(auth.getPrincipal()).thenReturn(mockUser);
+
+        Mockito.when(trophyService.findUser(any())).thenReturn(List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(List.of());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/profile/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getUserTrophiesOk() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(userService.findById(any())).thenReturn(mockUser);
+
+        Mockito.when(trophyService.findUser(any())).thenReturn(List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(List.of());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/1/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getUserTrophiesNotFoundException() throws Exception {
+
+
+        User mockUser = getMockUser();
+        Mockito.when(userService.findById(any())).thenThrow(new ResourceNotFoundException());
+
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/1/trophies")
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        this.mockMvc.perform(request)
+                .andExpect(status().isNotFound())
+                .andExpect( result ->  Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+
+    }
+
+    @Test
+    public void getRankingOK() throws Exception {
+
+
+        User mockUser = getMockUser();
+
+        Trophy trophy = new Trophy(5, TrophyType.CURRENCY);
+        Mockito.when(trophyService.findTrophyByType(any())).thenReturn(trophy);
+        Mockito.when(trophyService.getRanking(any())).thenReturn(List.of());
+
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("trophy", trophy);
+
+        responseMap.put("ranking", List.of());
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .get("/api/user/ranking")
+                .queryParam("ranking", trophy.getName().toString())
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+
+    }
 
 }

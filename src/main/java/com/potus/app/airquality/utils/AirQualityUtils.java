@@ -62,4 +62,10 @@ public class AirQualityUtils {
         return Arrays.asList(Gases.values());
     }
 
+    public static Regions[] getRegions() {
+        return Regions.values();
+    }
+
+
+
 }

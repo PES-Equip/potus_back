@@ -13,6 +13,7 @@ import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,10 +36,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.potus.app.potus.utils.PotusUtils.PRUNING_CURRENCY_BONUS;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +68,9 @@ public class PotusControllerTests {
 
     @MockBean
     private PotusEventsService potusEventsService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private UserService userService;
@@ -116,12 +117,14 @@ public class PotusControllerTests {
         user.setPotus(mockedUser.getPotus());
 
         user.setCurrency(mockedUser.getCurrency() + PRUNING_CURRENCY_BONUS);
-
-        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNING_CURRENCY_BONUS);
+        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNNING_CURRENCY_BONUS);
         Mockito.when(userService.addCurrency(any(),any())).thenReturn(user);
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(user);
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("user", user);
+        responseMap.put("trophies", List.of());
 
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
         RequestBuilder request = MockMvcRequestBuilders
                 .post("/api/potus/action")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))

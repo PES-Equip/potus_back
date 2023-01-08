@@ -25,6 +25,7 @@ import java.util.List;
 import static com.potus.app.exception.GeneralExceptionMessages.UNAUTHENTICATED;
 import static java.net.HttpURLConnection.*;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping(value="/api/admin")
 @Api(tags= "Admin",value = "Admin endpoints")
@@ -68,12 +69,43 @@ public class AdminController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
             @ApiResponse(code = HTTP_NOT_FOUND, message = "Token not found"),
     })
-    @DeleteMapping(value = "/tokens/{token}")
+    @DeleteMapping(value = "/tokens/{tokenId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteToken(@PathVariable String token) {
+    public void deleteToken(@PathVariable Long tokenId) {
 
-        APIToken selectedToken = adminService.findByName(token);
+        APIToken selectedToken = adminService.findByToken(tokenId);
         adminService.deleteToken(selectedToken);
+    }
+
+    @ApiOperation(value = "REFRESH A TOKEN")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Token refreshed"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "Token not found"),
+    })
+    @PostMapping(value = "/tokens/{tokenId}")
+    public APIToken refreshToken(@PathVariable Long tokenId) {
+
+        APIToken selectedToken = adminService.findByToken(tokenId);
+
+        return adminService.refreshToken(selectedToken);
+    }
+
+    @ApiOperation(value = "RENAME A TOKEN")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "Token deleted"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "Token not found"),
+    })
+    @PutMapping(value = "/tokens/{tokenId}")
+    public APIToken renameToken(@PathVariable Long tokenId,@RequestBody @Valid CreateAPITokenRequest body, Errors errors) {
+
+        if(errors.hasErrors())
+            throw new BadRequestException(errors.getAllErrors().get(0).getDefaultMessage());
+
+        APIToken selectedToken = adminService.findByToken(tokenId);
+
+        return adminService.renameToken(selectedToken, body.getName());
     }
 
     @ApiOperation(value = "ADD AN ADMIN")

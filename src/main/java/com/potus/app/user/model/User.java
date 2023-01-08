@@ -1,13 +1,18 @@
 package com.potus.app.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.potus.app.garden.model.Garden;
 import com.potus.app.garden.model.GardenMember;
+import com.potus.app.meetings.model.Meeting;
 import com.potus.app.potus.model.Potus;
 
 import javax.persistence.*;
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 
 @Entity
@@ -36,6 +41,12 @@ public class User {
     @JsonIgnoreProperties({"user"})
     @JsonProperty("garden_info")
     private GardenMember garden;
+
+
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JsonProperty("meetings")
+    private Set<Meeting> meetings;
 
     public User(){}
 
@@ -102,5 +113,18 @@ public class User {
 
     public void setGarden(GardenMember garden) {
         this.garden = garden;
+    }
+
+    public Set<Meeting> getMeetings() {
+        return meetings;
+    }
+
+    public void addMeeting(Meeting meeting) {
+        this.meetings.add(meeting);
+    }
+
+    public void deleteMeeting(Meeting meeting) {
+        meetings.remove(meeting);
+
     }
 }
