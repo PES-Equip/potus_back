@@ -4,10 +4,7 @@ import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
-import com.potus.app.garden.model.Garden;
-import com.potus.app.garden.model.GardenMember;
-import com.potus.app.garden.model.GardenRequest;
-import com.potus.app.garden.model.GardenRole;
+import com.potus.app.garden.model.*;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
 import com.potus.app.garden.payload.request.GardenSetRoleRequest;
@@ -464,7 +461,29 @@ public class GardenController {
 
 
 
+    @ApiOperation(value = "GET ALL GARDEN JOIN REQUESTS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Garden join requests"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+    })
+    @GetMapping("/{garden}/chats")
+    public List<ChatMessage> getChatMessages(@PathVariable String garden, @RequestParam(value = "page", required = false) Integer page) {
 
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+            throw new ForbiddenException();
+
+
+        int chatPage = 0;
+
+        if (page != null && page > 0)
+            chatPage = page;
+
+        return gardenService.findMessagesByGarden(selectedGarden, chatPage);
+    }
 
 
 }
