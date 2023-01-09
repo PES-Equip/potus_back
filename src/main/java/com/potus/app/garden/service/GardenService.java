@@ -13,6 +13,9 @@ import com.potus.app.garden.utils.GardenExceptionMessages;
 import com.potus.app.garden.utils.GardenUtils;
 import com.potus.app.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -121,5 +124,14 @@ public class GardenService {
 
     public ChatMessage saveChatMessage(ChatMessageDTO message, User user, String room){
         return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus()));
+    }
+
+    public List<ChatMessage> getAllChats() {
+        return chatMessageRepository.findAll();
+    }
+
+    public List<ChatMessage> findMessagesByGarden(Garden garden, int page) {
+        Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").descending());
+        return chatMessageRepository.findByRoom(garden.getId().toString(), sortByDate);
     }
 }

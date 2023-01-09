@@ -1,13 +1,14 @@
 package com.potus.app.garden.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
 import lombok.*;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.*;
+
 import com.potus.app.user.model.User;
 import org.springframework.data.annotation.CreatedDate;
 
-import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
@@ -16,13 +17,15 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
+@Entity
 public class ChatMessage {
 
     @Id
     private String id;
 
     @NotNull
-
+    @ManyToOne
+    @JsonIncludeProperties(value = {"username", "id"})
     private User sender;
 
     @CreatedDate

@@ -43,6 +43,7 @@ public class Garden {
     public Garden() {
     }
 
+    public Long getId() {return id;}
     public String getName() {
         return name;
     }
