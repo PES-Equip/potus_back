@@ -231,9 +231,9 @@ public class UserController {
         return trophyService.findUser(user);
     }
 
-    @ApiOperation(value = "GET POTUS REGISTRIES")
+    @ApiOperation(value = "GET RANKING")
     @ApiResponses(value = {
-            @ApiResponse(code = HTTP_OK, message = "Potus registries"),
+            @ApiResponse(code = HTTP_OK, message = "Return specified ranking"),
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @GetMapping("/ranking")
