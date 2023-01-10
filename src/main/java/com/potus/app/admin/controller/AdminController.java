@@ -1,7 +1,9 @@
 package com.potus.app.admin.controller;
 
 import com.potus.app.admin.model.APIToken;
+import com.potus.app.admin.model.BannedAccount;
 import com.potus.app.admin.payload.request.AddAdminRequest;
+import com.potus.app.admin.payload.request.BanAccountRequest;
 import com.potus.app.admin.payload.request.CreateAPITokenRequest;
 import com.potus.app.admin.service.AdminService;
 import com.potus.app.airquality.model.Region;
@@ -138,6 +140,39 @@ public class AdminController {
         User selectedUser = userService.findByUsername(user);
         adminService.deleteAdmin(selectedUser);
     }
+
+    @ApiOperation(value = "EMAILS BANNED")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Banned emails"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @DeleteMapping(value = "/ban")
+    public List<BannedAccount> getBannedAccounts() {
+        return adminService.findAllBannedAccounts();
+    }
+
+    @ApiOperation(value = "BAN AN USER")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User banned"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "User not found"),
+    })
+    @DeleteMapping(value = "/ban/{userId}")
+    public BannedAccount banAccount(@PathVariable Long userId, @RequestBody @Valid BanAccountRequest body, Errors errors) {
+
+        if(errors.hasErrors())
+            throw new BadRequestException(errors.getAllErrors().get(0).getDefaultMessage());
+
+        User selectedUser = userService.findById(userId);
+
+        return adminService.banAccount(selectedUser, body.getReason());
+    }
+
+
+    // get ban requests
+
+    // post ban
+    // delete ban
 
 
 }

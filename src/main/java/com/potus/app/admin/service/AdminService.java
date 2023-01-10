@@ -1,7 +1,9 @@
 package com.potus.app.admin.service;
 
 import com.potus.app.admin.model.APIToken;
+import com.potus.app.admin.model.BannedAccount;
 import com.potus.app.admin.repository.APITokenRepository;
+import com.potus.app.admin.repository.BannedAccountRepository;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.user.model.User;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.List;
 
 import static com.potus.app.admin.utils.AdminExceptionMessages.*;
@@ -25,6 +28,9 @@ public class AdminService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    BannedAccountRepository bannedAccountRepository;
 
     private static SecureRandom random = new SecureRandom();
 
@@ -114,5 +120,26 @@ public class AdminService {
 
         token.setName(name);
         return apiTokenRepository.save(token);
+    }
+
+    public boolean emailIsBanned(String email) {
+        return bannedAccountRepository.existsByEmail(email);
+    }
+
+    public BannedAccount findByEmail(String email){
+        return bannedAccountRepository.findByEmail(email);
+    }
+
+    public BannedAccount banAccount(User selectedUser, String reason) {
+
+        if(emailIsBanned(selectedUser.getEmail()))
+            throw new ResourceAlreadyExistsException("EMAIL IS ALREADY BANNED");
+
+        BannedAccount bannedAccount = new BannedAccount(selectedUser.getEmail(), reason, new Date());
+        return bannedAccountRepository.save(bannedAccount);
+    }
+
+    public List<BannedAccount> findAllBannedAccounts(){
+        return bannedAccountRepository.findAll();
     }
 }

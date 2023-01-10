@@ -26,6 +26,17 @@ public class FilterConfig {
     TrophyService trophyService;
 
     @Bean
+    public FilterRegistrationBean<BannedUserFilter> bannedUserFilter(){
+        FilterRegistrationBean<BannedUserFilter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new BannedUserFilter(adminService));
+
+        registrationBean.addUrlPatterns("/api/*");
+        registrationBean.setOrder(1);
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<ConfirmedUserFilter> userNormalFilter(){
         FilterRegistrationBean<ConfirmedUserFilter> registrationBean = new FilterRegistrationBean<>();
 
@@ -77,7 +88,7 @@ public class FilterConfig {
         registrationBean.setFilter(new AdminTokenFilter());
 
         registrationBean.addUrlPatterns("/api/admin/*");
-        registrationBean.setOrder(1);
+        registrationBean.setOrder(5);
         return registrationBean;
     }
 
