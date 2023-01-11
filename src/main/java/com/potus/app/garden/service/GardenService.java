@@ -1,14 +1,14 @@
 package com.potus.app.garden.service;
 
 
-import com.potus.app.exception.BadRequestException;
-import com.potus.app.exception.ConflictException;
-import com.potus.app.exception.ForbiddenException;
-import com.potus.app.exception.ResourceNotFoundException;
+import com.potus.app.admin.model.BanRequest;
+import com.potus.app.admin.repository.BanRequestRepository;
+import com.potus.app.exception.*;
 import com.potus.app.garden.model.*;
 import com.potus.app.garden.repository.ChatMessageRepository;
 import com.potus.app.garden.repository.GardenMemberRepository;
 import com.potus.app.garden.repository.GardenRepository;
+import com.potus.app.garden.repository.ReportRepository;
 import com.potus.app.garden.utils.GardenExceptionMessages;
 import com.potus.app.garden.utils.GardenUtils;
 import com.potus.app.user.model.User;
@@ -19,9 +19,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
 
@@ -36,6 +36,12 @@ public class GardenService {
 
     @Autowired
     ChatMessageRepository chatMessageRepository;
+
+    @Autowired
+    ReportRepository reportRepository;
+
+    @Autowired
+    BanRequestRepository banRequestRepository;
 
     public List<Garden> getAll(){
         return gardenRepository.findAll();
@@ -123,7 +129,7 @@ public class GardenService {
 
 
     public ChatMessage saveChatMessage(ChatMessageDTO message, User user, String room){
-        return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus()));
+        return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus(), message.getMessage()));
     }
 
     public List<ChatMessage> getAllChats() {
@@ -133,5 +139,45 @@ public class GardenService {
     public List<ChatMessage> findMessagesByGarden(Garden garden, int page) {
         Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").descending());
         return chatMessageRepository.findByRoom(garden.getId().toString(), sortByDate);
+    }
+
+    public ChatMessage findMessageById(String message) {
+        return chatMessageRepository.findById(message).orElseThrow(() -> new ResourceNotFoundException("MESSAGE NOT FOUND"));
+    }
+
+    @Transactional
+    public Report reportUser(User reporter, ChatMessage chatMessage) {
+
+        BanRequest banRequest = banRequestRepository.findByUser(chatMessage.getSender());
+
+
+        if(banRequest == null){
+            banRequest = new BanRequest(chatMessage.getSender());
+            banRequest.setReports(new ArrayList<>());
+        }
+        else{
+            List<Report> reports = banRequest.getReports();
+
+            reports.forEach(report -> {
+                Instant reportInstant = report.getDate().toInstant().plus(2, ChronoUnit.MINUTES);
+
+                if(report.getReporter().getId().equals(reporter.getId()) && reportInstant.isAfter(Instant.now())){
+                    throw new TooManyRequestsException("YOU ALREADY REPORTED THAT ACCOUNT TRY LATER");
+                }
+            });
+        }
+
+
+        Report report = new Report(reporter, new Date(), chatMessage);
+
+        reportRepository.save(report);
+        List<Report> reports = banRequest.getReports();
+        reports.add(report);
+        banRequestRepository.save(banRequest);
+        return report;
+    }
+
+    public ChatMessage createMessage(Long id, String message, User user) {
+        return chatMessageRepository.save(new ChatMessage(UUID.randomUUID().toString(), user, new Date(),id.toString(), MessageType.MESSAGE, message));
     }
 }

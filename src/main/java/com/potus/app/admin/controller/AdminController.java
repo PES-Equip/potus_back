@@ -1,11 +1,15 @@
 package com.potus.app.admin.controller;
 
 import com.potus.app.admin.model.APIToken;
+import com.potus.app.admin.model.BanRequest;
+import com.potus.app.admin.model.BannedAccount;
 import com.potus.app.admin.payload.request.AddAdminRequest;
+import com.potus.app.admin.payload.request.BanAccountRequest;
 import com.potus.app.admin.payload.request.CreateAPITokenRequest;
 import com.potus.app.admin.service.AdminService;
 import com.potus.app.airquality.model.Region;
 import com.potus.app.exception.BadRequestException;
+import com.potus.app.garden.model.ChatMessage;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
@@ -138,6 +142,74 @@ public class AdminController {
         User selectedUser = userService.findByUsername(user);
         adminService.deleteAdmin(selectedUser);
     }
+
+    @ApiOperation(value = "EMAILS BANNED")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Banned emails"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping(value = "/banned")
+    public List<BannedAccount> getBannedAccounts() {
+        return adminService.findAllBannedAccounts();
+    }
+
+    @ApiOperation(value = "BAN AN USER")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User banned"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "User not found"),
+    })
+    @PostMapping(value = "/ban/{userId}")
+    public BannedAccount banAccount(@PathVariable Long userId, @RequestBody @Valid BanAccountRequest body, Errors errors) {
+
+        if(errors.hasErrors())
+            throw new BadRequestException(errors.getAllErrors().get(0).getDefaultMessage());
+
+        User selectedUser = userService.findById(userId);
+
+        return adminService.banAccount(selectedUser, body.getReason());
+    }
+
+    @ApiOperation(value = "NOT BAN AN USER")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_NO_CONTENT, message = "User not banned"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "User not found"),
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping(value = "/ban/{userId}")
+    public void notBanAccount(@PathVariable Long userId) {
+        User selectedUser = userService.findById(userId);
+
+        adminService.deleteBanRequest(selectedUser);
+    }
+
+    @ApiOperation(value = "GET BAN REQUESTS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "User banned"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = "User not found"),
+    })
+    @GetMapping(value = "/ban")
+    public List<BanRequest> getBanRequests() {
+        return adminService.getBanRequests().stream().filter(request -> request.getReports().size() >= 3).toList();
+    }
+
+
+    @ApiOperation(value = "GET REPORT CHAT HISTORY")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "CHAT HISTORY"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @GetMapping(value = "/chat/{chatId}/history")
+    public List<ChatMessage> getChatHistory(@PathVariable String chatId) {
+
+        ChatMessage chatMessage = adminService.findChatMessageById(chatId);
+        return adminService.getPreviousMessages(chatMessage, 0);
+    }
+
+    // post ban
+    // delete ban
 
 
 }
