@@ -276,8 +276,8 @@ public class PotusService {
         return potusModifierRepository.findByPotus(potus);
     }
 
-    public void upgradeModifier(PotusModifier selectedModifier) {
+    public PotusModifier upgradeModifier(PotusModifier selectedModifier) {
         selectedModifier.setLevel(selectedModifier.getLevel() + 1);
-        potusModifierRepository.save(selectedModifier);
+        return potusModifierRepository.save(selectedModifier);
     }
 }

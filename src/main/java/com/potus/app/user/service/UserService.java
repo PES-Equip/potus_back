@@ -10,7 +10,6 @@ import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
-import com.potus.app.user.model.UserTrophy;
 import com.potus.app.user.repository.TrophyRepository;
 import com.potus.app.user.repository.UserRepository;
 import com.potus.app.user.repository.UserTrophyRepository;
@@ -149,15 +148,17 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void upgradeModifier(User user, PotusModifier selectedModifier) {
+    public PotusModifier upgradeModifier(User user, PotusModifier selectedModifier) {
 
         Double price = ModifierUtils.getCurrentPrice(selectedModifier.getModifier().getPrice(),selectedModifier.getLevel());
 
         if(user.getCurrency() < price)
             throw new ResourceAlreadyExistsException(USER_HAS_NOT_ENOUGH_CURRENCY);
 
-        potusService.upgradeModifier(selectedModifier);
+
         user.setCurrency((int) (user.getCurrency() - price));
+        saveUser(user);
+        return potusService.upgradeModifier(selectedModifier);
     }
 
     public void addMeeting(User user, Long meetingId) {

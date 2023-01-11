@@ -1,16 +1,13 @@
 package com.potus.app.potus.controller;
 
 import com.potus.app.exception.BadRequestException;
-import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.potus.model.Actions;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.payload.request.PotusActionRequest;
-import com.potus.app.potus.payload.request.PotusCreationRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
 import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
 import com.potus.app.potus.service.PotusEventsService;
-import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
@@ -34,7 +31,6 @@ import static com.potus.app.exception.GeneralExceptionMessages.*;
 import static com.potus.app.potus.utils.PotusExceptionMessages.*;
 import static com.potus.app.user.utils.UserUtils.*;
 import static java.net.HttpURLConnection.*;
-import static java.net.HttpURLConnection.HTTP_CONFLICT;
 
 @RestController
 @RequestMapping(value="/api/potus")
@@ -163,14 +159,18 @@ public class PotusController {
             @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
     })
     @PostMapping("/store/buy/{modifier}")
-    public List<UserTrophy> purchaseModifier(@PathVariable String modifier) {
+    public ResponseEntity<Map<String, Object>> purchaseModifier(@PathVariable String modifier) {
         User user = getUser();
         Potus potus = user.getPotus();
         PotusModifier selectedModifier = potus.getBuff(modifier);
-        userService.upgradeModifier(user,selectedModifier);
+        PotusModifier potusModifier = userService.upgradeModifier(user,selectedModifier);
         trophyService.updateTrophy(user, TrophyType.UPGRADES, 1);
         trophyService.conditionalUpdateTrophy(user, TrophyType.UPGRADES, selectedModifier.getLevel());
-        return trophyService.getLevelUpTrophies(user);
+        Map<String,Object> response = new HashMap<>();
+        response.put("bonus", new PotusModifierStoreResponse(selectedModifier));
+        response.put("trophies",trophyService.getLevelUpTrophies(user));
+
+        return ResponseEntity.ok(response);
     }
 
 }
