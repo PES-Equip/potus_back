@@ -38,6 +38,9 @@ public class ChatMessage {
     @NotNull
     private MessageType status;
 
+    @NotNull
+    private String message;
+
 
 
 }

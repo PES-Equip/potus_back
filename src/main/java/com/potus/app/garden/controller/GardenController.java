@@ -480,7 +480,7 @@ public class GardenController {
         Garden selectedGarden = gardenService.findByName(garden);
 
         GardenMember member = gardenService.findByUser(getUser());
-        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+        if(member.getGarden() != selectedGarden)
             throw new ForbiddenException();
 
 
@@ -503,13 +503,27 @@ public class GardenController {
         Garden selectedGarden = gardenService.findByName(garden);
 
         GardenMember member = gardenService.findByUser(getUser());
-        if(member.getGarden() != selectedGarden || member.getRole().compareTo(GardenRole.NORMAL) == 0)
+        if(member.getGarden() != selectedGarden)
             throw new ForbiddenException();
 
 
         ChatMessage chatMessage = gardenService.findMessageById(message);
 
         return gardenService.reportUser(getUser(), chatMessage);
+    }
+
+
+    @PostMapping("/{garden}/chat/{message}")
+    public ChatMessage chatMessage(@PathVariable String garden, @PathVariable String message){
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden)
+            throw new ForbiddenException();
+
+
+        return gardenService.createMessage(selectedGarden.getId(),message, getUser());
     }
 
 }

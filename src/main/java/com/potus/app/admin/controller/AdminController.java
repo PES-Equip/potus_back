@@ -192,7 +192,7 @@ public class AdminController {
     })
     @GetMapping(value = "/ban")
     public List<BanRequest> getBanRequests() {
-        return adminService.getBanRequests().stream().filter(request -> request.getReports().size() > 3).toList();
+        return adminService.getBanRequests().stream().filter(request -> request.getReports().size() >= 3).toList();
     }
 
 

@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.potus.app.garden.utils.GardenExceptionMessages.*;
 
@@ -132,7 +129,7 @@ public class GardenService {
 
 
     public ChatMessage saveChatMessage(ChatMessageDTO message, User user, String room){
-        return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus()));
+        return chatMessageRepository.save(new ChatMessage(message.getId(),user, new Date(), room, message.getStatus(), message.getMessage()));
     }
 
     public List<ChatMessage> getAllChats() {
@@ -163,7 +160,8 @@ public class GardenService {
 
             reports.forEach(report -> {
                 Instant reportInstant = report.getDate().toInstant().plus(2, ChronoUnit.MINUTES);
-                if(report.getReporter().equals(reporter) && reportInstant.isAfter(Instant.now())){
+
+                if(report.getReporter().getId().equals(reporter.getId()) && reportInstant.isAfter(Instant.now())){
                     throw new TooManyRequestsException("YOU ALREADY REPORTED THAT ACCOUNT TRY LATER");
                 }
             });
@@ -177,5 +175,9 @@ public class GardenService {
         reports.add(report);
         banRequestRepository.save(banRequest);
         return report;
+    }
+
+    public ChatMessage createMessage(Long id, String message, User user) {
+        return chatMessageRepository.save(new ChatMessage(UUID.randomUUID().toString(), user, new Date(),id.toString(), MessageType.MESSAGE, message));
     }
 }
