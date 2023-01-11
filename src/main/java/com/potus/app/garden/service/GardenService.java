@@ -137,8 +137,12 @@ public class GardenService {
     }
 
     public List<ChatMessage> findMessagesByGarden(Garden garden, int page) {
-        Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").ascending());
-        return chatMessageRepository.findByRoom(garden.getId().toString(), sortByDate);
+        Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").descending());
+        List<ChatMessage>  messages = chatMessageRepository.findByRoom(garden.getId().toString(), sortByDate);
+
+        Collections.reverse(messages);
+        return messages;
+
     }
 
     public ChatMessage findMessageById(String message) {
