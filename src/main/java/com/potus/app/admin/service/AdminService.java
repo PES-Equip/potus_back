@@ -182,7 +182,7 @@ public class AdminService {
     }
 
     public List<ChatMessage> getPreviousMessages(ChatMessage chatMessage, int page) {
-        Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").descending());
+        Pageable sortByDate = PageRequest.of(page, 20, Sort.by("date").ascending());
         return chatMessageRepository.findByDateLessThanEqualAndRoom(chatMessage.getDate(), chatMessage.getRoom(), sortByDate);
     }
 }
