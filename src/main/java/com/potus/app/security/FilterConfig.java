@@ -64,7 +64,7 @@ public class FilterConfig {
 
         registrationBean.setFilter(new PotusIsDeadFilter(potusRegistryService,trophyService));
 
-        registrationBean.addUrlPatterns("/api/potus/*");
+        registrationBean.addUrlPatterns("/api/potus/*", "/api/user/profile");
         registrationBean.setOrder(4);
         return registrationBean;
     }
