@@ -5,10 +5,7 @@ import com.potus.app.TestUtils;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.potus.controller.PotusController;
-import com.potus.app.potus.model.Modifier;
-import com.potus.app.potus.model.ModifierType;
-import com.potus.app.potus.model.Potus;
-import com.potus.app.potus.model.PotusModifier;
+import com.potus.app.potus.model.*;
 import com.potus.app.potus.payload.request.PotusActionRequest;
 import com.potus.app.potus.payload.request.PotusEventRequest;
 import com.potus.app.potus.payload.response.PotusModifierStoreResponse;
@@ -16,6 +13,7 @@ import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,12 +36,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import static com.potus.app.potus.utils.PotusUtils.PRUNNING_CURRENCY_BONUS;
+import static com.potus.app.potus.utils.PotusUtils.PRUNING_CURRENCY_BONUS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -73,6 +68,9 @@ public class PotusControllerTests {
 
     @MockBean
     private PotusEventsService potusEventsService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private UserService userService;
@@ -118,13 +116,15 @@ public class PotusControllerTests {
         User user = new User(mockedUser.getEmail(),mockedUser.getEmail());
         user.setPotus(mockedUser.getPotus());
 
-        user.setCurrency(mockedUser.getCurrency() + PRUNNING_CURRENCY_BONUS);
-
-        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNNING_CURRENCY_BONUS);
+        user.setCurrency(mockedUser.getCurrency() + PRUNING_CURRENCY_BONUS);
+        Mockito.when(potusService.doFilterAction(any(),any())).thenReturn(PRUNING_CURRENCY_BONUS);
         Mockito.when(userService.addCurrency(any(),any())).thenReturn(user);
 
-        final String expectedResponseContent = objectMapper.writeValueAsString(user);
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("user", user);
+        responseMap.put("trophies", List.of());
 
+        final String expectedResponseContent = objectMapper.writeValueAsString(responseMap);
         RequestBuilder request = MockMvcRequestBuilders
                 .post("/api/potus/action")
                 .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
@@ -267,7 +267,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -292,7 +292,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., false);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.TEMPORAL_DEBUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setDebuffs(modifiers);
@@ -317,7 +317,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -347,7 +347,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -370,7 +370,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);
@@ -394,7 +394,7 @@ public class PotusControllerTests {
         User mockedUser = TestUtils.getMockUser();
         Mockito.when(auth.getPrincipal()).thenReturn(mockedUser);
 
-        Modifier modifier = new Modifier("TEST", ModifierType.WATERING_MODIFIER, 1., 1., true);
+        Modifier modifier = new Modifier("TEST", ModifierEffectType.WATERING_MODIFIER, 1., 1., ModifierType.PERMANENT_BUFF);
         Set<PotusModifier> modifiers = Collections.singleton(new PotusModifier(mockedUser.getPotus(),modifier,1));
 
         mockedUser.getPotus().setBuffs(modifiers);

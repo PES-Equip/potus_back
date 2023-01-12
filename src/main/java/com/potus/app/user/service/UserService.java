@@ -1,15 +1,18 @@
 package com.potus.app.user.service;
 
 
-import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
+import com.potus.app.meetings.model.Meeting;
+import com.potus.app.meetings.service.MeetingsService;
 import com.potus.app.potus.model.Potus;
 import com.potus.app.potus.model.PotusModifier;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.potus.utils.ModifierUtils;
 import com.potus.app.user.model.User;
+import com.potus.app.user.repository.TrophyRepository;
 import com.potus.app.user.repository.UserRepository;
+import com.potus.app.user.repository.UserTrophyRepository;
 import com.potus.app.user.utils.UserUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.potus.app.user.utils.UserExceptionMessages.*;
 
@@ -34,6 +37,17 @@ public class UserService {
 
     @Autowired
     PotusService potusService;
+
+    @Autowired
+    MeetingsService meetingsService;
+
+    @Autowired
+    TrophyRepository trophyRepository;
+
+    @Autowired
+    UserTrophyRepository userTrophyRepository;
+
+
 
     Logger logger = LoggerFactory.getLogger(UserService.class);
 
@@ -134,15 +148,41 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void upgradeModifier(User user, PotusModifier selectedModifier) {
+    public PotusModifier upgradeModifier(User user, PotusModifier selectedModifier) {
 
         Double price = ModifierUtils.getCurrentPrice(selectedModifier.getModifier().getPrice(),selectedModifier.getLevel());
 
         if(user.getCurrency() < price)
             throw new ResourceAlreadyExistsException(USER_HAS_NOT_ENOUGH_CURRENCY);
 
-        potusService.upgradeModifier(selectedModifier);
+
         user.setCurrency((int) (user.getCurrency() - price));
+        saveUser(user);
+        return potusService.upgradeModifier(selectedModifier);
+    }
+
+    public void addMeeting(User user, Long meetingId) {
+        Meeting meeting = meetingsService.getMeetingById(meetingId);
+
+        Set<Meeting> meetings = user.getMeetings();
+
+        for(Meeting meetingAux : meetings) {
+            if(Objects.equals(meetingAux.getId(), meetingId)) throw new ResourceAlreadyExistsException(USER_ALREADY_HAS_ADDED_MEETING);
+        }
+
+        user.addMeeting(meeting);
+        saveUser(user);
+    }
+
+    public void deleteMeeting(User user, Long meetingId) {
+        for(Meeting meeting : user.getMeetings()) {
+            if(Objects.equals(meeting.getId(), meetingId)) {
+                user.deleteMeeting(meeting);
+                saveUser(user);
+                return;
+            }
+        }
+        throw new ResourceNotFoundException(USER_DOES_NOT_HAVE_MEETING);
     }
 
 }

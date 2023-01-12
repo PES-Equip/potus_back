@@ -2,14 +2,25 @@ package com.potus.app.garden.controller;
 
 
 import com.potus.app.garden.model.ChatMessage;
+import com.potus.app.garden.model.ChatMessageDTO;
+import com.potus.app.garden.model.GardenMember;
+import com.potus.app.garden.service.GardenService;
+import com.potus.app.user.model.User;
+import com.potus.app.user.service.UserService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class ChatController {
@@ -17,17 +28,31 @@ public class ChatController {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private GardenService gardenService;
+
     @MessageMapping("/message/{garden}")
     @SendTo("/chatroom/{garden}")
-    public ChatMessage receiveMessage(@DestinationVariable String garden, @Payload ChatMessage message){
+    public ChatMessageDTO receiveMessage(@DestinationVariable String garden, @Payload ChatMessageDTO message){
+        message.setId(UUID.randomUUID().toString());
+        message.setDate(new Date().toString());
+
+        User user = userService.findByUsername(message.getSenderName());
+        gardenService.saveChatMessage(message, user, garden);
         return message;
     }
 
+    /*
     @MessageMapping("/private-message")
     public ChatMessage recMessage(@Payload ChatMessage message){
         simpMessagingTemplate.convertAndSendToUser(message.getReceiverName(),"/private",message);
         return message;
     }
+    */
+
 
 
 }

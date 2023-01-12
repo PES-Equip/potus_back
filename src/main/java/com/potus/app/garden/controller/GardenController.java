@@ -4,17 +4,18 @@ import com.potus.app.exception.BadRequestException;
 import com.potus.app.exception.ForbiddenException;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
-import com.potus.app.garden.model.Garden;
-import com.potus.app.garden.model.GardenMember;
-import com.potus.app.garden.model.GardenRequest;
-import com.potus.app.garden.model.GardenRole;
+import com.potus.app.garden.model.*;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
 import com.potus.app.garden.payload.request.GardenDescriptionRequest;
 import com.potus.app.garden.payload.request.GardenSetRoleRequest;
 import com.potus.app.garden.payload.response.GardenMemberResponse;
 import com.potus.app.garden.service.GardenRequestService;
 import com.potus.app.garden.service.GardenService;
+import com.potus.app.user.model.Trophy;
+import com.potus.app.user.model.TrophyType;
 import com.potus.app.user.model.User;
+import com.potus.app.user.model.UserTrophy;
+import com.potus.app.user.payload.request.RankingResponse;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,12 +23,15 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.potus.app.exception.GeneralExceptionMessages.*;
@@ -464,7 +468,62 @@ public class GardenController {
 
 
 
+    @ApiOperation(value = "GET ALL GARDEN JOIN REQUESTS")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "Garden join requests"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+            @ApiResponse(code = HTTP_NOT_FOUND, message = NOT_FOUND),
+    })
+    @GetMapping("/{garden}/chats")
+    public List<ChatMessage> getChatMessages(@PathVariable String garden, @RequestParam(value = "page", required = false) Integer page) {
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden)
+            throw new ForbiddenException();
 
 
+        int chatPage = 0;
+
+        if (page != null && page > 0)
+            chatPage = page;
+
+        return gardenService.findMessagesByGarden(selectedGarden, chatPage);
+    }
+
+    @ApiOperation(value = "REGISTRIES A REPORT")
+    @ApiResponses(value = {
+            @ApiResponse(code = HTTP_OK, message = "REPORT SPECIFIED USER"),
+            @ApiResponse(code = HTTP_UNAUTHORIZED, message = UNAUTHENTICATED),
+    })
+    @PostMapping("/{garden}/profile/report/{message}")
+    public Report reportUser(@PathVariable String garden, @PathVariable String message){
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden)
+            throw new ForbiddenException();
+
+
+        ChatMessage chatMessage = gardenService.findMessageById(message);
+
+        return gardenService.reportUser(getUser(), chatMessage);
+    }
+
+
+    @PostMapping("/{garden}/chat/{message}")
+    public ChatMessage chatMessage(@PathVariable String garden, @PathVariable String message){
+
+        Garden selectedGarden = gardenService.findByName(garden);
+
+        GardenMember member = gardenService.findByUser(getUser());
+        if(member.getGarden() != selectedGarden)
+            throw new ForbiddenException();
+
+
+        return gardenService.createMessage(selectedGarden.getId(),message, getUser());
+    }
 
 }

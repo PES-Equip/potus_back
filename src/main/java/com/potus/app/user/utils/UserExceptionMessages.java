@@ -20,8 +20,13 @@ public final class UserExceptionMessages {
     }
 
     public static final String USER_MUST_BE_ADMIN = "User must be admin to access admin endpoints";
+    public static final String USER_ALREADY_HAS_ADDED_MEETING = "The meeting is already added";
+    public static final String USER_DOES_NOT_HAVE_MEETING = "The user does not have that meeting added";
 
 
+
+
+    public static final String TROPHY_DOES_NOT_EXISTS = "Trophy does not exists";
 
     private UserExceptionMessages(){
     }

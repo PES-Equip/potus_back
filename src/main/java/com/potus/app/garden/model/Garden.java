@@ -22,7 +22,6 @@ public class Garden {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
     private Long id;
 
     @Column(unique = true)
@@ -43,6 +42,7 @@ public class Garden {
     public Garden() {
     }
 
+    public Long getId() {return id;}
     public String getName() {
         return name;
     }

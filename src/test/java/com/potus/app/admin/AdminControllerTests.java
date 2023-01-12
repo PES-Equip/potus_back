@@ -151,11 +151,163 @@ public class AdminControllerTests {
     }
 
     @Test
+    public void renameTokenTest() throws Exception {
+
+        Long token = 2L;
+
+        APIToken apiToken = new APIToken("test", "test");
+
+
+        Mockito.when(adminService.findByToken(any())).thenReturn(apiToken);
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+
+        CreateAPITokenRequest createAPITokenRequest = new CreateAPITokenRequest("XDD");
+        APIToken mockToken = new APIToken(createAPITokenRequest.getName(), createAPITokenRequest.getName());
+
+        Mockito.when(adminService.renameToken(any(), any())).thenReturn(mockToken);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(mockToken);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/admin/tokens/"+token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAPITokenRequest));
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+    @Test
+    public void renameTokenTestNameAlreadyExists() throws Exception {
+
+        Long token = 2L;
+
+        APIToken apiToken = new APIToken("test", "test");
+
+
+        Mockito.when(adminService.findByToken(any())).thenReturn(apiToken);
+
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        CreateAPITokenRequest createAPITokenRequest = new CreateAPITokenRequest("XDD");
+
+        Mockito.when(adminService.renameToken(any(),any())).thenThrow(new ResourceAlreadyExistsException());
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/admin/tokens/" + token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAPITokenRequest));
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isConflict())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceAlreadyExistsException))
+                .andReturn();
+    }
+
+    @Test
+    public void renameTokenTestNotFound() throws Exception {
+
+        Long token = 2L;
+
+        APIToken apiToken = new APIToken("test", "test");
+
+
+        Mockito.when(adminService.findByToken(any())).thenThrow(new ResourceNotFoundException());
+
+
+
+        CreateAPITokenRequest createAPITokenRequest = new CreateAPITokenRequest("XDD");
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .put("/api/admin/tokens/" + token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAPITokenRequest));
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    // REFRESH
+
+    @Test
+    public void refreshTokenTest() throws Exception {
+
+        Long token = 2L;
+
+        APIToken apiToken = new APIToken("test", "test");
+
+
+        Mockito.when(adminService.findByToken(any())).thenReturn(apiToken);
+        Mockito.when(auth.getPrincipal()).thenReturn(TestUtils.getMockUser());
+
+        APIToken mockToken = new APIToken(apiToken.getName() ,"test2");
+
+        Mockito.when(adminService.refreshToken(any())).thenReturn(mockToken);
+
+        final String expectedResponseContent = objectMapper.writeValueAsString(mockToken);
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/admin/tokens/"+token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedResponseContent))
+                .andReturn();
+    }
+
+
+    @Test
+    public void refreshTokenTestNotFound() throws Exception {
+
+        Long token = 2L;
+
+        APIToken apiToken = new APIToken("test", "test");
+
+
+        Mockito.when(adminService.findByToken(any())).thenThrow(new ResourceNotFoundException());
+
+
+
+        CreateAPITokenRequest createAPITokenRequest = new CreateAPITokenRequest("XDD");
+
+        RequestBuilder request = MockMvcRequestBuilders
+                .post("/api/admin/tokens/" + token)
+                .with(SecurityMockMvcRequestPostProcessors.securityContext(securityContext))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createAPITokenRequest));
+
+        this.mockMvc.perform(request)
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(result -> Assertions.assertTrue(result.getResolvedException() instanceof ResourceNotFoundException))
+                .andReturn();
+    }
+
+    @Test
     public void deleteTokenTests() throws Exception {
 
-        String token = "test";
+        Long token = 2L;
 
-        APIToken apiToken = new APIToken(token, "test");
+        APIToken apiToken = new APIToken("test", "test");
 
 
         Mockito.when(adminService.findByName(any())).thenReturn(apiToken);
@@ -175,9 +327,10 @@ public class AdminControllerTests {
     @Test
     public void deleteTokenNotExistsTokenExceptionTests() throws Exception {
 
-        String token = "test";
+        Long token = 2L;
 
-        Mockito.when(adminService.findByName(any())).thenThrow(new ResourceNotFoundException());
+
+        Mockito.when(adminService.findByToken(any())).thenThrow(new ResourceNotFoundException());
 
         RequestBuilder request = MockMvcRequestBuilders
                 .delete("/api/admin/tokens/"+token)

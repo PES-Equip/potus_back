@@ -7,6 +7,7 @@ import com.potus.app.potus.service.PotusEventsService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.TestConfig;
 import com.potus.app.security.filter.ConfirmedUserFilter;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,9 @@ public class ConfirmedUserFilterTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     private Authentication auth;
     @Autowired

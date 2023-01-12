@@ -12,6 +12,7 @@ import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.PotusIsDeadFilter;
 import com.potus.app.security.filter.PotusStatesFilter;
 import com.potus.app.user.model.User;
+import com.potus.app.user.service.TrophyService;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,6 +66,9 @@ public class PotusStatesFilterTests {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private TrophyService trophyService;
 
     @MockBean
     private PotusRegistryService potusRegistryService;

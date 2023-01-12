@@ -4,6 +4,7 @@ import com.potus.app.admin.service.AdminService;
 import com.potus.app.potus.service.PotusRegistryService;
 import com.potus.app.potus.service.PotusService;
 import com.potus.app.security.filter.*;
+import com.potus.app.user.service.TrophyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +22,20 @@ public class FilterConfig {
     @Autowired
     AdminService adminService;
 
+    @Autowired
+    TrophyService trophyService;
+
+    @Bean
+    public FilterRegistrationBean<BannedUserFilter> bannedUserFilter(){
+        FilterRegistrationBean<BannedUserFilter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new BannedUserFilter(adminService));
+
+        registrationBean.addUrlPatterns("/api/*");
+        registrationBean.setOrder(1);
+        return registrationBean;
+    }
+
     @Bean
     public FilterRegistrationBean<ConfirmedUserFilter> userNormalFilter(){
         FilterRegistrationBean<ConfirmedUserFilter> registrationBean = new FilterRegistrationBean<>();
@@ -36,7 +51,7 @@ public class FilterConfig {
     public FilterRegistrationBean<PotusStatesFilter> potusStatesFilter(){
         FilterRegistrationBean<PotusStatesFilter> registrationBean = new FilterRegistrationBean<>();
 
-        registrationBean.setFilter(new PotusStatesFilter(potusService));
+        registrationBean.setFilter(new PotusStatesFilter(potusService, trophyService));
 
         registrationBean.addUrlPatterns("/api/potus/*", "/api/user/profile");
         registrationBean.setOrder(3);
@@ -47,7 +62,7 @@ public class FilterConfig {
     public FilterRegistrationBean<PotusIsDeadFilter> potusIsDeadFilter(){
         FilterRegistrationBean<PotusIsDeadFilter> registrationBean = new FilterRegistrationBean<>();
 
-        registrationBean.setFilter(new PotusIsDeadFilter(potusRegistryService));
+        registrationBean.setFilter(new PotusIsDeadFilter(potusRegistryService,trophyService));
 
         registrationBean.addUrlPatterns("/api/potus/*");
         registrationBean.setOrder(4);
@@ -73,7 +88,7 @@ public class FilterConfig {
         registrationBean.setFilter(new AdminTokenFilter());
 
         registrationBean.addUrlPatterns("/api/admin/*");
-        registrationBean.setOrder(1);
+        registrationBean.setOrder(5);
         return registrationBean;
     }
 
