@@ -63,7 +63,8 @@ public class AdminFilterTests {
 
     private SecurityContext securityContext;
 
-
+    @MockBean
+    private PotusService potusService;
     @MockBean
     private UserService userService;
 
