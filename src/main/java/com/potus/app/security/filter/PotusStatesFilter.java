@@ -53,10 +53,9 @@ public class PotusStatesFilter extends OncePerRequestFilter {
         User user = getUser();
         Potus potus = user.getPotus();
         if(user.getStatus() == UserStatus.CONFIRMED) {
-            potusService.updatePotusStats(potus);
-            trophyService.updateTrophyDateBased(user,POTUS_TIME, potus.getCreatedDate());
-            if(user.getGarden() != null){
-                trophyService.updateTrophyDateBased(user, GARDEN_TIME, user.getGarden().getCreatedDate());
+            if(potus.isAlive()) {
+                potusService.updatePotusStats(potus);
+                trophyService.updateTrophyDateBased(user, POTUS_TIME, potus.getCreatedDate());
             }
         }
 
