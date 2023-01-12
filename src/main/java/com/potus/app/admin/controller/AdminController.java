@@ -10,6 +10,7 @@ import com.potus.app.admin.service.AdminService;
 import com.potus.app.airquality.model.Region;
 import com.potus.app.exception.BadRequestException;
 import com.potus.app.garden.model.ChatMessage;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import io.swagger.annotations.Api;
@@ -40,6 +41,9 @@ public class AdminController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    PotusService potusService;
 
     @ApiOperation(value = "GET ALL THE TOKENS")
     @ApiResponses(value = {
@@ -206,6 +210,23 @@ public class AdminController {
 
         ChatMessage chatMessage = adminService.findChatMessageById(chatId);
         return adminService.getPreviousMessages(chatMessage, 0);
+    }
+
+
+    @PostMapping(value = "/user/{userId}/currency")
+    public void setCurrency(@PathVariable Long userId, @RequestParam(value = "currency", required = true) Integer currency) {
+
+        User user = userService.findById(userId);
+        user.setCurrency(currency);
+        userService.saveUser(user);
+    }
+
+    @PostMapping(value = "/user/{userId}/killpotus")
+    public void killPotus(@PathVariable Long userId) {
+
+        User user = userService.findById(userId);
+        user.getPotus().setAlive(false);
+        potusService.savePotus(user.getPotus());
     }
 
     // post ban
