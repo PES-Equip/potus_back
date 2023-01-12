@@ -23,7 +23,10 @@ import static com.potus.app.user.utils.UserUtils.getUser;
 public class BannedUserFilter extends OncePerRequestFilter {
 
     private final RequestMatcher uriMatcher =
-            new AntPathRequestMatcher("/api/external/*", HttpMethod.GET.name());
+            new AntPathRequestMatcher("/api/external/airquality/regions", HttpMethod.GET.name());
+
+    private final RequestMatcher uriMatcher2 =
+            new AntPathRequestMatcher("/api/external/airquality/region", HttpMethod.GET.name());
     public BannedUserFilter(AdminService adminService){
         this.adminService = adminService;
     }
@@ -45,6 +48,6 @@ public class BannedUserFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return uriMatcher.matches(request);
+        return uriMatcher.matches(request) || uriMatcher2.matches(request);
     }
 }
