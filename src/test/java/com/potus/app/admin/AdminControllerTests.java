@@ -14,6 +14,7 @@ import com.potus.app.airquality.service.AirQualityService;
 import com.potus.app.exception.ResourceAlreadyExistsException;
 import com.potus.app.exception.ResourceNotFoundException;
 import com.potus.app.garden.payload.request.GardenCreationRequest;
+import com.potus.app.potus.service.PotusService;
 import com.potus.app.user.model.User;
 import com.potus.app.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
@@ -67,6 +68,8 @@ public class AdminControllerTests {
     @MockBean
     private UserService userService;
 
+    @MockBean
+    private PotusService potusService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
